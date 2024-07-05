@@ -1,0 +1,13 @@
+{
+  "name": "summaraize",
+  "version": "2024.07.05",
+  "description": "A youtube summarise extension",
+  "main": "index.js",
+  "author": "Morgan Parry <morgan@trigify.io>",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}
