@@ -17,6 +17,7 @@ COPY apps/video apps/video
 COPY packages/prisma packages/prisma
 
 RUN bun install
+RUN bun prisma generate
 
 # run the app
 USER bun
