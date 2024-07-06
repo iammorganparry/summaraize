@@ -13,7 +13,7 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "start": "bun prisma generate && bun run --watch src/index.ts",
+    "start": "bun run --watch src/index.ts",
     "lint": "biome lint --write ./src",
     "format": "biome format --write ./src",
     "postinstall": "prisma generate"
