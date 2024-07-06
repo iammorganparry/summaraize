@@ -1,7 +1,7 @@
 {
   "name": "summaraize",
   "version": "2024.07.05",
-  "description": "A youtube summarise extension",
+  "description": "A youtube summaraize extension 🧙‍♂️",
   "main": "index.js",
   "author": "Morgan Parry <morgan@trigify.io>",
   "license": "MIT",
@@ -9,5 +9,11 @@
   "workspaces": [
     "packages/*",
     "apps/*"
-  ]
+  ],
+  "devDependencies": {
+    "turbo": "^2.0.6"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  }
 }

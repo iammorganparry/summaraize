@@ -27,3 +27,10 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 ## How do I deploy this?
 
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+## TODO
+
+- Create a micro-service to extract audio with ffmpeg
+- Add openai calls to generate the transcription using whisper
+- send back complete / failed with the transcription and meta data to save and serve
+- create inngest webhook to trigger events from the microservice

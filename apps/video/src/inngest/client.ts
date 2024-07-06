@@ -4,7 +4,7 @@ import type { AIEvents } from "./schema/ai";
 // Create a client to send and receive events
 
 export const inngest = new Inngest({
-	id: "summaraize",
+	id: "summaraize-video",
 	middleware: [servicesMiddleware],
 	schemas: new EventSchemas().fromRecord<AIEvents>(),
 });

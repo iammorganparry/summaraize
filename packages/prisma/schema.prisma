@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Video     Video[]
+  Summary   Summary[]
+}
+
+model Video {
+  id         String    @id @default(uuid())
+  name       String
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  url        String
+  summary    Summary[]
+  user       User      @relation(fields: [user_id], references: [id])
+  user_id    String
+  data_raw   Json // used to store the raw data from the API for future use
+  thumbnail  String
+  duration   String
+  views      String?
+  likes      Int?
+  authors    Author[]
+}
+
+model Author {
+  id          String   @id @default(uuid())
+  name        String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  video       Video    @relation(fields: [video_id], references: [id])
+  video_id    String
+  avatar      String
+  channel_url String
+}
+
+model Summary {
+  id            String   @id @default(uuid())
+  name          String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  transcription String
+  summary       String
+  video         Video    @relation(fields: [video_id], references: [id])
+  video_id      String
+  user          User     @relation(fields: [user_id], references: [id])
+  user_id       String
+
+  @@index([name])
+}
