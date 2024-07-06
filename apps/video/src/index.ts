@@ -11,30 +11,30 @@ const app = new Hono();
 app.use("*", clerkMiddleware());
 
 app.get("/", (c) => {
-	const auth = getAuth(c);
+  const auth = getAuth(c);
 
-	if (!auth?.userId) {
-		return c.json({
-			message: "You are not logged in.",
-		});
-	}
+  if (!auth?.userId) {
+    return c.json({
+      message: "You are not logged in.",
+    });
+  }
 
-	return c.json({
-		message: "You are logged in!",
-		userId: auth.userId,
-	});
+  return c.json({
+    message: "You are logged in!",
+    userId: auth.userId,
+  });
 });
 
 app.on(["GET", "PUT", "POST"], "/api/inngest", (c) => {
-	const handler = serve({
-		client: inngest,
-		functions: [transcribeVideo],
-		signingKey: process.env.INNGEST_SIGNING_KEY,
-	});
-	return handler(c);
+  const handler = serve({
+    client: inngest,
+    functions: [transcribeVideo],
+    signingKey: process.env.INNGEST_SIGNING_KEY,
+  });
+  return handler(c);
 });
 
 export default {
-	port: 3001,
-	fetch: app.fetch,
+  port: 3001,
+  fetch: app.fetch,
 };
