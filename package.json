@@ -11,7 +11,8 @@
     "apps/*"
   ],
   "scripts": {
-    "start:video": "prisma generate && bun install && bun run --cwd apps/video start"
+    "start:video": "yarn workspace @summaraize/video start",
+    "postinstall": "prisma generate"
   },
   "devDependencies": {
     "turbo": "^2.0.6"
