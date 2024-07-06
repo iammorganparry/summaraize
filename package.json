@@ -6,6 +6,12 @@
   "author": "Morgan Parry <morgan@trigify.io>",
   "license": "MIT",
   "private": true,
+  "licenses": [
+    {
+      "type": "CC BY-ND 4.0",
+      "url": "https://creativecommons.org/licenses/by-nd/4.0/"
+    }
+  ],
   "workspaces": [
     "packages/*",
     "apps/*"
