@@ -13,8 +13,11 @@ ARG DATABASE_URL
 ARG SHADOW_DATABASE_URL
 
 COPY package*.json bun.lockb ./
-COPY apps/video apps/video
-COPY packages/prisma packages/prisma
+# Copy all files from apps/video
+COPY apps/video/ ./apps/video
+COPY apps/video/package*.json ./apps/video/
+COPY packages/prisma/ ./packages/prisma
+COPY packages/prisma/package*.json ./packages/prisma/
 
 RUN bun install
 RUN bun prisma generate
