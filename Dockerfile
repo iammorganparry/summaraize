@@ -20,6 +20,5 @@ RUN bun install
 RUN bun prisma generate
 
 # run the app
-USER bun
 EXPOSE 3001/tcp
 ENTRYPOINT [ "bun", "run", "start:video" ]
