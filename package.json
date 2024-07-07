@@ -6,6 +6,7 @@
   "author": "Morgan Parry <morgan@trigify.io>",
   "license": "MIT",
   "private": true,
+  "packageManager": "yarn@1.22.22",
   "licenses": [
     {
       "type": "CC BY-ND 4.0",
@@ -17,8 +18,11 @@
     "apps/*"
   ],
   "scripts": {
+    "check-types": "tsc --noEmit",
     "start:video": "yarn workspace @summaraize/video start",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "format": "turbo format",
+    "lint": "turbo lint"
   },
   "devDependencies": {
     "turbo": "^2.0.6"

@@ -1,5 +1,6 @@
 import { type GetFunctionInput, NonRetriableError } from "inngest";
 import { inngest } from "../client";
+import { PusherEvents } from "@summaraize/pusher";
 
 export const _transcribeVideo = async ({
 	event,
@@ -45,12 +46,17 @@ export const _transcribeVideo = async ({
 		throw new NonRetriableError("Failed to summarize video");
 	}
 
-	await step.run("save-summary", async () => {
+	await step.run("save-summary-and-alert", async () => {
 		await services.video.saveSummary({
 			userId,
 			summary: summary.choices[0].message.content as string,
 			transcription,
 			videoMetaData,
+		});
+		await services.pusher.sendToUser(userId, PusherEvents.SummaryCreated, {
+			summary: summary.choices[0].message.content as string,
+			videoMetaData: JSON.stringify(videoMetaData),
+			transcription,
 		});
 	});
 

@@ -11,6 +11,9 @@ export const env = createEnv({
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
+		PLASMO_PUBLIC_PUSHER_APP_ID: z.string(),
+		PLASMO_PUBLIC_PUSHER_APP_KEY: z.string(),
+		PUSHER_APP_SECRET: z.string(),
 	},
 
 	/**
@@ -29,6 +32,10 @@ export const env = createEnv({
 	runtimeEnv: {
 		DATABASE_URL: process.env.DATABASE_URL,
 		NODE_ENV: process.env.NODE_ENV,
+		PLASMO_PUBLIC_PUSHER_APP_ID: process.env.PLASMO_PUBLIC_PUSHER_APP_ID,
+		PLASMO_PUBLIC_PUSHER_APP_KEY: process.env.PLASMO_PUBLIC_PUSHER_APP_KEY,
+		PUSHER_APP_SECRET: process.env.PUSHER_APP_SECRET,
+
 		// NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 	},
 	/**

@@ -10,7 +10,7 @@ import { Hono } from "hono";
 import dotenv from "dotenv";
 
 console.log("Starting video app...", {
-  env: process.env.OPENAI_API_KEY,
+	env: process.env.OPENAI_API_KEY,
 });
 
 const app = new Hono();
@@ -19,30 +19,30 @@ const port = 3001;
 app.use("*", clerkMiddleware());
 
 app.get("/", (c) => {
-  const auth = getAuth(c);
+	const auth = getAuth(c);
 
-  if (!auth?.userId) {
-    return c.json({
-      message: "You are not logged in.",
-    });
-  }
+	if (!auth?.userId) {
+		return c.json({
+			message: "You are not logged in.",
+		});
+	}
 
-  return c.json({
-    message: "You are logged in!",
-    userId: auth.userId,
-  });
+	return c.json({
+		message: "You are logged in!",
+		userId: auth.userId,
+	});
 });
 
 app.on(["GET", "PUT", "POST"], "/api/inngest", (c) => {
-  const handler = inngestServe({
-    client: inngest,
-    functions: [transcribeVideo],
-    signingKey: process.env.INNGEST_SIGNING_KEY,
-  });
-  return handler(c);
+	const handler = inngestServe({
+		client: inngest,
+		functions: [transcribeVideo],
+		signingKey: process.env.INNGEST_SIGNING_KEY,
+	});
+	return handler(c);
 });
 
 serve({
-  fetch: app.fetch,
-  port,
+	fetch: app.fetch,
+	port,
 });

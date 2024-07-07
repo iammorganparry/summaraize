@@ -4,10 +4,10 @@ import { transcribeVideo } from "~/app/inngest/ai/transcribe-video";
 import { inngest } from "~/app/inngest/client";
 
 export const { GET, POST, PUT } = serve({
-  client: inngest,
-  functions: [
-    transcribeVideo,
-    /* your functions will be passed here later! */
-  ],
-  streaming: "allow",
+	client: inngest,
+	functions: [
+		transcribeVideo,
+		/* your functions will be passed here later! */
+	],
+	streaming: "allow",
 });

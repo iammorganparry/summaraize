@@ -6,12 +6,11 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import type { auth } from "@clerk/nextjs/server";
-import { TRPCError, initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
-
-import { db } from "~/server/db";
+import { auth } from "@clerk/nextjs/server";
+import { db } from "@summaraize/prisma";
 
 /**
  * 1. CONTEXT
@@ -25,14 +24,21 @@ import { db } from "~/server/db";
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: {
-	headers: Headers;
-	auth?: ReturnType<typeof auth>;
+
+export const createTRPCContext = () => {
+  const a = auth();
+  return createInnerTRPCContext({ a });
+};
+
+export const createInnerTRPCContext = async ({
+  a,
+}: {
+  a: ReturnType<typeof auth>;
 }) => {
-	return {
-		db,
-		...opts,
-	};
+  return {
+    auth: a,
+    db,
+  };
 };
 
 /**
@@ -43,17 +49,17 @@ export const createTRPCContext = async (opts: {
  * errors on the backend.
  */
 const t = initTRPC.context<typeof createTRPCContext>().create({
-	transformer: superjson,
-	errorFormatter({ shape, error }) {
-		return {
-			...shape,
-			data: {
-				...shape.data,
-				zodError:
-					error.cause instanceof ZodError ? error.cause.flatten() : null,
-			},
-		};
-	},
+  transformer: superjson,
+  errorFormatter({ shape, error }) {
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        zodError:
+          error.cause instanceof ZodError ? error.cause.flatten() : null,
+      },
+    };
+  },
 });
 
 /**
@@ -69,6 +75,17 @@ export const createCallerFactory = t.createCallerFactory;
  * These are the pieces you use to build your tRPC API. You should import these a lot in the
  * "/src/server/api/routers" directory.
  */
+
+const isAuthed = t.middleware(async ({ next, ctx }) => {
+  if (!ctx.auth.userId) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+  }
+  return next({
+    ctx: {
+      auth: ctx.auth,
+    },
+  });
+});
 
 /**
  * This is how you create new routers and sub-routers in your tRPC API.
@@ -86,15 +103,13 @@ export const createTRPCRouter = t.router;
  */
 export const publicProcedure = t.procedure;
 
-const isAuthed = t.middleware(async ({ next, ctx }) => {
-	if (!ctx?.auth?.userId) {
-		throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
-	}
-	// const user = await clerkClient.users.getUser(ctx.auth.userId);
-	return next({
-		ctx: {
-			auth: ctx.auth,
-		},
-	});
-});
+/**
+ * Protected (authed) procedure
+ *
+ * If you want a query or mutation to ONLY be accessible to logged in users, use
+ * this. It verifies the session is valid and guarantees ctx.session.user is not
+ * null
+ *
+ * @see https://trpc.io/docs/procedures
+ */
 export const protectedProcedure = t.procedure.use(isAuthed);

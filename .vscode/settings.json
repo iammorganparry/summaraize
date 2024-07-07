@@ -1,4 +1,6 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "tailwindCSS.experimental.configFile": "apps/extension/tailwind.config.js",
+  "tailwindCSS.emmetCompletions": true
 }

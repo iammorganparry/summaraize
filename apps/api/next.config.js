@@ -5,6 +5,12 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  transpilePackages: [
+    "@summaraize/prisma",
+    "@summaraize/trpc",
+    "@summaraize/pusher",
+  ],
+};
 
 export default config;

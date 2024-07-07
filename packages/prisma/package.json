@@ -8,9 +8,6 @@
     "@types/bun": "latest",
     "prisma": "^5.16.1"
   },
-  "scripts": {
-    "postinstall": "prisma generate"
-  },
   "peerDependencies": {
     "typescript": "^5.0.0"
   }

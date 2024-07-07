@@ -1,11 +1,36 @@
 {
-  "extends": "plasmo/templates/tsconfig.base",
-  "exclude": ["node_modules", "../../node_modules/**/*", "dist"],
-  "include": [".plasmo/index.d.ts", "./**/*.ts", "./**/*.tsx"],
-  "compilerOptions": {
-    "paths": {
-      "~*": ["./*"]
-    },
-    "baseUrl": "."
-  }
+	"extends": "plasmo/templates/tsconfig.base",
+	"exclude": ["dist"],
+	"include": [
+		".plasmo/index.d.ts",
+		"./**/*.ts",
+		"./**/*.tsx",
+		"global.d.ts",
+		"tailwind.config.js"
+	],
+	"compilerOptions": {
+		"target": "ES2020",
+		"useDefineForClassFields": true,
+		"lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
+		"module": "ESNext",
+		"skipLibCheck": true,
+		"types": ["chrome"],
+
+		/* Bundler mode */
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"jsx": "react-jsx",
+		"baseUrl": "./",
+		/* Linting */
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"strict": true,
+		"paths": {
+			"~*": ["./src/*"]
+		}
+	}
 }

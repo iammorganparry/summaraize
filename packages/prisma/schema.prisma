@@ -19,6 +19,9 @@ model User {
   updatedAt DateTime  @updatedAt
   Video     Video[]
   Summary   Summary[]
+
+  @@index([email])
+  @@index([id])
 }
 
 model Video {
@@ -36,6 +39,9 @@ model Video {
   views      String?
   likes      Int?
   authors    Author[]
+
+  @@index([user_id])
+  @@index([id])
 }
 
 model Author {
@@ -47,6 +53,8 @@ model Author {
   video_id    String
   avatar      String
   channel_url String
+
+  @@index([video_id])
 }
 
 model Summary {
@@ -62,4 +70,7 @@ model Summary {
   user_id       String
 
   @@index([name])
+  @@index([video_id])
+  @@index([user_id])
+  @@index([id])
 }
