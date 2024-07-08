@@ -7,6 +7,10 @@ ARG INNGEST_SIGNING_KEY
 ARG DATABASE_URL
 ARG SHADOW_DATABASE_URL
 
+ARG PLASMO_PUBLIC_PUSHER_APP_ID
+ARG PLASMO_PUBLIC_PUSHER_KEY
+ARG PUSHER_SECRET
+
 
 FROM base AS builder
 
@@ -29,6 +33,7 @@ RUN adduser --system --uid 1001 hono
 COPY --from=builder --chown=hono:nodejs /app/node_modules /app/node_modules
 COPY --from=builder --chown=hono:nodejs /app/apps/video /app/apps/video
 COPY --from=builder --chown=hono:nodejs /app/packages/prisma /app/packages/prisma
+COPY --from=builder --chown=hono:nodejs /app/packages/pusher /app/packages/pusher
 COPY --from=builder --chown=hono:nodejs /app/package.json /app/package.json
 
 USER hono
