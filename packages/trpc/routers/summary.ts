@@ -9,8 +9,15 @@ export const summaryRouter = createTRPCRouter({
         videoId: z.string(),
       })
     )
-    .mutation(({ input }) => {
-      return input.videoId;
+    .mutation(({ input, ctx }) => {
+      console.log("requestSummary", input);
+      return ctx.inngest.send({
+        name: "app/transcribe-video",
+        data: {
+          src: input.videoId,
+          userId: ctx.auth.userId,
+        },
+      });
     }),
   getLatest: protectedProcedure
     .input(

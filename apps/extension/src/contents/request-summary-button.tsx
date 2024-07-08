@@ -6,8 +6,12 @@ import createCache from "@emotion/cache";
 import { Stars01 } from "@untitled-ui/icons-react";
 import { getSystemTheme, sleep } from "~utils";
 import { createToastMessage } from "~api/messages";
-import { ClerkProvider } from "@clerk/chrome-extension";
-import { TRPCReactProvider, api } from "~lib/trpc/react";
+import { useCallback, useEffect, useState } from "react";
+import { sendToBackground } from "@plasmohq/messaging";
+import type {
+  RequestBody,
+  ResponseBody,
+} from "~background/messages/request-summary";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -31,17 +35,34 @@ export const getShadowHostId = () => "summaraize-request-summary-button";
 export const getStyle: PlasmoGetStyle = () => styleElement;
 
 function RequestSummaryButton() {
-  const { data: summary, isPending: loading } =
-    api.summary.requestSummary.useMutation();
+  const [loading, setLoading] = useState(false);
   const systemTheme = getSystemTheme();
   const theme = createSummaraizeTheme({}, systemTheme) ?? createTheme();
   const handleRequestSummary = async () => {
-    await sleep(3000);
+    setLoading(true);
+    const resp = await sendToBackground<RequestBody, ResponseBody>({
+      name: "request-summary",
+      body: {
+        videoId: "123",
+      },
+    });
+
+    if (resp.errors) {
+      createToastMessage(
+        "Failed to schedule request summary, please try again. 🙁",
+        "error"
+      );
+      setLoading(false);
+      return;
+    }
+
     createToastMessage(
       "Scheduled request summary, check back in a few moments after a tasty beverage. 🍺",
       "success"
     );
+    setLoading(false);
   };
+
   return (
     <CacheProvider value={styleCache}>
       <ThemeProvider theme={theme}>
@@ -61,7 +82,16 @@ function RequestSummaryButton() {
             },
           }}
         >
-          {loading ? <CircularProgress /> : <Stars01 />}
+          {loading ? (
+            <CircularProgress
+              size="14px"
+              sx={{
+                color: (theme) => theme.palette.common.white,
+              }}
+            />
+          ) : (
+            <Stars01 />
+          )}
           Request Summary
         </Button>
       </ThemeProvider>
@@ -70,13 +100,5 @@ function RequestSummaryButton() {
 }
 
 export default function RequestButton() {
-  return (
-    <ClerkProvider
-      publishableKey={process.env.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY || ""}
-    >
-      <TRPCReactProvider>
-        <RequestSummaryButton />
-      </TRPCReactProvider>
-    </ClerkProvider>
-  );
+  return <RequestSummaryButton />;
 }

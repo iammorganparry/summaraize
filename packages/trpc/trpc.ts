@@ -9,9 +9,9 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { auth } from "@clerk/nextjs/server";
 import { db } from "@summaraize/prisma";
-
+import type { getAuth } from "@hono/clerk-auth";
+import type { inngest as inngestClient } from "@summaraize/video";
 /**
  * 1. CONTEXT
  *
@@ -25,19 +25,17 @@ import { db } from "@summaraize/prisma";
  * @see https://trpc.io/docs/server/context
  */
 
-export const createTRPCContext = () => {
-  const a = auth();
-  return createInnerTRPCContext({ a });
-};
-
-export const createInnerTRPCContext = async ({
-  a,
+export const createTRPCContext = ({
+  auth,
+  inngest,
 }: {
-  a: ReturnType<typeof auth>;
+  auth: ReturnType<typeof getAuth>;
+  inngest: typeof inngestClient;
 }) => {
   return {
-    auth: a,
+    auth,
     db,
+    inngest,
   };
 };
 
@@ -77,7 +75,7 @@ export const createCallerFactory = t.createCallerFactory;
  */
 
 const isAuthed = t.middleware(async ({ next, ctx }) => {
-  if (!ctx.auth.userId) {
+  if (!ctx.auth?.userId) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
   }
   return next({

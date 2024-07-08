@@ -4,5 +4,8 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@hono/clerk-auth": "^2.0.0"
+  }
 }

@@ -22,7 +22,8 @@
     "start:video": "yarn workspace @summaraize/video start",
     "postinstall": "prisma generate",
     "format": "turbo format",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "dev": "turbo dev"
   },
   "devDependencies": {
     "turbo": "^2.0.6"

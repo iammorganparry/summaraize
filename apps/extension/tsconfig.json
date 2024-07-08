@@ -1,36 +1,30 @@
 {
-	"extends": "plasmo/templates/tsconfig.base",
-	"exclude": ["dist"],
-	"include": [
-		".plasmo/index.d.ts",
-		"./**/*.ts",
-		"./**/*.tsx",
-		"global.d.ts",
-		"tailwind.config.js"
-	],
-	"compilerOptions": {
-		"target": "ES2020",
-		"useDefineForClassFields": true,
-		"lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
-		"module": "ESNext",
-		"skipLibCheck": true,
-		"types": ["chrome"],
+  "extends": "plasmo/templates/tsconfig.base",
+  "exclude": ["dist"],
+  "include": [".plasmo/index.d.ts", "./**/*.ts", "./**/*.tsx", "global.d.ts", "tailwind.config.js"],
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "types": ["chrome"],
 
-		/* Bundler mode */
-		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": true,
-		"resolveJsonModule": true,
-		"isolatedModules": true,
-		"noEmit": true,
-		"jsx": "react-jsx",
-		"baseUrl": "./",
-		/* Linting */
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noFallthroughCasesInSwitch": true,
-		"strict": true,
-		"paths": {
-			"~*": ["./src/*"]
-		}
-	}
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": "./",
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "strict": true,
+    "paths": {
+      "~*": ["./src/*"]
+    }
+  }
 }
