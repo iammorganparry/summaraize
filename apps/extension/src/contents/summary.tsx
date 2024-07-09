@@ -4,9 +4,9 @@ import "@fontsource/public-sans/500.css";
 import "@fontsource/public-sans/700.css";
 import { ClerkProvider } from "@clerk/chrome-extension";
 import type {
-	PlasmoCreateShadowRoot,
-	PlasmoCSConfig,
-	PlasmoMountShadowHost,
+  PlasmoCreateShadowRoot,
+  PlasmoCSConfig,
+  PlasmoMountShadowHost,
 } from "plasmo";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 
@@ -21,10 +21,11 @@ import { createSummaraizeTheme } from "~theme";
 import { TRPCReactProvider } from "~lib/trpc/react";
 import { PusherProvider } from "~providers/pusher";
 import { ToasterBoi } from "~components/toaster";
+import { getSystemTheme } from "~utils";
 
 export const config: PlasmoCSConfig = {
-	matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
-	all_frames: false,
+  matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
+  all_frames: false,
 };
 
 export const getShadowHostId = () => "summaraize-slider";
@@ -32,9 +33,9 @@ export const getShadowHostId = () => "summaraize-slider";
 const styleElement = document.createElement("style");
 
 const styleCache = createCache({
-	key: "plasmo-emotion-cache",
-	prepend: true,
-	container: styleElement,
+  key: "plasmo-emotion-cache",
+  prepend: true,
+  container: styleElement,
 });
 
 export const getStyle: PlasmoGetStyle = () => styleElement;
@@ -45,61 +46,63 @@ export const getStyle: PlasmoGetStyle = () => styleElement;
 let container: Element | null = null;
 let theme: Theme | null = null;
 export const mountShadowHost: PlasmoMountShadowHost = ({
-	shadowHost,
-	anchor,
+  shadowHost,
+  anchor,
 }) => {
-	anchor?.element.appendChild(shadowHost);
-	container = shadowHost;
-	theme = createSummaraizeTheme({
-		components: {
-			MuiPopover: {
-				defaultProps: {
-					container: shadowHost,
-				},
-			},
-			MuiPopper: {
-				defaultProps: {
-					container: shadowHost,
-				},
-			},
-			MuiModal: {
-				defaultProps: {
-					container: shadowHost,
-				},
-			},
-		},
-	});
+  anchor?.element.appendChild(shadowHost);
+  container = shadowHost;
+  theme = createSummaraizeTheme({
+    components: {
+      MuiPopover: {
+        defaultProps: {
+          container: shadowHost,
+        },
+      },
+      MuiPopper: {
+        defaultProps: {
+          container: shadowHost,
+        },
+      },
+      MuiModal: {
+        defaultProps: {
+          container: shadowHost,
+        },
+      },
+    },
+  });
 };
 
 export const createShadowRoot: PlasmoCreateShadowRoot = (shadowHost) =>
-	shadowHost.attachShadow({ mode: "open" });
+  shadowHost.attachShadow({ mode: "open" });
 
 function SummaraizeExtension() {
-	const navigate = useNavigate();
-	return (
-		<ClerkProvider
-			publishableKey={process.env.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY || ""}
-			routerPush={(to) => navigate(to)}
-			routerReplace={(to) => navigate(to, { replace: true })}
-		>
-			<TRPCReactProvider>
-				<SummaraizeSheet shadowHost={container} />
-			</TRPCReactProvider>
-		</ClerkProvider>
-	);
+  const navigate = useNavigate();
+  return (
+    <ClerkProvider
+      publishableKey={process.env.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY || ""}
+      routerPush={(to) => navigate(to)}
+      routerReplace={(to) => navigate(to, { replace: true })}
+    >
+      <TRPCReactProvider>
+        <SummaraizeSheet shadowHost={container} />
+      </TRPCReactProvider>
+    </ClerkProvider>
+  );
 }
 
 export default function Summary() {
-	return (
-		<CacheProvider value={styleCache}>
-			<ThemeProvider theme={theme || createTheme()}>
-				<MemoryRouter>
-					{/* <PusherProvider> */}
-					<SummaraizeExtension />
-					<ToasterBoi />
-					{/* </PusherProvider> */}
-				</MemoryRouter>
-			</ThemeProvider>
-		</CacheProvider>
-	);
+  const systemTheme = getSystemTheme();
+  const theme = createSummaraizeTheme({}, systemTheme) ?? createTheme();
+  return (
+    <CacheProvider value={styleCache}>
+      <ThemeProvider theme={theme || createTheme()}>
+        <MemoryRouter>
+          {/* <PusherProvider> */}
+          <SummaraizeExtension />
+          <ToasterBoi />
+          {/* </PusherProvider> */}
+        </MemoryRouter>
+      </ThemeProvider>
+    </CacheProvider>
+  );
 }

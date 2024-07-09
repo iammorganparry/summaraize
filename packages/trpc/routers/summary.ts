@@ -7,6 +7,7 @@ export const summaryRouter = createTRPCRouter({
     .input(
       z.object({
         videoId: z.string(),
+        src: z.string(),
       })
     )
     .mutation(({ input, ctx }) => {
@@ -14,7 +15,25 @@ export const summaryRouter = createTRPCRouter({
       return ctx.inngest.send({
         name: "app/transcribe-video",
         data: {
-          src: input.videoId,
+          src: input.src,
+          videoId: input.videoId,
+          userId: ctx.auth.userId,
+        },
+      });
+    }),
+  cancelSummary: protectedProcedure
+    .input(
+      z.object({
+        videoId: z.string(),
+        src: z.string(),
+      })
+    )
+    .mutation(({ input, ctx }) => {
+      return ctx.inngest.send({
+        name: "app/cancel-transcription",
+        data: {
+          src: input.src,
+          videoId: input.videoId,
           userId: ctx.auth.userId,
         },
       });

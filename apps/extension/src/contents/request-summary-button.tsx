@@ -3,15 +3,13 @@ import { Button, CircularProgress, createTheme } from "@mui/material";
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo";
 import { createSummaraizeTheme } from "~theme";
 import createCache from "@emotion/cache";
-import { Stars01 } from "@untitled-ui/icons-react";
-import { getSystemTheme, sleep } from "~utils";
+import { AlertCircle, Stars01, XClose } from "@untitled-ui/icons-react";
+import { getSystemTheme } from "~utils";
 import { createToastMessage } from "~api/messages";
-import { useCallback, useEffect, useState } from "react";
-import { sendToBackground } from "@plasmohq/messaging";
-import type {
-  RequestBody,
-  ResponseBody,
-} from "~background/messages/request-summary";
+import { useState } from "react";
+import { useObserver } from "~lib/hooks/useObserver";
+import { getYoutuveVideoId } from "~lib/utils";
+import { client } from "~lib/trpc/vanilla-client";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -34,20 +32,54 @@ export const getShadowHostId = () => "summaraize-request-summary-button";
 
 export const getStyle: PlasmoGetStyle = () => styleElement;
 
+const MAX_VIDEO_LENGTH = 60 * 10;
+
 function RequestSummaryButton() {
   const [loading, setLoading] = useState(false);
-  const systemTheme = getSystemTheme();
-  const theme = createSummaraizeTheme({}, systemTheme) ?? createTheme();
+
+  const [requested, setRequested] = useState(false);
+  const [videoToLong, setVideoToLong] = useState(true);
+  useObserver(
+    {
+      childList: true,
+      subtree: true,
+    },
+    (mutations, observer) => {
+      console.log(
+        "mutation observer",
+        document.querySelector<HTMLVideoElement>("#player-container video")
+          ?.duration
+      );
+
+      const video = document.querySelector<HTMLVideoElement>(
+        "#player-container video"
+      );
+      if (video) {
+        setVideoToLong(video.duration > MAX_VIDEO_LENGTH);
+        observer.disconnect();
+      }
+    }
+  );
+
   const handleRequestSummary = async () => {
     setLoading(true);
-    const resp = await sendToBackground<RequestBody, ResponseBody>({
-      name: "request-summary",
-      body: {
-        videoId: "123",
-      },
+    const videoId = getYoutuveVideoId(window.location.href);
+
+    if (!videoId) {
+      createToastMessage(
+        "Failed to get video ID, please try again. 🙁",
+        "error"
+      );
+      setLoading(false);
+      return;
+    }
+
+    const resp = await client.summary.requestSummary.mutate({
+      src: window.location.href,
+      videoId,
     });
 
-    if (resp.errors) {
+    if (!resp.ids) {
       createToastMessage(
         "Failed to schedule request summary, please try again. 🙁",
         "error"
@@ -61,44 +93,131 @@ function RequestSummaryButton() {
       "success"
     );
     setLoading(false);
+    setRequested(true);
   };
 
-  return (
-    <CacheProvider value={styleCache}>
-      <ThemeProvider theme={theme}>
+  const handleCancelRequest = async () => {
+    setLoading(true);
+    const videoId = getYoutuveVideoId(window.location.href);
+
+    if (!videoId) {
+      createToastMessage(
+        "Failed to get video ID, please try again. 🙁",
+        "error"
+      );
+      setLoading(false);
+      return;
+    }
+
+    const resp = await client.summary.cancelSummary.mutate({
+      src: window.location.href,
+      videoId,
+    });
+
+    if (!resp.ids) {
+      createToastMessage(
+        "Failed to cancel request summary, please try again. 🙁",
+        "error"
+      );
+      setLoading(false);
+      return;
+    }
+
+    createToastMessage(
+      "Canceled request summary, you can request again. 😉",
+      "success"
+    );
+    setLoading(false);
+    setRequested(false);
+  };
+
+  if (requested) {
+    return (
+      <>
         <Button
-          onClick={handleRequestSummary}
-          variant="contained"
+          onClick={handleCancelRequest}
+          endIcon={<XClose />}
+          variant="outlined"
           sx={{
-            mx: 2,
             fontWeight: 600,
             fontSize: 12,
+            opacity: 0.5,
             boxShadow: (theme) => theme.shadows[0],
             zIndex: 3,
+            color: (theme) => theme.palette.common.white,
             gap: 1,
-            width: 200,
+            mx: 2,
             "&:hover": {
-              boxShadow: (theme) => theme.shadows[3],
+              borderColor: (theme) => theme.palette.common.white,
+              opacity: 1,
+              boxShadow: (theme) => theme.shadows[2],
             },
           }}
         >
-          {loading ? (
-            <CircularProgress
-              size="14px"
-              sx={{
-                color: (theme) => theme.palette.common.white,
-              }}
-            />
-          ) : (
-            <Stars01 />
-          )}
-          Request Summary
+          Cancel summary
         </Button>
-      </ThemeProvider>
-    </CacheProvider>
+      </>
+    );
+  }
+
+  if (videoToLong) {
+    return (
+      <Button
+        disabled
+        endIcon={<AlertCircle />}
+        variant="outlined"
+        sx={{
+          mx: 2,
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          width: 200,
+        }}
+      >
+        Too long to summarize
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      onClick={handleRequestSummary}
+      variant="contained"
+      sx={{
+        fontWeight: 600,
+        fontSize: 12,
+        boxShadow: (theme) => theme.shadows[0],
+        zIndex: 3,
+        gap: 1,
+        mx: 2,
+        "&:hover": {
+          boxShadow: (theme) => theme.shadows[2],
+        },
+      }}
+    >
+      {loading ? (
+        <CircularProgress
+          size="14px"
+          sx={{
+            color: (theme) => theme.palette.common.white,
+          }}
+        />
+      ) : (
+        <Stars01 />
+      )}
+      Request Summary
+    </Button>
   );
 }
 
 export default function RequestButton() {
-  return <RequestSummaryButton />;
+  const systemTheme = getSystemTheme();
+  const theme = createSummaraizeTheme({}, systemTheme) ?? createTheme();
+  return (
+    <CacheProvider value={styleCache}>
+      <ThemeProvider theme={theme}>
+        <RequestSummaryButton />
+      </ThemeProvider>
+    </CacheProvider>
+  );
 }

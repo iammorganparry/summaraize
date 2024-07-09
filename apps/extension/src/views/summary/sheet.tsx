@@ -1,4 +1,4 @@
-import { SignedIn, SignedOut, useAuth } from "@clerk/chrome-extension";
+import { SignedIn, SignedOut, useAuth, useUser } from "@clerk/chrome-extension";
 import { useCallback, useEffect, useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import Button from "@mui/material/Button";
@@ -20,6 +20,8 @@ export function SummaraizeSheet({
     open: false,
   });
 
+  const user = useUser();
+
   const { getToken } = useAuth();
 
   const container = shadowHost?.shadowRoot?.querySelector(
@@ -35,9 +37,9 @@ export function SummaraizeSheet({
    */
   const saveToken = useCallback(async () => {
     const token = await getToken();
-    console.log("Got Token", token);
     storage.set("clerk-token", token);
-  }, [getToken]);
+    storage.set("clerk-user", user);
+  }, [getToken, user]);
 
   useEffect(() => {
     void saveToken();
@@ -50,6 +52,7 @@ export function SummaraizeSheet({
         variant="contained"
         color="primary"
         sx={{
+          opacity: state.open ? 0 : 1,
           position: "fixed",
           top: "1rem",
           zIndex: 1300,
@@ -58,15 +61,27 @@ export function SummaraizeSheet({
           height: "100px",
           right: state.open ? Sizes.SLIDER_WIDTH : 0,
           transition: "right 225ms cubic-bezier(0, 0, 0.2, 1) 0ms",
+          "&:hover": {
+            boxShadow: (theme) => theme.shadows[2],
+          },
         }}
       >
-        🧙‍♂️
+        Summaraize
       </Button>
       <Drawer
         container={container}
         anchor="right"
         open={state.open}
         onClose={handleClose}
+        PaperProps={{
+          sx: {
+            boxShadow: (theme) =>
+              state.open
+                ? `"-12px 20px 0 0 ${theme.palette.common.black}"`
+                : "none",
+            borderLeft: (theme) => `4px solid ${theme.palette.common.white}`,
+          },
+        }}
       >
         <SignedIn>
           <RouteContainer>

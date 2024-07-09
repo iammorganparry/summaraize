@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,65 +9,78 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  name      String
-  email     String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  Video     Video[]
-  Summary   Summary[]
+  id             String    @id @default(uuid())
+  name           String
+  email          String    @unique
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @default(now()) @updatedAt
+  xata_createdat DateTime  @default(now()) @db.Timestamptz(6)
+  xata_id        String    @unique(map: "User__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  xata_updatedat DateTime  @default(now()) @db.Timestamptz(6)
+  xata_version   Int       @default(0)
+  Video          Video[]
+  Summary        Summary[] @relation("SummaryToUser")
 
   @@index([email])
   @@index([id])
 }
 
 model Video {
-  id         String    @id @default(uuid())
-  name       String
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  url        String
-  summary    Summary[]
-  user       User      @relation(fields: [user_id], references: [id])
-  user_id    String
-  data_raw   Json // used to store the raw data from the API for future use
-  thumbnail  String
-  duration   String
-  views      String?
-  likes      Int?
-  authors    Author[]
+  id             String   @id @default(uuid())
+  name           String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  url            String   @unique
+  user_id        String
+  data_raw       Json
+  thumbnail      String
+  duration       String
+  views          String?
+  likes          Int?
+  xata_version   Int      @default(0)
+  xata_createdat DateTime @default(now()) @db.Timestamptz(6)
+  xata_updatedat DateTime @default(now()) @db.Timestamptz(6)
+  xata_id        String   @unique(map: "Video__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  authors        Author[]
+  summary        Summary?
+  user           User     @relation(fields: [user_id], references: [id])
 
+  @@index([url])
   @@index([user_id])
   @@index([id])
 }
 
 model Author {
-  id          String   @id @default(uuid())
-  name        String
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  video       Video    @relation(fields: [video_id], references: [id])
-  video_id    String
-  avatar      String
-  channel_url String
+  id             String   @id @default(uuid())
+  name           String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  video_id       String
+  avatar         String
+  channel_url    String
+  xata_id        String   @unique(map: "Author__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  xata_version   Int      @default(0)
+  xata_createdat DateTime @default(now()) @db.Timestamptz(6)
+  xata_updatedat DateTime @default(now()) @db.Timestamptz(6)
+  video          Video    @relation(fields: [video_id], references: [id])
 
   @@index([video_id])
 }
 
 model Summary {
-  id            String   @id @default(uuid())
-  name          String
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  transcription String
-  summary       String
-  video         Video    @relation(fields: [video_id], references: [id])
-  video_id      String
-  user          User     @relation(fields: [user_id], references: [id])
-  user_id       String
+  name           String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  transcription  String
+  summary        String
+  video_url      String   @id
+  xata_id        String   @unique(map: "Summary__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  xata_version   Int      @default(0)
+  xata_createdat DateTime @default(now()) @db.Timestamptz(6)
+  xata_updatedat DateTime @default(now()) @db.Timestamptz(6)
+  video          Video    @relation(fields: [video_url], references: [url])
+  users          User[]   @relation("SummaryToUser")
 
   @@index([name])
-  @@index([video_id])
-  @@index([user_id])
-  @@index([id])
+  @@index([video_url])
 }
