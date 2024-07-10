@@ -32,7 +32,7 @@ export const getShadowHostId = () => "summaraize-request-summary-button";
 
 export const getStyle: PlasmoGetStyle = () => styleElement;
 
-const MAX_VIDEO_LENGTH = 60 * 10;
+const MAX_VIDEO_LENGTH_IN_MINUTES = 15;
 
 function RequestSummaryButton() {
   const [loading, setLoading] = useState(false);
@@ -55,7 +55,9 @@ function RequestSummaryButton() {
         "#player-container video"
       );
       if (video) {
-        setVideoToLong(video.duration > MAX_VIDEO_LENGTH);
+        console.log("video duration", video.duration);
+        const minutes = video.duration / 60;
+        setVideoToLong(minutes > MAX_VIDEO_LENGTH_IN_MINUTES);
         observer.disconnect();
       }
     }

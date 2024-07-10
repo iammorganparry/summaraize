@@ -1,10 +1,39 @@
 import { type Theme, createTheme } from "@mui/material/styles";
 
-export const createSummaraizeTheme = (overrides?: Partial<Theme>, mode: "light" | "dark" = "light") =>
+export const createSummaraizeTheme = (
+  overrides?: Partial<Theme>,
+  mode: "light" | "dark" = "light"
+) =>
   createTheme(
     {
       typography: {
         fontFamily: '"Public Sans", sans-serif',
+        body1: {
+          fontSize: "16px",
+        },
+        body2: {
+          fontSize: "14px",
+        },
+        h1: {
+          fontSize: "40px",
+          fontWeight: 600,
+        },
+        h2: {
+          fontSize: "32px",
+          fontWeight: 600,
+        },
+        h3: {
+          fontSize: "24px",
+          fontWeight: 600,
+        },
+        h4: {
+          fontSize: "20px",
+          fontWeight: 600,
+        },
+        h5: {
+          fontSize: "16px",
+          fontWeight: 600,
+        },
       },
       palette: {
         mode,
@@ -56,6 +85,7 @@ export const createSummaraizeTheme = (overrides?: Partial<Theme>, mode: "light" 
         `14px 16px 0px 0px ${mode === "dark" ? "#fff" : "#000"}`,
         `14px 16px 0px 0px ${mode === "dark" ? "#fff" : "#000"}`,
       ],
+
       components: {
         MuiCard: {
           defaultProps: {
@@ -84,5 +114,5 @@ export const createSummaraizeTheme = (overrides?: Partial<Theme>, mode: "light" 
         },
       },
     },
-    overrides ?? {},
+    overrides ?? {}
   );

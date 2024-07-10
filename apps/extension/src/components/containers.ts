@@ -8,7 +8,7 @@ export const RouteContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   width: 500,
   overflowX: "hidden",
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: theme.palette.background.paper,
   flexDirection: "column",
   "& > *": {
     marginBottom: theme.spacing(2),

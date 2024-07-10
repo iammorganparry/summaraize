@@ -7,17 +7,18 @@ import type ytdl from "ytdl-core";
 import progress from "progress-stream";
 import path from "node:path";
 import type { PrismaClient } from "@summaraize/prisma";
-import promiseFs from "node:fs/promises";
 import type {
   AdaptiveFormat,
   VideoDetails,
   YoutubeVideoResponse,
 } from "../../types/youtube";
-import { responseToReadable } from "../../lib/utils";
+import { Readable } from "node:stream";
+
 export class VideoService {
   private videoFilePath: string;
   private audioFilePath: string;
   readonly MODEL = "whisper-1";
+  private readonly API_KEY = process.env.YOUTU;
   private readonly MAX_FRAMES = 5;
   constructor(
     private readonly db: PrismaClient,
@@ -28,6 +29,16 @@ export class VideoService {
   ) {
     this.videoFilePath = "";
     this.audioFilePath = "";
+  }
+  private get reliableHeaders() {
+    return {
+      "X-YouTube-Client-Name": "5",
+      "X-YouTube-Client-Version": "19.09.3",
+      Origin: "https://www.youtube.com",
+      "User-Agent":
+        "com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)",
+      "content-type": "application/json",
+    };
   }
 
   // return the file path
@@ -59,53 +70,49 @@ export class VideoService {
     outputFilePath: string
   ): Promise<{ outputFilePath: string }> {
     // if the file already exists, return the path
-    return new Promise((resolve, reject) => {
-      this.logger.info("Format chosen:", { data });
+    this.logger.info("Format chosen:", { data });
 
-      if (!data.approxDurationMs) {
-        this.logger.error("Failed to get target duration:", { data });
-        throw new Error(
-          `[VideoService] Failed to get target duration from format: ${JSON.stringify(
-            data
-          )}`
-        );
-      }
-
-      const video = data.url;
-
-      const writeable = fs.createWriteStream(outputFilePath);
-      fetch(video).then((r) =>
-        responseToReadable(r)
-          .pipe(writeable)
-          .on("progress", (progress) => {
-            this.logger.info("Progress:", { progress });
-          })
-          .on("finish", () => {
-            this.logger.info("Finished writing file:", { outputFilePath });
-            resolve({ outputFilePath });
-          })
-          .on("close", () => {
-            this.logger.info("Finished writing file:", { outputFilePath });
-            resolve({ outputFilePath });
-          })
+    if (!data.approxDurationMs) {
+      this.logger.error("Failed to get target duration:", { data });
+      throw new Error(
+        `[VideoService] Failed to get target duration from format: ${JSON.stringify(
+          data
+        )}`
       );
+    }
+
+    const progressStream = progress({
+      length: Number.parseInt(data.contentLength),
+      time: 3000,
+    });
+
+    progressStream.on("progress", (progress) => {
+      this.logger.info("Downloading video:", { progress });
+    });
+
+    const response = await fetch(data.url);
+
+    if (!response.ok) throw new Error("Response is not ok.");
+
+    if (!response.body) throw new Error("Response body is empty.");
+
+    const writeStream = fs.createWriteStream(outputFilePath);
+
+    // @ts-expect-error This type should be fine? it like wants a strict any.. bizarre
+    const readable = Readable.fromWeb(response.body);
+
+    readable.pipe(progressStream).pipe(writeStream);
+
+    return await new Promise((resolve, reject) => {
+      readable.on("end", () => resolve({ outputFilePath }));
+      readable.on("error", reject);
     });
   }
 
   public async getInfo(videoId: string): Promise<YoutubeVideoResponse> {
     // hard-coded from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py
-    const apiKey = "AIzaSyB-63vPrdThhKuerbB2N_l7Kwwcxj6yUAc";
 
-    const headers = {
-      "X-YouTube-Client-Name": "5",
-      "X-YouTube-Client-Version": "19.09.3",
-      Origin: "https://www.youtube.com",
-      "User-Agent":
-        "com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)",
-      "content-type": "application/json",
-    };
-
-    const b = {
+    const body = {
       context: {
         client: {
           clientName: "IOS",
@@ -127,9 +134,33 @@ export class VideoService {
     };
 
     return fetch(
-      `https://www.youtube.com/youtubei/v1/player?key${apiKey}&prettyPrint=false`,
-      { method: "POST", body: JSON.stringify(b), headers }
+      `https://www.youtube.com/youtubei/v1/player?key${this.API_KEY}&prettyPrint=false`,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: this.reliableHeaders,
+      }
     ).then((r) => r.json());
+  }
+
+  private findSuitableVideoFormat(
+    formats: AdaptiveFormat[]
+  ): AdaptiveFormat | undefined {
+    return formats.find(
+      (f) =>
+        (f.mimeType.includes("video/mp4") && f.qualityLabel === "720p60") ||
+        f.qualityLabel === "720p"
+    );
+  }
+
+  private findSuitableAudioFormat(
+    formats: AdaptiveFormat[]
+  ): AdaptiveFormat | undefined {
+    return formats.find(
+      (f) =>
+        f.mimeType.includes("audio/mp4") &&
+        f.audioQuality === "AUDIO_QUALITY_MEDIUM"
+    );
   }
 
   public async createFilesFromYoutubeUrl(url: string): Promise<{
@@ -151,14 +182,12 @@ export class VideoService {
       throw new Error(`[VideoService] Failed to fetch file: ${error.message}`);
     });
 
-    const videoData = resp.streamingData.adaptiveFormats.find(
-      (f) => f.mimeType.includes("video/mp4") && f.qualityLabel === "720p60"
+    const videoData = this.findSuitableVideoFormat(
+      resp.streamingData.adaptiveFormats
     );
 
-    const audioData = resp.streamingData.adaptiveFormats.find(
-      (f) =>
-        f.mimeType.includes("audio/mp4") &&
-        f.audioQuality === "AUDIO_QUALITY_MEDIUM"
+    const audioData = this.findSuitableAudioFormat(
+      resp.streamingData.adaptiveFormats
     );
 
     this.logger.info("Video & Audio data:", { videoData, audioData });
@@ -255,8 +284,8 @@ export class VideoService {
         messages: [
           {
             role: "system",
-            content:
-              "You are a helpful assistant that summarizes a video from a transcription and frames. Please summarize who is in the video, what they are doing, who is talking to who, and any other important details.",
+            content: `You are a helpful assistant that summarizes a video from a transcription and frames. Please summarize who is in the video, what they are doing, who is talking to who, and any other important details.
+              Be sure to return the summary in a formatted markdown format. including any newlines, bullet points, or other formatting that you think would be helpful for the user to understand the video.`,
           },
           {
             role: "user",
