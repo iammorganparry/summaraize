@@ -5,7 +5,6 @@ import Button from "@mui/material/Button";
 
 import { Selectors, Sizes } from "./constants";
 import { LoginPage } from "~views/login/login";
-import { Footer } from "~components/footer";
 import { Route, Routes } from "react-router-dom";
 import { SummaryList } from "./list";
 import { RouteContainer } from "~components/containers";
@@ -91,7 +90,6 @@ export function SummaraizeSheet({
               <Route path="/search" element={<>Search</>} />
             </Routes>
           </RouteContainer>
-          <Footer />
         </SignedIn>
         <SignedOut>
           <LoginPage />

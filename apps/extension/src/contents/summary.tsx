@@ -19,7 +19,6 @@ import { createTheme, ThemeProvider, type Theme } from "@mui/material";
 
 import { createSummaraizeTheme } from "~theme";
 import { TRPCReactProvider } from "~lib/trpc/react";
-import { PusherProvider } from "~providers/pusher";
 import { ToasterBoi } from "~components/toaster";
 import { getSystemTheme } from "~utils";
 

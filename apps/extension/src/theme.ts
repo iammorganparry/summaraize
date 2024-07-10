@@ -34,6 +34,9 @@ export const createSummaraizeTheme = (
           fontSize: "16px",
           fontWeight: 600,
         },
+        caption: {
+          fontSize: "12px",
+        },
       },
       palette: {
         mode,

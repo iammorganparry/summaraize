@@ -3,6 +3,19 @@ import { z } from "zod";
 import { protectedProcedure, createTRPCRouter } from "../trpc";
 
 export const summaryRouter = createTRPCRouter({
+  getSummaryByVideoUrl: protectedProcedure
+    .input(
+      z.object({
+        url: z.string(),
+      })
+    )
+    .query(({ input, ctx }) => {
+      return ctx.db.summary.findFirst({
+        where: {
+          video_url: input.url,
+        },
+      });
+    }),
   requestSummary: protectedProcedure
     .input(
       z.object({

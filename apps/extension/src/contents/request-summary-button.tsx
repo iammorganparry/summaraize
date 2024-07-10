@@ -1,15 +1,17 @@
 import { CacheProvider, ThemeProvider } from "@emotion/react";
-import { Button, CircularProgress, createTheme } from "@mui/material";
+import { CircularProgress, createTheme } from "@mui/material";
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo";
 import { createSummaraizeTheme } from "~theme";
 import createCache from "@emotion/cache";
-import { AlertCircle, Stars01, XClose } from "@untitled-ui/icons-react";
+import { AlertCircle, Eye, Stars01, XClose } from "@untitled-ui/icons-react";
 import { getSystemTheme } from "~utils";
 import { createToastMessage } from "~api/messages";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useObserver } from "~lib/hooks/useObserver";
 import { getYoutuveVideoId } from "~lib/utils";
 import { client } from "~lib/trpc/vanilla-client";
+import type { Summary } from "@summaraize/prisma";
+import { ContainedButton, OutlinedButton } from "~components/buttons/outlined";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -36,7 +38,7 @@ const MAX_VIDEO_LENGTH_IN_MINUTES = 15;
 
 function RequestSummaryButton() {
   const [loading, setLoading] = useState(false);
-
+  const [summary, setSummary] = useState<Summary | null>(null);
   const [requested, setRequested] = useState(false);
   const [videoToLong, setVideoToLong] = useState(true);
   useObserver(
@@ -54,7 +56,7 @@ function RequestSummaryButton() {
       const video = document.querySelector<HTMLVideoElement>(
         "#player-container video"
       );
-      if (video) {
+      if (video?.duration) {
         console.log("video duration", video.duration);
         const minutes = video.duration / 60;
         setVideoToLong(minutes > MAX_VIDEO_LENGTH_IN_MINUTES);
@@ -64,38 +66,46 @@ function RequestSummaryButton() {
   );
 
   const handleRequestSummary = async () => {
-    setLoading(true);
-    const videoId = getYoutuveVideoId(window.location.href);
+    try {
+      setLoading(true);
+      const videoId = getYoutuveVideoId(window.location.href);
 
-    if (!videoId) {
+      if (!videoId) {
+        createToastMessage(
+          "Failed to get video ID, please try again. 🙁",
+          "error"
+        );
+        setLoading(false);
+        return;
+      }
+
+      const resp = await client.summary.requestSummary.mutate({
+        src: window.location.href,
+        videoId,
+      });
+
+      if (!resp.ids) {
+        createToastMessage(
+          "Failed to schedule request summary, please try again. 🙁",
+          "error"
+        );
+        setLoading(false);
+        return;
+      }
+
       createToastMessage(
-        "Failed to get video ID, please try again. 🙁",
-        "error"
+        "Scheduled request summary, check back in a few moments after a tasty beverage. 🍺",
+        "success"
       );
       setLoading(false);
-      return;
-    }
-
-    const resp = await client.summary.requestSummary.mutate({
-      src: window.location.href,
-      videoId,
-    });
-
-    if (!resp.ids) {
+      setRequested(true);
+    } catch (error) {
       createToastMessage(
         "Failed to schedule request summary, please try again. 🙁",
         "error"
       );
       setLoading(false);
-      return;
     }
-
-    createToastMessage(
-      "Scheduled request summary, check back in a few moments after a tasty beverage. 🍺",
-      "success"
-    );
-    setLoading(false);
-    setRequested(true);
   };
 
   const handleCancelRequest = async () => {
@@ -133,70 +143,51 @@ function RequestSummaryButton() {
     setRequested(false);
   };
 
+  const handleCheckForSummary = useCallback(async () => {
+    const resp = await client.summary.getSummaryByVideoUrl.query({
+      url: window.location.href,
+    });
+    if (resp) {
+      setSummary(resp);
+    }
+  }, []);
+
+  useEffect(() => {
+    void handleCheckForSummary();
+  }, [handleCheckForSummary]);
+
+  if (summary) {
+    return (
+      <OutlinedButton variant="outlined" endIcon={<Eye />}>
+        View summary
+      </OutlinedButton>
+    );
+  }
+
   if (requested) {
     return (
       <>
-        <Button
+        <OutlinedButton
           onClick={handleCancelRequest}
           endIcon={<XClose />}
           variant="outlined"
-          sx={{
-            fontWeight: 600,
-            fontSize: 12,
-            opacity: 0.5,
-            boxShadow: (theme) => theme.shadows[0],
-            zIndex: 3,
-            color: (theme) => theme.palette.common.white,
-            gap: 1,
-            mx: 2,
-            "&:hover": {
-              borderColor: (theme) => theme.palette.common.white,
-              opacity: 1,
-              boxShadow: (theme) => theme.shadows[2],
-            },
-          }}
         >
           Cancel summary
-        </Button>
+        </OutlinedButton>
       </>
     );
   }
 
   if (videoToLong) {
     return (
-      <Button
-        disabled
-        endIcon={<AlertCircle />}
-        variant="outlined"
-        sx={{
-          mx: 2,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          width: 200,
-        }}
-      >
+      <OutlinedButton disabled endIcon={<AlertCircle />} variant="outlined">
         Too long to summarize
-      </Button>
+      </OutlinedButton>
     );
   }
 
   return (
-    <Button
-      onClick={handleRequestSummary}
-      variant="contained"
-      sx={{
-        fontWeight: 600,
-        fontSize: 12,
-        boxShadow: (theme) => theme.shadows[0],
-        zIndex: 3,
-        gap: 1,
-        mx: 2,
-        "&:hover": {
-          boxShadow: (theme) => theme.shadows[2],
-        },
-      }}
-    >
+    <ContainedButton onClick={handleRequestSummary} variant="contained">
       {loading ? (
         <CircularProgress
           size="14px"
@@ -208,7 +199,7 @@ function RequestSummaryButton() {
         <Stars01 />
       )}
       Request Summary
-    </Button>
+    </ContainedButton>
   );
 }
 

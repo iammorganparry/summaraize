@@ -2,19 +2,20 @@ import { api } from "~lib/trpc/react";
 import { ListSkeleton } from "./skeleton";
 import { NoSummaries } from "./no-summaries";
 import {
+  Box,
   Button,
   Card,
   CardActions,
   CardContent,
   CardMedia,
-  Container,
   Stack,
   Typography,
 } from "@mui/material";
 import { Header } from "~components/header";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-// import Markdown from "react-markdown";
+
+import { truncate } from "~utils";
 
 dayjs.extend(relativeTime);
 export const SummaryList = () => {
@@ -47,19 +48,27 @@ export const SummaryList = () => {
                 image={summary.video.thumbnail}
                 src="thumbnail"
               />
-              <CardContent>
+              <CardContent
+                sx={{ gap: 1, display: "flex", flexDirection: "column" }}
+              >
                 <Typography variant="h3">{summary.name}</Typography>
-                <Typography variant="caption">
-                  {summary.video.authors
-                    .map((author) => author.name)
-                    .join(", ")}
-                </Typography>
-
-                <Typography variant="caption">
-                  {dayjs(summary.created_at).fromNow()}
-                </Typography>
-
-                {/* <Markdown>{summary.summary}</Markdown> */}
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Typography variant="caption">
+                    {summary.video.authors
+                      .map((author) => author.name)
+                      .join(", ")}
+                  </Typography>
+                  <Typography variant="caption">
+                    {dayjs(summary.created_at).fromNow()}
+                  </Typography>
+                </Box>
+                <div
+                  style={{ fontSize: "1.2rem" }}
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+                  dangerouslySetInnerHTML={{
+                    __html: summary.summary,
+                  }}
+                />
               </CardContent>
               <CardActions
                 sx={{

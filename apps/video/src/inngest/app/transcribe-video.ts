@@ -26,10 +26,15 @@ export const _transcribeVideo = async ({
     }
   );
 
-  const { frames } = await step.run("extract-frames", async () => {
-    const frames = await services.video.extractFrames(outputFilePath);
-    return { frames, videoMetaData };
-  });
+  const { uploadedImages, frames } = await step.run(
+    "extract-frames",
+    async () => {
+      const frames = await services.video.extractFrames(outputFilePath);
+      // save frames to upload thing and return the urls / ids
+      const images = await services.images.uploadImagesFromPath(frames);
+      return { videoMetaData, uploadedImages: images.data, frames };
+    }
+  );
 
   const summary = await step.run(
     "summarize-transcription-and-frames",
@@ -37,7 +42,7 @@ export const _transcribeVideo = async ({
       return await services.video.summarise(
         videoMetaData,
         transcription,
-        frames
+        uploadedImages
       );
     }
   );
@@ -56,6 +61,14 @@ export const _transcribeVideo = async ({
     });
     await services.pusher.sendToUser(userId, PusherEvents.SummaryCreated, {
       summary: summary.choices[0].message.content as string,
+    });
+  });
+
+  await step.run("cleanup", async () => {
+    await services.video.cleanup({
+      audioFilePath,
+      outputFilePath,
+      frames,
     });
   });
 

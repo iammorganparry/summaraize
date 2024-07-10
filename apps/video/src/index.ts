@@ -22,7 +22,7 @@ console.log("Starting video app...", {
   env: process.env.OPENAI_API_KEY,
 });
 
-const app = new Hono();
+export const app = new Hono();
 const port = 3001;
 
 app.use(logger());
@@ -42,13 +42,11 @@ app.use(
 
 app.get("/", (c) => {
   const auth = getAuth(c);
-
   if (!auth?.userId) {
     return c.json({
       message: "You are not logged in.",
     });
   }
-
   return c.json({
     message: "You are logged in! good job!",
     userId: auth.userId,

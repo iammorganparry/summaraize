@@ -1,11 +1,13 @@
 import { InngestMiddleware } from "inngest";
-import { VideoService } from "./services/video";
+import { VideoService } from "../services/video";
 import { logger } from "../lib/logger";
 import Ffmpeg from "fluent-ffmpeg";
-import { getOpenAI } from "./services/openai";
+import { getOpenAI } from "../services/openai";
 import ytdl from "ytdl-core";
 import { db } from "@summaraize/prisma";
 import { pusher } from "@summaraize/pusher";
+import { ImageService } from "../services/images";
+import { utapi } from "../services/uploadthing";
 
 export const servicesMiddleware = new InngestMiddleware({
   name: "Summaraize Services Middleware",
@@ -17,6 +19,8 @@ export const servicesMiddleware = new InngestMiddleware({
       Ffmpeg,
       logger
     );
+
+    const images = new ImageService(utapi, logger);
     return {
       onFunctionRun() {
         return {
@@ -26,6 +30,7 @@ export const servicesMiddleware = new InngestMiddleware({
                 services: {
                   pusher: pusher,
                   video: videoService,
+                  images,
                 },
               },
             };
