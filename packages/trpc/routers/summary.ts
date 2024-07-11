@@ -13,6 +13,18 @@ export const summaryRouter = createTRPCRouter({
       return ctx.db.summary.findFirst({
         where: {
           video_url: input.url,
+          users: {
+            some: {
+              id: ctx.auth.userId,
+            },
+          },
+        },
+        include: {
+          video: {
+            include: {
+              authors: true,
+            },
+          },
         },
       });
     }),
@@ -59,7 +71,15 @@ export const summaryRouter = createTRPCRouter({
       })
     )
     .query(({ input, ctx }) => {
+      const userId = ctx.auth.userId;
       return ctx.db.summary.findMany({
+        where: {
+          users: {
+            some: {
+              id: userId,
+            },
+          },
+        },
         take: input.limit,
         skip: (input.page - 1) * input.limit,
         orderBy: {

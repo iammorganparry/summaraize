@@ -152,6 +152,25 @@ function RequestSummaryButton() {
     }
   }, []);
 
+  const resetState = useCallback(async () => {
+    setSummary(null);
+    setRequested(false);
+    setVideoToLong(false);
+    await handleCheckForSummary();
+  }, [handleCheckForSummary]);
+
+  const handleTabChange = useCallback(() => {
+    chrome.tabs.onUpdated.addListener((_, changeInfo, __) => {
+      if (changeInfo.status === "complete") {
+        resetState();
+      }
+    });
+  }, [resetState]);
+
+  useEffect(() => {
+    handleTabChange();
+  }, [handleTabChange]);
+
   useEffect(() => {
     void handleCheckForSummary();
   }, [handleCheckForSummary]);

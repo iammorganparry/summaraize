@@ -9,10 +9,29 @@ export const _transcribeVideo = async ({
 }: GetFunctionInput<typeof inngest, "app/transcribe-video">) => {
   const { src, userId, videoId } = event.data;
 
+  const { existing } = await step.run("check-existing-summary", async () => {
+    const existing = await services.video.getSummaryByVideoUrl(src);
+    if (existing) {
+      const summary = await services.video.addUserToSummry(userId);
+      return {
+        existing: summary,
+      };
+    }
+    return {
+      existing: null,
+    };
+  });
+
+  if (existing) {
+    return {
+      summary: existing,
+    };
+  }
+
   const { audioFilePath, outputFilePath, videoMetaData } = await step.run(
     "download-audio-video-file",
     async () => {
-      return await services.video.createFilesFromYoutubeUrl(videoId);
+      return await services.video.createFilesFromYoutubeUrl(videoId, userId);
     }
   );
 
@@ -29,7 +48,7 @@ export const _transcribeVideo = async ({
   const { uploadedImages, frames } = await step.run(
     "extract-frames",
     async () => {
-      const frames = await services.video.extractFrames(outputFilePath);
+      const frames = await services.video.extractFrames(outputFilePath, userId);
       // save frames to upload thing and return the urls / ids
       const images = await services.images.uploadImagesFromPath(frames);
       return { videoMetaData, uploadedImages: images.data, frames };
@@ -39,7 +58,7 @@ export const _transcribeVideo = async ({
   const summary = await step.run(
     "summarize-transcription-and-frames",
     async () => {
-      return await services.video.summarise(
+      return await services.video.summarize(
         videoMetaData,
         transcription,
         uploadedImages
@@ -47,28 +66,26 @@ export const _transcribeVideo = async ({
     }
   );
 
-  if (summary.choices.length === 0 || !summary.choices[0].message?.content) {
+  if (!summary.summary) {
     throw new NonRetriableError("Failed to summarize video");
   }
 
   await step.run("save-summary-and-alert", async () => {
     await services.video.saveSummary({
       userId,
-      summary: summary.choices[0].message.content as string,
+      summary: summary,
       transcription,
       videoMetaData,
       videoUrl: src,
     });
     await services.pusher.sendToUser(userId, PusherEvents.SummaryCreated, {
-      summary: summary.choices[0].message.content as string,
+      summary: summary.summary as string,
     });
   });
 
   await step.run("cleanup", async () => {
     await services.video.cleanup({
-      audioFilePath,
-      outputFilePath,
-      frames,
+      userId,
     });
   });
 

@@ -68,19 +68,47 @@ model Author {
 }
 
 model Summary {
-  name           String
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
-  transcription  String
-  summary        String
-  video_url      String   @id
-  xata_id        String   @unique(map: "Summary__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
-  xata_version   Int      @default(0)
-  xata_createdat DateTime @default(now()) @db.Timestamptz(6)
-  xata_updatedat DateTime @default(now()) @db.Timestamptz(6)
-  video          Video    @relation(fields: [video_url], references: [url])
-  users          User[]   @relation("SummaryToUser")
+  name                   String
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+  transcription          String
+  summary                String
+  summary_html_formatted String
+  video_url              String   @id
+  xata_id                String   @unique(map: "Summary__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  xata_version           Int      @default(0)
+  xata_createdat         DateTime @default(now()) @db.Timestamptz(6)
+  xata_updatedat         DateTime @default(now()) @db.Timestamptz(6)
+  video                  Video    @relation(fields: [video_url], references: [url])
+  users                  User[]   @relation("SummaryToUser")
 
   @@index([name])
   @@index([video_url])
+}
+
+enum SummaryStage {
+  DOWNLOADING
+  TRANSCRIBING
+  EXTRACTING
+  SUMMARIZING
+  DONE
+}
+
+model SummaryRequest {
+  id             String       @id @default(uuid())
+  name           String
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @updatedAt
+  stage          SummaryStage
+  transcription  String
+  summary        String
+  summary_html   String
+  video_url      String
+  xata_id        String       @unique(map: "SummaryRequest__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  xata_version   Int          @default(0)
+  xata_createdat DateTime     @default(now()) @db.Timestamptz(6)
+  xata_updatedat DateTime     @default(now()) @db.Timestamptz(6)
+
+  @@index([video_url])
+  @@index([id])
 }

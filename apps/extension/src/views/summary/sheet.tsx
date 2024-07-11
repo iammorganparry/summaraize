@@ -1,27 +1,25 @@
-import { SignedIn, SignedOut, useAuth, useUser } from "@clerk/chrome-extension";
-import { useCallback, useEffect, useState } from "react";
+import { SignedIn, SignedOut } from "@clerk/chrome-extension";
+import { useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import Button from "@mui/material/Button";
 
 import { Selectors, Sizes } from "./constants";
 import { LoginPage } from "~views/login/login";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { SummaryList } from "./list";
 import { RouteContainer } from "~components/containers";
-import { storage } from "~lib/storage/client";
+import { ViewSummary } from "./view-summary";
 
 export function SummaraizeSheet({
   shadowHost,
 }: {
   shadowHost: Element | null;
 }) {
+  const location = useLocation();
+
   const [state, setState] = useState({
     open: false,
   });
-
-  const user = useUser();
-
-  const { getToken } = useAuth();
 
   const container = shadowHost?.shadowRoot?.querySelector(
     Selectors.SHADOW_CONTAINER
@@ -30,19 +28,6 @@ export function SummaraizeSheet({
   const handleClose = () => {
     setState({ open: false });
   };
-
-  /**
-   * Save the token to storage for use in the buttons
-   */
-  const saveToken = useCallback(async () => {
-    const token = await getToken();
-    storage.set("clerk-token", token);
-    storage.set("clerk-user", user);
-  }, [getToken, user]);
-
-  useEffect(() => {
-    void saveToken();
-  }, [saveToken]);
 
   return (
     <>
@@ -84,8 +69,10 @@ export function SummaraizeSheet({
       >
         <SignedIn>
           <RouteContainer>
-            <Routes>
+            <Routes location={location} key={location.key}>
               <Route path="/" element={<SummaryList />} />
+              <Route path="/summary/:videoUrl" element={<ViewSummary />} />
+
               <Route path="/chat" element={<>Chat</>} />
               <Route path="/search" element={<>Search</>} />
             </Routes>

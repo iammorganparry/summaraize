@@ -3,7 +3,7 @@ import { VideoService } from "../services/video";
 import { logger } from "../lib/logger";
 import Ffmpeg from "fluent-ffmpeg";
 import { getOpenAI } from "../services/openai";
-import ytdl from "ytdl-core";
+import ytdl from "@distube/ytdl-core";
 import { db } from "@summaraize/prisma";
 import { pusher } from "@summaraize/pusher";
 import { ImageService } from "../services/images";
