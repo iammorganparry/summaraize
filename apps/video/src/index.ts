@@ -4,7 +4,7 @@ import { serve } from "@hono/node-server";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 
 import { inngest } from "./inngest/client";
-import { transcribeVideo } from "./inngest/app/transcribe-video";
+import { cancelSummary, transcribeVideo } from "./inngest/app/transcribe-video";
 
 import { Hono } from "hono";
 import { trpcServer } from "@hono/trpc-server";
@@ -13,6 +13,7 @@ import { createTRPCContext } from "@summaraize/trpc/trpc";
 import dotenv from "dotenv";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { pusherAuthRoute } from "./routes/pusher";
 
 dotenv.config({
   path: "../../.env",
@@ -28,7 +29,6 @@ const port = 3001;
 app.use(logger());
 app.use("*", clerkMiddleware());
 app.use("/api/*", cors());
-
 app.use(
   "/api/trpc/*",
   trpcServer({
@@ -53,10 +53,12 @@ app.get("/", (c) => {
   });
 });
 
+app.route("api/pusher/auth", pusherAuthRoute);
+
 app.on(["GET", "PUT", "POST"], "/api/inngest", (c) => {
   const handler = inngestServe({
     client: inngest,
-    functions: [transcribeVideo],
+    functions: [transcribeVideo, cancelSummary],
     signingKey: process.env.INNGEST_SIGNING_KEY,
   });
   return handler(c);

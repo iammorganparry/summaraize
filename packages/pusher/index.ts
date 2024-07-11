@@ -1,7 +1,10 @@
 import PusherServer from "pusher";
 
 export enum PusherEvents {
-  SummaryCreated = "summary-created",
+  SummaryCreated = "summary.created",
+  SummaryCompleted = "summary.completed",
+  SummaryProgressVideo = "summary.progress.video",
+  SummaryProgressAudio = "summary.progress.audio",
 }
 
 export const pusher = new PusherServer({

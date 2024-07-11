@@ -6,12 +6,21 @@ import createCache from "@emotion/cache";
 import { AlertCircle, Eye, Stars01, XClose } from "@untitled-ui/icons-react";
 import { getSystemTheme } from "~utils";
 import { createToastMessage } from "~api/messages";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useObserver } from "~lib/hooks/useObserver";
 import { getYoutuveVideoId } from "~lib/utils";
 import { client } from "~lib/trpc/vanilla-client";
-import type { Summary } from "@summaraize/prisma";
 import { ContainedButton, OutlinedButton } from "~components/buttons/outlined";
+import {
+  QueryClientProvider,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
+import { createQueryClient } from "~lib/trpc/query-client";
+import { pusher } from "~lib/socket/pusher";
+import { getClerkJs } from "~lib/clerk/vanilla";
+import type { Channel } from "pusher-js";
+import { PusherEvents } from "@summaraize/pusher";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -37,16 +46,55 @@ export const getStyle: PlasmoGetStyle = () => styleElement;
 const MAX_VIDEO_LENGTH_IN_MINUTES = 15;
 
 function RequestSummaryButton() {
-  const [loading, setLoading] = useState(false);
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [requested, setRequested] = useState(false);
-  const [videoToLong, setVideoToLong] = useState(true);
+  const [{ requested, videoToLong, progress }, setState] = useState({
+    progress: 0,
+    requested: false,
+    videoToLong: true,
+  });
+
+  const { data: clerk } = useQuery({
+    queryKey: ["clerk"],
+    queryFn: () => getClerkJs(),
+  });
+
+  const channel = useRef<Channel | null>(null);
+  useEffect(() => {
+    if (clerk) {
+      channel.current = pusher.subscribe(`private-${clerk.user?.id}`);
+    }
+  }, [clerk]);
+
+  const { data: summary, refetch } = useQuery({
+    queryKey: ["summary", window.location.href],
+    queryFn: () =>
+      client.summary.getSummaryByVideoUrl.query({ url: window.location.href }),
+  });
+
+  const { mutateAsync: requestSummary, isLoading: loading } = useMutation(
+    ["summary", window.location.href],
+    () => {
+      return client.summary.requestSummary.mutate({
+        src: window.location.href,
+        videoId: getYoutuveVideoId(window.location.href) as string,
+      });
+    }
+  );
+  const { mutateAsync: cancelSummary } = useMutation(
+    ["cancel-summary", window.location.href],
+    () => {
+      return client.summary.cancelSummary.mutate({
+        src: window.location.href,
+        videoId: getYoutuveVideoId(window.location.href) as string,
+      });
+    }
+  );
+
   useObserver(
     {
       childList: true,
       subtree: true,
     },
-    (mutations, observer) => {
+    (_, observer) => {
       console.log(
         "mutation observer",
         document.querySelector<HTMLVideoElement>("#player-container video")
@@ -59,7 +107,10 @@ function RequestSummaryButton() {
       if (video?.duration) {
         console.log("video duration", video.duration);
         const minutes = video.duration / 60;
-        setVideoToLong(minutes > MAX_VIDEO_LENGTH_IN_MINUTES);
+        setState((prev) => ({
+          ...prev,
+          videoToLong: minutes > MAX_VIDEO_LENGTH_IN_MINUTES,
+        }));
         observer.disconnect();
       }
     }
@@ -67,29 +118,22 @@ function RequestSummaryButton() {
 
   const handleRequestSummary = async () => {
     try {
-      setLoading(true);
       const videoId = getYoutuveVideoId(window.location.href);
-
       if (!videoId) {
         createToastMessage(
           "Failed to get video ID, please try again. 🙁",
           "error"
         );
-        setLoading(false);
         return;
       }
 
-      const resp = await client.summary.requestSummary.mutate({
-        src: window.location.href,
-        videoId,
-      });
+      const resp = await requestSummary();
 
       if (!resp.ids) {
         createToastMessage(
           "Failed to schedule request summary, please try again. 🙁",
           "error"
         );
-        setLoading(false);
         return;
       }
 
@@ -97,19 +141,19 @@ function RequestSummaryButton() {
         "Scheduled request summary, check back in a few moments after a tasty beverage. 🍺",
         "success"
       );
-      setLoading(false);
-      setRequested(true);
+      setState((prev) => ({
+        ...prev,
+        requested: true,
+      }));
     } catch (error) {
       createToastMessage(
         "Failed to schedule request summary, please try again. 🙁",
         "error"
       );
-      setLoading(false);
     }
   };
 
   const handleCancelRequest = async () => {
-    setLoading(true);
     const videoId = getYoutuveVideoId(window.location.href);
 
     if (!videoId) {
@@ -117,21 +161,16 @@ function RequestSummaryButton() {
         "Failed to get video ID, please try again. 🙁",
         "error"
       );
-      setLoading(false);
       return;
     }
 
-    const resp = await client.summary.cancelSummary.mutate({
-      src: window.location.href,
-      videoId,
-    });
+    const resp = await cancelSummary();
 
     if (!resp.ids) {
       createToastMessage(
         "Failed to cancel request summary, please try again. 🙁",
         "error"
       );
-      setLoading(false);
       return;
     }
 
@@ -139,41 +178,57 @@ function RequestSummaryButton() {
       "Canceled request summary, you can request again. 😉",
       "success"
     );
-    setLoading(false);
-    setRequested(false);
+    setState((prev) => ({
+      ...prev,
+      requested: false,
+    }));
   };
 
-  const handleCheckForSummary = useCallback(async () => {
-    const resp = await client.summary.getSummaryByVideoUrl.query({
-      url: window.location.href,
-    });
-    if (resp) {
-      setSummary(resp);
-    }
-  }, []);
-
   const resetState = useCallback(async () => {
-    setSummary(null);
-    setRequested(false);
-    setVideoToLong(false);
-    await handleCheckForSummary();
-  }, [handleCheckForSummary]);
-
-  const handleTabChange = useCallback(() => {
-    chrome.tabs.onUpdated.addListener((_, changeInfo, __) => {
-      if (changeInfo.status === "complete") {
-        resetState();
-      }
+    setState({
+      progress: 0,
+      requested: false,
+      videoToLong: true,
     });
+    await refetch();
+  }, [refetch]);
+
+  // const handleTabChange = useCallback(() => {
+  //   chrome.tabs.onUpdated.addListener((_, changeInfo, __) => {
+  //     if (changeInfo.status === "complete") {
+  //       resetState();
+  //     }
+  //   });
+  // }, [resetState]);
+
+  // useEffect(() => {
+  //   handleTabChange();
+  // }, [handleTabChange]);
+
+  const refresh = useCallback(() => {
+    resetState();
   }, [resetState]);
 
-  useEffect(() => {
-    handleTabChange();
-  }, [handleTabChange]);
+  const setProgressFromWS = useCallback(
+    (data: { progress: number }) => {
+      if (data.progress === 100) {
+        return refresh();
+      }
+      setState((prev) => ({
+        ...prev,
+        progress: data.progress,
+      }));
+    },
+    [refresh]
+  );
 
   useEffect(() => {
-    void handleCheckForSummary();
-  }, [handleCheckForSummary]);
+    channel.current?.bind(PusherEvents.SummaryProgressVideo, setProgressFromWS);
+    channel.current?.bind(PusherEvents.SummaryCompleted, refresh);
+    return () => {
+      channel.current?.unbind_all();
+    };
+  }, [refresh, setProgressFromWS]);
 
   if (summary) {
     return (
@@ -187,6 +242,13 @@ function RequestSummaryButton() {
     return (
       <>
         <OutlinedButton
+          sx={{
+            // fill up the background based on progress
+            background: (theme) =>
+              `linear-gradient(to right, ${theme.palette.primary.main} ${progress}%, ${theme.palette.action.disabled} ${progress}%)
+            `,
+            transition: "background 0.5s",
+          }}
           onClick={handleCancelRequest}
           endIcon={<XClose />}
           variant="outlined"
@@ -223,13 +285,16 @@ function RequestSummaryButton() {
 }
 
 export default function RequestButton() {
+  const [queryClient] = useState(createQueryClient());
   const systemTheme = getSystemTheme();
   const theme = createSummaraizeTheme({}, systemTheme) ?? createTheme();
   return (
-    <CacheProvider value={styleCache}>
-      <ThemeProvider theme={theme}>
-        <RequestSummaryButton />
-      </ThemeProvider>
-    </CacheProvider>
+    <QueryClientProvider client={queryClient}>
+      <CacheProvider value={styleCache}>
+        <ThemeProvider theme={theme}>
+          <RequestSummaryButton />
+        </ThemeProvider>
+      </CacheProvider>
+    </QueryClientProvider>
   );
 }

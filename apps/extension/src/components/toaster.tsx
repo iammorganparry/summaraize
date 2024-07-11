@@ -17,7 +17,10 @@ export const ToasterBoi = () => {
 
   return (
     <Toaster
+      richColors
       theme="system"
+      visibleToasts={3}
+      expand
       toastOptions={{
         style: {
           position: "fixed",
@@ -32,9 +35,9 @@ export const ToasterBoi = () => {
           display: "flex",
           alignItems: "center",
           gap: 2,
+          background: theme.palette.background.paper,
           color: theme.palette.text.primary,
           zIndex: 1300,
-          background: theme.palette.background.paper,
           borderRadius: 0,
           border: systemTheme === "dark" ? "3px solid #fff" : "3px solid #000",
           boxShadow: theme.shadows[3],

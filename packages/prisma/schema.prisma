@@ -99,10 +99,7 @@ model SummaryRequest {
   name           String
   created_at     DateTime     @default(now())
   updated_at     DateTime     @updatedAt
-  stage          SummaryStage
-  transcription  String
-  summary        String
-  summary_html   String
+  stage          SummaryStage @default(DOWNLOADING)
   video_url      String
   xata_id        String       @unique(map: "SummaryRequest__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
   xata_version   Int          @default(0)

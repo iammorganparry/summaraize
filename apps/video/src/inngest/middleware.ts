@@ -17,6 +17,7 @@ export const servicesMiddleware = new InngestMiddleware({
       getOpenAI(),
       ytdl,
       Ffmpeg,
+      pusher,
       logger
     );
 

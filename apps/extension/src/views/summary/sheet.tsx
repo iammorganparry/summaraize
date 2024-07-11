@@ -9,6 +9,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import { SummaryList } from "./list";
 import { RouteContainer } from "~components/containers";
 import { ViewSummary } from "./view-summary";
+import { Typography } from "@mui/material";
 
 export function SummaraizeSheet({
   shadowHost,
@@ -42,15 +43,19 @@ export function SummaraizeSheet({
           zIndex: 1300,
           width: "30px",
           minWidth: "unset",
+          // vertical text
           height: "100px",
           right: state.open ? Sizes.SLIDER_WIDTH : 0,
           transition: "right 225ms cubic-bezier(0, 0, 0.2, 1) 0ms",
+          boxShadow: (theme) => theme.shadows[2],
           "&:hover": {
-            boxShadow: (theme) => theme.shadows[2],
+            boxShadow: (theme) => theme.shadows[0],
           },
         }}
       >
-        Summaraize
+        <Typography sx={{ transform: "rotate(90deg)" }} variant="caption">
+          Summaraize
+        </Typography>
       </Button>
       <Drawer
         container={container}

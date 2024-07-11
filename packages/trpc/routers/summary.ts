@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { protectedProcedure, createTRPCRouter } from "../trpc";
+import { SummaryStage } from ".prisma/client";
 
 export const summaryRouter = createTRPCRouter({
   getSummaryByVideoUrl: protectedProcedure
@@ -35,8 +36,14 @@ export const summaryRouter = createTRPCRouter({
         src: z.string(),
       })
     )
-    .mutation(({ input, ctx }) => {
-      console.log("requestSummary", input);
+    .mutation(async ({ input, ctx }) => {
+      await ctx.db.summaryRequest.create({
+        data: {
+          name: `Summary request for video ${input.videoId}`,
+          stage: SummaryStage.DOWNLOADING,
+          video_url: input.src,
+        },
+      });
       return ctx.inngest.send({
         name: "app/transcribe-video",
         data: {
@@ -60,6 +67,24 @@ export const summaryRouter = createTRPCRouter({
           src: input.src,
           videoId: input.videoId,
           userId: ctx.auth.userId,
+        },
+      });
+    }),
+  deleteSummary: protectedProcedure
+    .input(
+      z.object({
+        url: z.string(),
+      })
+    )
+    .mutation(({ input, ctx }) => {
+      return ctx.db.summary.deleteMany({
+        where: {
+          video_url: input.url,
+          users: {
+            some: {
+              id: ctx.auth.userId,
+            },
+          },
         },
       });
     }),

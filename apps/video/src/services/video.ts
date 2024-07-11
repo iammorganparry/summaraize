@@ -7,17 +7,14 @@ import type ytdl from "@distube/ytdl-core";
 import progress from "progress-stream";
 import path from "node:path";
 import type { PrismaClient } from "@summaraize/prisma";
-import type {
-  AdaptiveFormat,
-  VideoDetails,
-  YoutubeVideoResponse,
-} from "../types/youtube";
-import { Readable } from "node:stream";
+import type { AdaptiveFormat, YoutubeVideoResponse } from "../types/youtube";
 import type { UploadFileResult } from "uploadthing/types";
 import type { z } from "zod";
 import { SummarySchema } from "../schema/summary";
 import { printNode, zodToTs } from "zod-to-ts";
-import type { downloadOptions, videoInfo } from "@distube/ytdl-core";
+import type { downloadOptions } from "@distube/ytdl-core";
+import type Pusher from "pusher";
+import { PusherEvents } from "@summaraize/pusher";
 export class VideoService {
   private videoFilePath: string;
   private audioFilePath: string;
@@ -29,6 +26,7 @@ export class VideoService {
     private readonly ai: OpenAI,
     private readonly youtube: typeof ytdl,
     private readonly ffmpeg: typeof Ffmpeg,
+    private readonly socket: Pusher,
     private logger: winston.Logger
   ) {
     this.videoFilePath = "";
@@ -72,7 +70,9 @@ export class VideoService {
   public async getItemFromYoutube(
     info: ytdl.videoInfo,
     format: downloadOptions["format"],
-    outputFilePath: string
+    outputFilePath: string,
+    userId: string,
+    isAudio = false
   ): Promise<{ outputFilePath: string }> {
     // if the file already exists, return the path
     this.logger.info("Format chosen:", { format });
@@ -91,8 +91,14 @@ export class VideoService {
       time: 1000,
     });
 
-    progressStream.on("progress", (progress) => {
+    progressStream.on("progress", async (progress) => {
       this.logger.info("Downloading video:", { progress });
+      // const eventToUse = isAudio
+      //   ? PusherEvents.SummaryProgressAudio
+      //   : PusherEvents.SummaryProgressVideo;
+      // await this.socket.sendToUser(userId, eventToUse, {
+      //   progress: progress.percentage,
+      // });
     });
     const writeStream = fs.createWriteStream(outputFilePath);
 
@@ -249,8 +255,14 @@ export class VideoService {
 
     const [{ outputFilePath: video }, { outputFilePath: audio }] =
       await Promise.all([
-        this.getItemFromYoutube(resp, videoFormat, outputFilePath),
-        this.getItemFromYoutube(resp, audioFormat, audioFilePath),
+        this.getItemFromYoutube(
+          resp,
+          videoFormat,
+          outputFilePath,
+          userId,
+          false
+        ),
+        this.getItemFromYoutube(resp, audioFormat, audioFilePath, userId, true),
       ]);
 
     return {
@@ -309,8 +321,8 @@ export class VideoService {
             role: "system",
             content: `You are a helpful assistant that summarizes a video from a transcription and frames. Please summarize who is in the video, what they are doing, who is talking to who, and any other important details.\
               You must return the summary in a html format. Do not include markdown tags. Just use HTML. including any newlines, bullet points, or other formatting that you think would be helpful for the user to understand the video.
-              output the message in the following format: \n
-              ${printNode(zodToTs(SummarySchema).node)}`,
+              output the message in the following format: ${printNode(zodToTs(SummarySchema).node)} \n
+              you must at all times generate a html formatted output. with no markdown formatting at all. \n`,
           },
           {
             role: "user",
@@ -388,23 +400,28 @@ export class VideoService {
         summary_html_formatted: summary.summaryFormatted,
         transcription,
         video: {
-          create: {
-            user: {
-              connect: {
-                id: userId,
-              },
+          connectOrCreate: {
+            where: {
+              url: videoUrl,
             },
-            data_raw: JSON.stringify(videoMetaData),
-            name: videoMetaData.title,
-            duration: videoMetaData.lengthSeconds,
-            thumbnail: videoMetaData.thumbnails[0].url,
-            url: videoUrl,
-            views: videoMetaData.viewCount,
-            authors: {
-              create: {
-                name: videoMetaData.author.name,
-                avatar: videoMetaData.author.avatar || "",
-                channel_url: videoMetaData.author.channel_url || "",
+            create: {
+              user: {
+                connect: {
+                  id: userId,
+                },
+              },
+              data_raw: JSON.stringify(videoMetaData),
+              name: videoMetaData.title,
+              duration: videoMetaData.lengthSeconds,
+              thumbnail: videoMetaData.thumbnails[0].url,
+              url: videoUrl,
+              views: videoMetaData.viewCount,
+              authors: {
+                create: {
+                  name: videoMetaData.author.name,
+                  avatar: videoMetaData.author.avatar || "",
+                  channel_url: videoMetaData.author.channel_url || "",
+                },
               },
             },
           },

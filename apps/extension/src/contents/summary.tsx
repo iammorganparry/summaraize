@@ -21,6 +21,7 @@ import { createSummaraizeTheme } from "~theme";
 import { TRPCReactProvider } from "~lib/trpc/react";
 import { ToasterBoi } from "~components/toaster";
 import { getSystemTheme } from "~utils";
+import { PusherProvider } from "~providers/pusher";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -83,7 +84,9 @@ function SummaraizeExtension() {
       routerReplace={(to) => navigate(to, { replace: true })}
     >
       <TRPCReactProvider>
-        <SummaraizeSheet shadowHost={container} />
+        <PusherProvider>
+          <SummaraizeSheet shadowHost={container} />
+        </PusherProvider>
       </TRPCReactProvider>
     </ClerkProvider>
   );
@@ -96,10 +99,8 @@ export default function Summary() {
     <CacheProvider value={styleCache}>
       <ThemeProvider theme={theme || createTheme()}>
         <MemoryRouter>
-          {/* <PusherProvider> */}
           <SummaraizeExtension />
           <ToasterBoi />
-          {/* </PusherProvider> */}
         </MemoryRouter>
       </ThemeProvider>
     </CacheProvider>

@@ -45,15 +45,12 @@ export const _transcribeVideo = async ({
     }
   );
 
-  const { uploadedImages, frames } = await step.run(
-    "extract-frames",
-    async () => {
-      const frames = await services.video.extractFrames(outputFilePath, userId);
-      // save frames to upload thing and return the urls / ids
-      const images = await services.images.uploadImagesFromPath(frames);
-      return { videoMetaData, uploadedImages: images.data, frames };
-    }
-  );
+  const { uploadedImages } = await step.run("extract-frames", async () => {
+    const frames = await services.video.extractFrames(outputFilePath, userId);
+    // save frames to upload thing and return the urls / ids
+    const images = await services.images.uploadImagesFromPath(frames);
+    return { videoMetaData, uploadedImages: images.data, frames };
+  });
 
   const summary = await step.run(
     "summarize-transcription-and-frames",
@@ -77,9 +74,6 @@ export const _transcribeVideo = async ({
       transcription,
       videoMetaData,
       videoUrl: src,
-    });
-    await services.pusher.sendToUser(userId, PusherEvents.SummaryCreated, {
-      summary: summary.summary as string,
     });
   });
 
@@ -106,8 +100,12 @@ export const transcribeVideo = inngest.createFunction(
       scope: "fn",
       key: "data.userId",
     },
-    onFailure: () => {
-      // alert the user that the video could not be transcribed
+    onFailure: async ({ services, event, logger }) => {
+      const { event: originalEvent } = event.data;
+      logger.error("Failed to transcribe video", event.data.error);
+      await services.video.cleanup({
+        userId: originalEvent.data.userId,
+      });
     },
     cancelOn: [
       {
@@ -119,4 +117,23 @@ export const transcribeVideo = inngest.createFunction(
   },
   { event: "app/transcribe-video" },
   _transcribeVideo
+);
+
+export const cancelSummary = inngest.createFunction(
+  {
+    id: "app-cancel-summary",
+    name: "Cancel Summary",
+    onFailure: async ({ services, event, logger }) => {
+      const { event: originalEvent } = event.data;
+      logger.error("Failed to cancel summary", event.data.error);
+      await services.video.cleanup({
+        userId: originalEvent.data.userId,
+      });
+    },
+  },
+  { event: "app/cancel-transcription" },
+  async ({ event, services }) => {
+    const { userId } = event.data;
+    await services.video.cleanup({ userId });
+  }
 );
