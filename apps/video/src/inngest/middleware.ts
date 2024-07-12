@@ -2,24 +2,29 @@ import { InngestMiddleware } from "inngest";
 import { VideoService } from "../services/video";
 import { logger } from "../lib/logger";
 import Ffmpeg from "fluent-ffmpeg";
-import { getOpenAI } from "../services/openai";
+import { OpenAiService, getOpenAI } from "../services/openai";
 import ytdl from "@distube/ytdl-core";
 import { db } from "@summaraize/prisma";
 import { pusher } from "@summaraize/pusher";
 import { ImageService } from "../services/images";
 import { utapi } from "../services/uploadthing";
+import { getXataClient } from "../services/xata";
 
 export const servicesMiddleware = new InngestMiddleware({
   name: "Summaraize Services Middleware",
   init() {
+    const xata = getXataClient();
+    const ai = getOpenAI();
     const videoService = new VideoService(
       db,
-      getOpenAI(),
+      xata,
       ytdl,
       Ffmpeg,
       pusher,
       logger
     );
+
+    const openai = new OpenAiService(ai, logger);
 
     const images = new ImageService(utapi, logger);
     return {
@@ -32,6 +37,7 @@ export const servicesMiddleware = new InngestMiddleware({
                   pusher: pusher,
                   video: videoService,
                   images,
+                  ai: openai,
                 },
               },
             };

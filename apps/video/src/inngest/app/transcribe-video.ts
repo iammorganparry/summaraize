@@ -41,7 +41,7 @@ export const _transcribeVideo = async ({
   const { text: transcription } = await step.run(
     "transcribe-audio",
     async () => {
-      return await services.video.transcribe(audioFilePath);
+      return await services.ai.transcribe(audioFilePath);
     }
   );
 
@@ -55,11 +55,13 @@ export const _transcribeVideo = async ({
   const summary = await step.run(
     "summarize-transcription-and-frames",
     async () => {
-      return await services.video.summarize(
+      const summary = await services.ai.summarize(
         videoMetaData,
         transcription,
         uploadedImages
       );
+
+      return summary;
     }
   );
 
@@ -68,12 +70,16 @@ export const _transcribeVideo = async ({
   }
 
   await step.run("save-summary-and-alert", async () => {
+    const embeddings = await services.ai.generateEmbeddings(
+      `${transcription}\n${summary.summary}`
+    );
     await services.video.saveSummary({
       userId,
       summary: summary,
       transcription,
       videoMetaData,
       videoUrl: src,
+      embeddings,
     });
   });
 

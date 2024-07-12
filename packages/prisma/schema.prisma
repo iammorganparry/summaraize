@@ -37,12 +37,13 @@ model Video {
   duration       String
   views          String?
   likes          Int?
-  xata_version   Int      @default(0)
   xata_createdat DateTime @default(now()) @db.Timestamptz(6)
-  xata_updatedat DateTime @default(now()) @db.Timestamptz(6)
   xata_id        String   @unique(map: "Video__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  xata_updatedat DateTime @default(now()) @db.Timestamptz(6)
+  xata_version   Int      @default(0)
+  summary_id     String   @unique
   authors        Author[]
-  summary        Summary?
+  summary        Summary  @relation(fields: [summary_id], references: [id])
   user           User     @relation(fields: [user_id], references: [id])
 
   @@index([url])
@@ -57,11 +58,11 @@ model Author {
   updated_at     DateTime @updatedAt
   video_id       String
   avatar         String
-  channel_url    String
-  xata_id        String   @unique(map: "Author__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
-  xata_version   Int      @default(0)
+  channel_url    String   @unique
   xata_createdat DateTime @default(now()) @db.Timestamptz(6)
+  xata_id        String   @unique(map: "Author__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
   xata_updatedat DateTime @default(now()) @db.Timestamptz(6)
+  xata_version   Int      @default(0)
   video          Video    @relation(fields: [video_id], references: [id])
 
   @@index([video_id])
@@ -73,25 +74,19 @@ model Summary {
   updated_at             DateTime @updatedAt
   transcription          String
   summary                String
-  summary_html_formatted String
-  video_url              String   @id
-  xata_id                String   @unique(map: "Summary__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
-  xata_version           Int      @default(0)
+  video_url              String   @unique
   xata_createdat         DateTime @default(now()) @db.Timestamptz(6)
+  xata_id                String   @unique(map: "Summary__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
   xata_updatedat         DateTime @default(now()) @db.Timestamptz(6)
-  video                  Video    @relation(fields: [video_url], references: [url])
+  xata_version           Int      @default(0)
+  summary_html_formatted String
+  id                     String   @id @default(uuid())
+  videoId                String?
+  video                  Video?
   users                  User[]   @relation("SummaryToUser")
 
   @@index([name])
   @@index([video_url])
-}
-
-enum SummaryStage {
-  DOWNLOADING
-  TRANSCRIBING
-  EXTRACTING
-  SUMMARIZING
-  DONE
 }
 
 model SummaryRequest {
@@ -108,4 +103,23 @@ model SummaryRequest {
 
   @@index([video_url])
   @@index([id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model embeddings {
+  xata_id        String                @unique(map: "_pgroll_new_embeddings_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  xata_version   Int                   @default(0)
+  xata_createdat DateTime              @default(now()) @db.Timestamptz(6)
+  xata_updatedat DateTime              @default(now()) @db.Timestamptz(6)
+  content        String?
+  embedding      Unsupported("vector")
+}
+
+enum SummaryStage {
+  DOWNLOADING
+  TRANSCRIBING
+  EXTRACTING
+  SUMMARIZING
+  DONE
 }

@@ -10,6 +10,8 @@ import { SummaryList } from "./list";
 import { RouteContainer } from "~components/containers";
 import { ViewSummary } from "./view-summary";
 import { Typography } from "@mui/material";
+import { FooterNav } from "~components/footer";
+import { ChatWithSummaraize } from "~views/chat/chat";
 
 export function SummaraizeSheet({
   shadowHost,
@@ -64,6 +66,7 @@ export function SummaraizeSheet({
         onClose={handleClose}
         PaperProps={{
           sx: {
+            maxWidth: Sizes.SLIDER_WIDTH,
             boxShadow: (theme) =>
               state.open
                 ? `"-12px 20px 0 0 ${theme.palette.common.black}"`
@@ -77,10 +80,10 @@ export function SummaraizeSheet({
             <Routes location={location} key={location.key}>
               <Route path="/" element={<SummaryList />} />
               <Route path="/summary/:videoUrl" element={<ViewSummary />} />
-
-              <Route path="/chat" element={<>Chat</>} />
+              <Route path="/chat" element={<ChatWithSummaraize />} />
               <Route path="/search" element={<>Search</>} />
             </Routes>
+            <FooterNav />
           </RouteContainer>
         </SignedIn>
         <SignedOut>

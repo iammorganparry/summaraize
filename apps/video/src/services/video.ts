@@ -1,29 +1,25 @@
 import fs from "node:fs";
 import type OpenAI from "openai";
-import type { OpenAIError } from "openai/error";
 import type winston from "winston";
 import type Ffmpeg from "fluent-ffmpeg";
 import type ytdl from "@distube/ytdl-core";
 import progress from "progress-stream";
 import path from "node:path";
-import type { PrismaClient } from "@summaraize/prisma";
 import type { AdaptiveFormat, YoutubeVideoResponse } from "../types/youtube";
-import type { UploadFileResult } from "uploadthing/types";
 import type { z } from "zod";
-import { SummarySchema } from "../schema/summary";
-import { printNode, zodToTs } from "zod-to-ts";
 import type { downloadOptions } from "@distube/ytdl-core";
 import type Pusher from "pusher";
-import { PusherEvents } from "@summaraize/pusher";
+import type { SummarySchema } from "../schema/summary";
+import type { XataClient } from "../xata";
+import type { Prisma, PrismaClient } from "@prisma/client";
 export class VideoService {
   private videoFilePath: string;
   private audioFilePath: string;
   readonly MODEL = "whisper-1";
-  private readonly API_KEY = process.env.YOUTU;
-  private readonly MAX_FRAMES = 5;
+  readonly API_KEY = process.env.YOUTUBE_API_KEY;
   constructor(
     private readonly db: PrismaClient,
-    private readonly ai: OpenAI,
+    private readonly xata: XataClient,
     private readonly youtube: typeof ytdl,
     private readonly ffmpeg: typeof Ffmpeg,
     private readonly socket: Pusher,
@@ -44,23 +40,6 @@ export class VideoService {
   }
 
   // return the file path
-
-  public async transcribe(filePath: string) {
-    try {
-      this.logger.info("Transcribing audio:", { filePath });
-      const file = fs.createReadStream(filePath);
-
-      return await this.ai.audio.transcriptions.create({
-        file: file,
-        model: this.MODEL,
-        language: "en", //TODO: make this configurable
-      });
-    } catch (error) {
-      const err = error as OpenAIError;
-      this.logger.error("Failed to transcribe audio:", { error: err });
-      throw err;
-    }
-  }
 
   private sanitizeFileName(fileName: string) {
     // remove spaces and special characters and replace them with underscores
@@ -307,64 +286,6 @@ export class VideoService {
     });
   }
 
-  public async summarize(
-    videoMetaData: ytdl.MoreVideoDetails,
-    transcription: string,
-    uploadedImages: UploadFileResult[]
-  ) {
-    try {
-      const response = await this.ai.chat.completions.create({
-        model: "gpt-4o",
-        max_tokens: 2000,
-        messages: [
-          {
-            role: "system",
-            content: `You are a helpful assistant that summarizes a video from a transcription and frames. Please summarize who is in the video, what they are doing, who is talking to who, and any other important details.\
-              You must return the summary in a html format. Do not include markdown tags. Just use HTML. including any newlines, bullet points, or other formatting that you think would be helpful for the user to understand the video.
-              output the message in the following format: ${printNode(zodToTs(SummarySchema).node)} \n
-              you must at all times generate a html formatted output. with no markdown formatting at all. \n`,
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `Here is the video information: 
-            Title: ${videoMetaData.title}
-            Description: ${videoMetaData.description}
-            Channel: ${videoMetaData.author}
-            Duration: ${videoMetaData.lengthSeconds}
-            `,
-              },
-              {
-                type: "text",
-                text: `Here is the transcription of the video: ${transcription}`,
-              },
-              // @ts-expect-error
-              ...uploadedImages.map((image) => ({
-                type: "image_url",
-                image_url: {
-                  url: image.data?.url,
-                  detail: "low",
-                },
-              })),
-            ],
-          },
-        ],
-      });
-      const responseContent = response.choices[0].message?.content;
-
-      if (typeof responseContent === "string") {
-        return SummarySchema.parse(JSON.parse(responseContent));
-      }
-      throw new Error("Failed to parse response content");
-    } catch (error) {
-      const err = error as OpenAIError;
-      this.logger.error("Failed to summarize video:", { error: err });
-      throw err;
-    }
-  }
-
   public cleanup({ userId }: { userId: string }) {
     this.logger.info("Cleaning up:", { userId });
     // delete the /userId directory
@@ -377,56 +298,71 @@ export class VideoService {
     summary,
     transcription,
     videoMetaData,
+    embeddings,
   }: {
     userId: string;
     summary: z.infer<typeof SummarySchema>;
     videoUrl: string;
     transcription: string;
     videoMetaData: ytdl.MoreVideoDetails;
+    embeddings: number[];
   }) {
-    return await this.db.summary.upsert({
-      where: {
-        video_url: videoUrl,
-      },
-      update: {}, // Not going to change
-      create: {
-        users: {
-          connect: {
-            id: userId,
-          },
+    try {
+      await this.xata.db.embeddings.create({
+        embed: embeddings,
+        content: `${transcription}\n${summary.summary}`,
+      });
+      return await this.db.summary.upsert({
+        where: {
+          video_url: videoUrl,
         },
-        name: videoMetaData.title,
-        summary: summary.summary,
-        summary_html_formatted: summary.summaryFormatted,
-        transcription,
-        video: {
-          connectOrCreate: {
-            where: {
-              url: videoUrl,
-            },
-            create: {
-              user: {
-                connect: {
-                  id: userId,
-                },
-              },
-              data_raw: JSON.stringify(videoMetaData),
-              name: videoMetaData.title,
-              duration: videoMetaData.lengthSeconds,
-              thumbnail: videoMetaData.thumbnails[0].url,
-              url: videoUrl,
-              views: videoMetaData.viewCount,
-              authors: {
-                create: {
-                  name: videoMetaData.author.name,
-                  avatar: videoMetaData.author.avatar || "",
-                  channel_url: videoMetaData.author.channel_url || "",
-                },
-              },
+        update: {}, // Not going to change
+        create: {
+          users: {
+            connect: {
+              id: userId,
             },
           },
+          video_url: videoUrl,
+          name: videoMetaData.title,
+          summary: summary.summary,
+          summary_html_formatted: summary.summaryFormatted,
+          transcription,
+          video: {
+            connectOrCreate: {
+              where: {
+                id: videoMetaData.videoId,
+                url: videoUrl,
+              },
+              create: {
+                user: {
+                  connect: {
+                    id: userId,
+                  },
+                },
+                id: videoMetaData.videoId,
+                data_raw: JSON.stringify(videoMetaData),
+                name: videoMetaData.title,
+                duration: videoMetaData.lengthSeconds,
+                thumbnail: videoMetaData.thumbnails[0]?.url,
+                url: videoUrl,
+                views: videoMetaData.viewCount,
+                authors: {
+                  create: {
+                    name: videoMetaData.author.name,
+                    avatar: videoMetaData.author.avatar || "",
+                    channel_url: videoMetaData.author.channel_url || "",
+                  },
+                },
+              },
+            },
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      const err = error as Prisma.PrismaClientKnownRequestError;
+      this.logger.error("Failed to save summary:", { error });
+      throw new Error(`[VideoService] Failed to save summary: ${err.message}`);
+    }
   }
 }

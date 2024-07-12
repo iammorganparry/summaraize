@@ -7,7 +7,7 @@ export const OutlinedButton = styled(Button)(({ theme }) => ({
   gap: theme.spacing(1),
   margin: `0 ${theme.spacing(2)} 0 ${theme.spacing(2)}`,
   color: theme.palette.common.white,
-  boxShadow: theme.shadows[2],
+  boxShadow: theme.shadows[1],
   "&:hover": {
     boxShadow: theme.shadows[0],
   },

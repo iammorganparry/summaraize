@@ -9,6 +9,7 @@ import {
   CardActions,
   CardContent,
   CardMedia,
+  IconButton,
   Stack,
   Typography,
 } from "@mui/material";
@@ -24,6 +25,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { LoadingButton } from "~components/buttons/loading";
 import { OutlinedButton } from "~components/buttons/outlined";
+import { Trash01 } from "@untitled-ui/icons-react";
 
 dayjs.extend(relativeTime);
 export const SummaryList = () => {
@@ -127,18 +129,19 @@ export const SummaryList = () => {
                   }}
                 >
                   <LoadingButton
-                    variant="text"
+                    sx={{
+                      borderRadius: 0,
+                      width: 30,
+                      background: (theme) => theme.palette.error.main,
+                      color: (theme) => theme.palette.common.white,
+                      boxShadow: (theme) => theme.shadows[1],
+                      height: 30,
+                    }}
                     loading={isDeleting}
                     onClick={handleDeleteSummary(summary)}
                   >
-                    Delete
+                    <Trash01 />
                   </LoadingButton>
-                  <OutlinedButton
-                    variant="contained"
-                    onClick={handleViewSummary(summary)}
-                  >
-                    View
-                  </OutlinedButton>
                 </CardActions>
               </CardActionArea>
             </Card>

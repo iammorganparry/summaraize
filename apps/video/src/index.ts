@@ -12,8 +12,10 @@ import { appRouter } from "@summaraize/trpc";
 import { createTRPCContext } from "@summaraize/trpc/trpc";
 import dotenv from "dotenv";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
+import { logger as honorLogger } from "hono/logger";
 import { pusherAuthRoute } from "./routes/pusher";
+import { summaraizeServices } from "./middlware";
+import { aiChatRoute } from "./routes/chat";
 
 dotenv.config({
   path: "../../.env",
@@ -26,9 +28,12 @@ console.log("Starting video app...", {
 export const app = new Hono();
 const port = 3001;
 
-app.use(logger());
+app.use(honorLogger());
 app.use("*", clerkMiddleware());
 app.use("/api/*", cors());
+
+app.use("/api/*", summaraizeServices);
+
 app.use(
   "/api/trpc/*",
   trpcServer({
@@ -54,6 +59,7 @@ app.get("/", (c) => {
 });
 
 app.route("api/pusher/auth", pusherAuthRoute);
+app.route("api/chat", aiChatRoute);
 
 app.on(["GET", "PUT", "POST"], "/api/inngest", (c) => {
   const handler = inngestServe({

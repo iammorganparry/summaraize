@@ -1,0 +1,6 @@
+{
+  "databaseURL": "https://Morgan-Parry-s-workspace-pebqlc.eu-west-1.xata.sh/db/summaraize",
+  "codegen": {
+    "output": "src/xata.ts"
+  }
+}

@@ -1,6 +1,10 @@
 import { CacheProvider, ThemeProvider } from "@emotion/react";
 import { CircularProgress, createTheme } from "@mui/material";
-import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo";
+import type {
+  PlasmoCSConfig,
+  PlasmoGetInlineAnchor,
+  PlasmoGetStyle,
+} from "plasmo";
 import { createSummaraizeTheme } from "~theme";
 import createCache from "@emotion/cache";
 import { AlertCircle, Eye, Stars01, XClose } from "@untitled-ui/icons-react";
@@ -27,8 +31,8 @@ export const config: PlasmoCSConfig = {
 };
 
 export const getInlineAnchor = async () => ({
-  element: document.querySelector("#owner"),
-  insertPosition: "beforeend",
+  element: document.querySelector("#content #container"),
+  insertPosition: "afterbegin",
 });
 
 const styleElement = document.createElement("style");
@@ -95,17 +99,10 @@ function RequestSummaryButton() {
       subtree: true,
     },
     (_, observer) => {
-      console.log(
-        "mutation observer",
-        document.querySelector<HTMLVideoElement>("#player-container video")
-          ?.duration
-      );
-
       const video = document.querySelector<HTMLVideoElement>(
         "#player-container video"
       );
       if (video?.duration) {
-        console.log("video duration", video.duration);
         const minutes = video.duration / 60;
         setState((prev) => ({
           ...prev,
