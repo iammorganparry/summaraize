@@ -22,16 +22,11 @@ aiChatRoute.post("/", summaraizeServices, async (c) => {
       const userMessages = messages.filter((i: Message) => i.role === "user");
       const input = userMessages[userMessages.length - 1].content;
 
-      const relevantRecords = await xata.semanticSearch(
-        input,
-        userId as string
-      );
+      const relevantRecords = await xata.semanticSearch(input, userId as string);
 
       console.log("relevantRecords", relevantRecords);
 
-      const systemContext = relevantRecords
-        .map((i) => i.pageContent)
-        .join("\n");
+      const systemContext = relevantRecords.map((i) => i.pageContent).join("\n");
 
       const response = await streamTextResponse({
         model: openai.chat("gpt-3.5-turbo", {

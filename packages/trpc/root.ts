@@ -1,4 +1,5 @@
 import { summaryRouter } from "./routers/summary";
+import { userRouter } from "./routers/user";
 import { createCallerFactory, createTRPCRouter } from "./trpc";
 
 /**
@@ -9,6 +10,7 @@ import { createCallerFactory, createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
   summary: summaryRouter,
+  user: userRouter,
 });
 
 export type AppRouter = typeof appRouter;

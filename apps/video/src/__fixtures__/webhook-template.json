@@ -1,6 +1,6 @@
 {
-	"name": "transcribe-video",
-	"data": {
-		"example": "paste the incoming JSON payload here to test your transform"
-	}
+  "name": "transcribe-video",
+  "data": {
+    "example": "paste the incoming JSON payload here to test your transform"
+  }
 }

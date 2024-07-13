@@ -42,7 +42,7 @@ app.use(
     createContext: (_opts, c) => {
       return createTRPCContext({ auth: getAuth(c), inngest });
     },
-  })
+  }),
 );
 
 app.get("/", (c) => {

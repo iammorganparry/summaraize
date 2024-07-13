@@ -22,8 +22,10 @@
     "start:video": "yarn workspace @summaraize/video start",
     "postinstall": "prisma generate",
     "format": "turbo format",
+    "build": "turbo build",
     "lint": "turbo lint",
-    "dev": "turbo dev"
+    "dev": "turbo dev",
+    "install:ce": "turbo install:ce"
   },
   "devDependencies": {
     "path-browserify": "^1.0.0",

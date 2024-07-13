@@ -15,11 +15,7 @@ const SkeletonCard = () => {
         <Skeleton height={30} width={300} />
         <Skeleton height={30} width={225} />
         {Array.from({ length: 3 }, () => (
-          <Skeleton
-            key={`skeleton-${window.crypto.randomUUID()}`}
-            height={20}
-            width={createRandomWidth()}
-          />
+          <Skeleton key={`skeleton-${window.crypto.randomUUID()}`} height={20} width={createRandomWidth()} />
         ))}
       </Grid>
     </Grid>
@@ -46,11 +42,7 @@ export const PageSkeleton = () => {
         <Skeleton variant="text" height={30} width={400} />
         <Skeleton variant="text" height={30} width={225} />
         {Array.from({ length: 10 }, () => (
-          <Skeleton
-            key={`skeleton-${window.crypto.randomUUID()}`}
-            height={20}
-            width={createRandomWidth(400)}
-          />
+          <Skeleton key={`skeleton-${window.crypto.randomUUID()}`} height={20} width={createRandomWidth(400)} />
         ))}
       </Stack>
     </Card>

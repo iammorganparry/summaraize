@@ -9,11 +9,7 @@ import { randomUUID } from "node:crypto";
 
 class BlobbyBoi extends Blob {
   public name: string;
-  constructor(
-    parts: (Blob | ArrayBuffer | Buffer)[],
-    options?: BlobPropertyBag,
-    name?: string
-  ) {
+  constructor(parts: (Blob | ArrayBuffer | Buffer)[], options?: BlobPropertyBag, name?: string) {
     super(parts, options);
     this.name = name ?? randomUUID();
   }
@@ -22,7 +18,7 @@ class BlobbyBoi extends Blob {
 export class ImageService {
   constructor(
     private readonly utapi: UTApi,
-    private readonly logger: winston.Logger
+    private readonly logger: winston.Logger,
   ) {}
 
   public async uploadImagesFromPath(imageDir: string) {

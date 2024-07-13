@@ -1,9 +1,6 @@
 import { type Theme, createTheme } from "@mui/material/styles";
 
-export const createSummaraizeTheme = (
-  overrides?: Partial<Theme>,
-  mode: "light" | "dark" = "light"
-) =>
+export const createSummaraizeTheme = (overrides?: Partial<Theme>, mode: "light" | "dark" = "light") =>
   createTheme(
     {
       typography: {
@@ -117,5 +114,5 @@ export const createSummaraizeTheme = (
         },
       },
     },
-    overrides ?? {}
+    overrides ?? {},
   );

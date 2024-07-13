@@ -15,14 +15,7 @@ export const servicesMiddleware = new InngestMiddleware({
   name: "Summaraize Services Middleware",
   init() {
     const ai = getOpenAI();
-    const videoService = new VideoService(
-      db,
-      xata,
-      ytdl,
-      Ffmpeg,
-      pusher,
-      logger
-    );
+    const videoService = new VideoService(db, xata, ytdl, Ffmpeg, pusher, logger);
 
     const xataService = new XataService(xata, db, logger);
 

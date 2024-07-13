@@ -1,0 +1,13 @@
+{
+  "name": "@summaraize/scripts",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "install:ce": "tsx install.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.2"
+  }
+}

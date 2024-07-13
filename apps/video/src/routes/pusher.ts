@@ -8,9 +8,7 @@ const clerk = createClerkClient({});
 
 pusherAuthRoute.post("/", async (c) => {
   const data = await c.req.text();
-  const [socketId, channelName] = data
-    .split("&")
-    .map((str) => str.split("=")[1]);
+  const [socketId, channelName] = data.split("&").map((str) => str.split("=")[1]);
 
   const userId = getAuth(c)?.userId;
   if (!userId) {
@@ -38,7 +36,7 @@ pusherAuthRoute.post("/", async (c) => {
       {
         error: `Unable to establish socket connection, missing: ${missingItems.join(",")}`,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

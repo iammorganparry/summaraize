@@ -33,49 +33,41 @@ export const SummaryList = () => {
     limit: 10,
   });
 
-  const { mutateAsync: deleteSummary, isLoading: isDeleting } =
-    api.summary.deleteSummary.useMutation({
-      onError: (error) => {
-        console.error(error);
-        toast.error(
-          "Failed to delete summary.. please try again, if the issue persists contact support 😰"
-        );
-      },
-      onSuccess: () => {
-        toast.success("Summary deleted successfully 😅");
-      },
-    });
+  const { mutateAsync: deleteSummary, isLoading: isDeleting } = api.summary.deleteSummary.useMutation({
+    onError: (error) => {
+      console.error(error);
+      toast.error("Failed to delete summary.. please try again, if the issue persists contact support 😰");
+    },
+    onSuccess: () => {
+      toast.success("Summary deleted successfully 😅");
+    },
+  });
   const utils = api.useUtils();
 
   const navigate = useNavigate();
 
   const handleDeleteSummary = useCallback(
-    (summary: Prisma.SummaryGetPayload<{ include: { video: true } }>) =>
-      async (e: React.MouseEvent) => {
-        e.stopPropagation();
-        await deleteSummary({ url: summary.video_url });
-        await refetch();
-      },
-    [deleteSummary, refetch]
+    (summary: Prisma.SummaryGetPayload<{ include: { video: true } }>) => async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      await deleteSummary({ url: summary.video_url });
+      await refetch();
+    },
+    [deleteSummary, refetch],
   );
 
   const handleViewSummary = useCallback(
     (
       summary: Prisma.SummaryGetPayload<{
         include: { video: { include: { authors: true } } };
-      }>
+      }>,
     ) =>
       () => {
-        utils.summary.getSummaryByVideoUrl.setData(
-          { url: summary.video_url },
-          summary,
-          {
-            updatedAt: Date.now(),
-          }
-        );
+        utils.summary.getSummaryByVideoUrl.setData({ url: summary.video_url }, summary, {
+          updatedAt: Date.now(),
+        });
         navigate(`/summary/${window.encodeURIComponent(summary.video_url)}`);
       },
-    [navigate, utils.summary.getSummaryByVideoUrl]
+    [navigate, utils.summary.getSummaryByVideoUrl],
   );
 
   return (
@@ -100,25 +92,14 @@ export const SummaryList = () => {
               key={`card-${window.crypto.randomUUID()}`}
             >
               <CardActionArea onClick={handleViewSummary(summary)}>
-                <CardMedia
-                  component="img"
-                  height="140"
-                  image={summary.video.thumbnail}
-                  src="thumbnail"
-                />
-                <CardContent
-                  sx={{ gap: 1, display: "flex", flexDirection: "column" }}
-                >
+                <CardMedia component="img" height="140" image={summary.video.thumbnail} src="thumbnail" />
+                <CardContent sx={{ gap: 1, display: "flex", flexDirection: "column" }}>
                   <Typography variant="h3">{summary.name}</Typography>
                   <Box sx={{ display: "flex", gap: 1 }}>
                     <Typography variant="caption">
-                      {summary.video.authors
-                        .map((author) => author.name)
-                        .join(", ")}
+                      {summary.video.authors.map((author) => author.name).join(", ")}
                     </Typography>
-                    <Typography variant="caption">
-                      {dayjs(summary.created_at).fromNow()}
-                    </Typography>
+                    <Typography variant="caption">{dayjs(summary.created_at).fromNow()}</Typography>
                   </Box>
                 </CardContent>
                 <CardActions

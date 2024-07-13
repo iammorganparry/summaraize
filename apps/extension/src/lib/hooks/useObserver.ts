@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 export const useObserver = (
   options: MutationObserverInit & { timeout?: number },
-  callback: (mutations: MutationRecord[], observer: MutationObserver) => void
+  callback: (mutations: MutationRecord[], observer: MutationObserver) => void,
 ) => {
   const [observer] = useState(new MutationObserver(callback));
 

@@ -8,7 +8,7 @@ export const responseSummarySchema = z.object({
       z.object({
         message: z.string(),
         code: z.string(),
-      })
+      }),
     )
     .optional(),
 });

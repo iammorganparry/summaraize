@@ -24,9 +24,7 @@ export function SummaraizeSheet({
     open: false,
   });
 
-  const container = shadowHost?.shadowRoot?.querySelector(
-    Selectors.SHADOW_CONTAINER
-  );
+  const container = shadowHost?.shadowRoot?.querySelector(Selectors.SHADOW_CONTAINER);
 
   const handleClose = () => {
     setState({ open: false });
@@ -67,10 +65,7 @@ export function SummaraizeSheet({
         PaperProps={{
           sx: {
             maxWidth: Sizes.SLIDER_WIDTH,
-            boxShadow: (theme) =>
-              state.open
-                ? `"-12px 20px 0 0 ${theme.palette.common.black}"`
-                : "none",
+            boxShadow: (theme) => (state.open ? `"-12px 20px 0 0 ${theme.palette.common.black}"` : "none"),
             borderLeft: (theme) => `4px solid ${theme.palette.common.white}`,
           },
         }}

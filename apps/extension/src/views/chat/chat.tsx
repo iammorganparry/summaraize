@@ -6,10 +6,10 @@ import { useCallback, useEffect, useRef } from "react";
 
 import { getBaseUrl } from "~lib/trpc/react";
 import { getAuthToken } from "~lib/trpc/vanilla-client";
-import { useUser } from "@clerk/chrome-extension";
 import { useQuery } from "@tanstack/react-query";
 import { Message, WelcomeMessage } from "./components/messages";
 import { AnswerSkeleton } from "./components/answer-skeleton";
+import { Header } from "~components/header";
 
 const StyledFormContainer = styled("form")(({ theme }) => ({
   position: "fixed",
@@ -35,21 +35,17 @@ export const ChatWithSummaraize = () => {
     queryKey: ["token"],
     queryFn: getAuthToken,
   });
-  const { user } = useUser();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      api: `${getBaseUrl()}/api/chat`,
-      streamMode: "text",
-      // credentials: "same-origin",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-  // const { answer, askQuestion, clearAnswer, isLoading } = useAskXataDocs();
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    api: `${getBaseUrl()}/api/chat`,
+    streamMode: "text",
+    // credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,60 +66,53 @@ export const ChatWithSummaraize = () => {
   }, [stopPropagation]);
 
   return (
-    <Container
-      sx={{
-        overflowY: "auto",
-        width: "100%",
-        height: "80vh",
-        display: "flex",
-        gap: 1,
-        flexDirection: "column-reverse",
-        position: "relative",
-      }}
-    >
-      {isLoading && <AnswerSkeleton />}
-      {messages.length === 0 ? (
-        <WelcomeMessage />
-      ) : (
-        <>
-          {messages.map((message) => (
-            <Message
-              key={message.id}
-              message={message.content}
-              type={message.role}
-            />
-          ))}
-        </>
-      )}
+    <>
+      <Header title="Chat" />
+      <Container
+        sx={{
+          overflowY: "auto",
+          width: "100%",
+          height: "70vh",
+          display: "flex",
+          gap: 1,
+          flexDirection: "column-reverse",
+          position: "relative",
+        }}
+      >
+        {isLoading && <AnswerSkeleton />}
+        {messages.length === 0 ? (
+          <WelcomeMessage />
+        ) : (
+          <>
+            {messages.map((message) => (
+              <Message key={message.id} message={message.content} type={message.role} />
+            ))}
+          </>
+        )}
 
-      <StyledFormContainer onSubmit={onSubmit}>
-        <Box
-          sx={{
-            width: "100%",
-            display: "flex",
-            height: "100%",
-          }}
-        >
-          <StyledInput
-            inputRef={inputRef}
-            name="prompt"
-            value={input}
-            onChange={onChange}
-            id="input"
-          />
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            height: "100%",
-          }}
-        >
-          <IconButton type="submit">
-            <Send01 />
-          </IconButton>
-        </Box>
-      </StyledFormContainer>
-    </Container>
+        <StyledFormContainer onSubmit={onSubmit}>
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              height: "100%",
+            }}
+          >
+            <StyledInput inputRef={inputRef} name="prompt" value={input} onChange={onChange} id="input" />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
+            <IconButton type="submit">
+              <Send01 />
+            </IconButton>
+          </Box>
+        </StyledFormContainer>
+      </Container>
+    </>
   );
 };

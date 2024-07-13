@@ -19,22 +19,16 @@ export const _transcribeVideo = async ({
     };
   }
 
-  const { audioFilePath, outputFilePath, videoMetaData } = await step.run(
-    "download-audio-video-file",
-    async () => {
-      return await services.video.createFilesFromYoutubeUrl(videoId, userId);
-    }
-  );
+  const { audioFilePath, outputFilePath, videoMetaData } = await step.run("download-audio-video-file", async () => {
+    return await services.video.createFilesFromYoutubeUrl(videoId, userId);
+  });
 
   if (!audioFilePath) {
     throw new Error("Failed to download audio file");
   }
-  const { text: transcription } = await step.run(
-    "transcribe-audio",
-    async () => {
-      return await services.ai.transcribe(audioFilePath);
-    }
-  );
+  const { text: transcription } = await step.run("transcribe-audio", async () => {
+    return await services.ai.transcribe(audioFilePath);
+  });
 
   const { uploadedImages } = await step.run("extract-frames", async () => {
     const frames = await services.video.extractFrames(outputFilePath, userId);
@@ -43,27 +37,18 @@ export const _transcribeVideo = async ({
     return { videoMetaData, uploadedImages: images.data, frames };
   });
 
-  const summary = await step.run(
-    "summarize-transcription-and-frames",
-    async () => {
-      const summary = await services.ai.summarize(
-        videoMetaData,
-        transcription,
-        uploadedImages
-      );
+  const summary = await step.run("summarize-transcription-and-frames", async () => {
+    const summary = await services.ai.summarize(videoMetaData, transcription, uploadedImages);
 
-      return summary;
-    }
-  );
+    return summary;
+  });
 
   if (!summary.summary) {
     throw new NonRetriableError("Failed to summarize video");
   }
 
   await step.run("save-summary-and-alert", async () => {
-    const embeddings = await services.ai.generateEmbeddings(
-      `${transcription}\n${summary.summary}`
-    );
+    const embeddings = await services.ai.generateEmbeddings(`${transcription}\n${summary.summary}`);
     await services.xata.saveSummary({
       userId,
       summary: summary,
@@ -117,7 +102,7 @@ export const transcribeVideo = inngest.createFunction(
     ],
   },
   { event: "app/transcribe-video" },
-  _transcribeVideo
+  _transcribeVideo,
 );
 
 export const cancelSummary = inngest.createFunction(
@@ -141,5 +126,5 @@ export const cancelSummary = inngest.createFunction(
     } catch (error) {
       return;
     }
-  }
+  },
 );

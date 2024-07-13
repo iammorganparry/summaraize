@@ -3,11 +3,7 @@ import "@fontsource/public-sans/400.css";
 import "@fontsource/public-sans/500.css";
 import "@fontsource/public-sans/700.css";
 import { ClerkProvider } from "@clerk/chrome-extension";
-import type {
-  PlasmoCreateShadowRoot,
-  PlasmoCSConfig,
-  PlasmoMountShadowHost,
-} from "plasmo";
+import type { PlasmoCreateShadowRoot, PlasmoCSConfig, PlasmoMountShadowHost } from "plasmo";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 
 import { SummaraizeSheet } from "~views/summary/sheet";
@@ -45,10 +41,7 @@ export const getStyle: PlasmoGetStyle = () => styleElement;
  */
 let container: Element | null = null;
 let theme: Theme | null = null;
-export const mountShadowHost: PlasmoMountShadowHost = ({
-  shadowHost,
-  anchor,
-}) => {
+export const mountShadowHost: PlasmoMountShadowHost = ({ shadowHost, anchor }) => {
   anchor?.element.appendChild(shadowHost);
   container = shadowHost;
   theme = createSummaraizeTheme({
@@ -72,8 +65,7 @@ export const mountShadowHost: PlasmoMountShadowHost = ({
   });
 };
 
-export const createShadowRoot: PlasmoCreateShadowRoot = (shadowHost) =>
-  shadowHost.attachShadow({ mode: "open" });
+export const createShadowRoot: PlasmoCreateShadowRoot = (shadowHost) => shadowHost.attachShadow({ mode: "open" });
 
 function SummaraizeExtension() {
   const navigate = useNavigate();

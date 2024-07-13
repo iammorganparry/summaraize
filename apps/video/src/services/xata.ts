@@ -12,7 +12,7 @@ export class XataService {
   constructor(
     private readonly client: XataClient,
     private readonly db: PrismaClient,
-    private readonly logger: winston.Logger
+    private readonly logger: winston.Logger,
   ) {}
 
   get api() {
@@ -67,22 +67,16 @@ export class XataService {
       const err = error as AskTableError;
       if (err.status === 400 || err.status === 404) {
         return {
-          answer:
-            "I couldn't answer your question. Please try again later or ask a different question. 😔",
+          answer: "I couldn't answer your question. Please try again later or ask a different question. 😔",
           records: [],
         } satisfies AskResult;
       }
 
-      throw new Error(
-        `[XataService] Failed to get summary from Xata: ${error}`
-      );
+      throw new Error(`[XataService] Failed to get summary from Xata: ${error}`);
     }
   }
 
-  public async updateSummaryRequest(
-    id: string,
-    update: Prisma.SummaryRequestUpdateInput
-  ) {
+  public async updateSummaryRequest(id: string, update: Prisma.SummaryRequestUpdateInput) {
     return await this.db.summaryRequest.update({
       where: {
         id,
@@ -166,7 +160,7 @@ export class XataService {
                 // },
               },
             }),
-          ])
+          ]),
         );
 
         return createdSummary;

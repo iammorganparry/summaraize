@@ -8,10 +8,7 @@ const service = new XataService(xata, db, logger);
 
 describe("Chat", () => {
   it("should handle semanticSearch", async () => {
-    const resp = await service.semanticSearch(
-      "This is a test transcript",
-      "user_2iuPh9T519gz50eUoP8MG21u08j"
-    );
+    const resp = await service.semanticSearch("This is a test transcript", "user_2iuPh9T519gz50eUoP8MG21u08j");
     console.log(resp);
     expect(resp).toBeDefined();
   });

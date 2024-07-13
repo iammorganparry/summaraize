@@ -24,13 +24,7 @@ export const Message = ({
         label={type === "user" ? "You" : "Assistant"}
         sx={{ my: 1, borderRadius: 0, borderWidth: 2 }}
       />
-      <CardContainer>
-        {message ? (
-          <Typography variant="body1">{message}</Typography>
-        ) : (
-          children
-        )}
-      </CardContainer>
+      <CardContainer>{message ? <Typography variant="body1">{message}</Typography> : children}</CardContainer>
     </Box>
   );
 };
