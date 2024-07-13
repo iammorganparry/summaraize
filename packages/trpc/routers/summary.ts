@@ -4,6 +4,20 @@ import { protectedProcedure, createTRPCRouter } from "../trpc";
 import { SummaryStage } from ".prisma/client";
 
 export const summaryRouter = createTRPCRouter({
+  getSummaryRequestByUrl: protectedProcedure
+    .input(
+      z.object({
+        url: z.string(),
+      })
+    )
+    .query(({ input, ctx }) => {
+      return ctx.db.summaryRequest.findFirst({
+        where: {
+          video_url: input.url,
+          user_id: ctx.auth.userId,
+        },
+      });
+    }),
   getSummaryByVideoUrl: protectedProcedure
     .input(
       z.object({
@@ -14,10 +28,8 @@ export const summaryRouter = createTRPCRouter({
       return ctx.db.summary.findFirst({
         where: {
           video_url: input.url,
-          users: {
-            some: {
-              id: ctx.auth.userId,
-            },
+          user: {
+            id: ctx.auth.userId,
           },
         },
         include: {
@@ -42,6 +54,7 @@ export const summaryRouter = createTRPCRouter({
           name: `Summary request for video ${input.videoId}`,
           stage: SummaryStage.DOWNLOADING,
           video_url: input.src,
+          user_id: ctx.auth.userId,
         },
       });
       return ctx.inngest.send({
@@ -80,10 +93,8 @@ export const summaryRouter = createTRPCRouter({
       return ctx.db.summary.deleteMany({
         where: {
           video_url: input.url,
-          users: {
-            some: {
-              id: ctx.auth.userId,
-            },
+          user: {
+            id: ctx.auth.userId,
           },
         },
       });
@@ -99,10 +110,8 @@ export const summaryRouter = createTRPCRouter({
       const userId = ctx.auth.userId;
       return ctx.db.summary.findMany({
         where: {
-          users: {
-            some: {
-              id: userId,
-            },
+          user: {
+            id: userId,
           },
         },
         take: input.limit,

@@ -54,7 +54,7 @@ export class OpenAiService {
           {
             role: "system",
             content: `You are a helpful assistant that summarizes a video from a transcription and frames. Please summarize who is in the video, what they are doing, who is talking to who, and any other important details.\
-                You must return the summary in a html format. Do not include markdown tags. Just use HTML. including any newlines, bullet points, or other formatting that you think would be helpful for the user to understand the video.
+                You must return the summary in a json format. Please refer to the required format below. When creating the html summary.. including any newlines, bullet points, or other formatting that you think would be helpful for the user to understand the video.
                 output the message in the following format: ${printNode(zodToTs(SummarySchema).node)} \n
                 you must at all times generate a html formatted summary that adheres to the provided format. with no markdown formatting at all. \n`,
           },
@@ -103,7 +103,7 @@ export class OpenAiService {
     try {
       this.logger.info("Generating embeddings for transcription and summary");
       const embeddings = await this.ai.embeddings.create({
-        model: this.EMBEDDING_MODEL,
+        model: "text-embedding-ada-002",
         input: input,
       });
       this.logger.info("Embeddings generated successfully");

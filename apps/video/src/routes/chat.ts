@@ -1,65 +1,71 @@
 import { Hono } from "hono";
 import { summaraizeServices } from "../middlware";
-import type { Message } from "openai/resources/beta/threads/messages.mjs";
-import { experimental_buildLlama2Prompt } from "ai/prompts";
-import { ReplicateStream, StreamingTextResponse } from "ai";
+import { streamSSE } from "hono/streaming";
+import { z } from "zod";
 
 export const aiChatRoute = new Hono();
+
+const askSchema = z.object({
+  question: z.string(),
+  sessionId: z.string().optional(),
+});
+
 aiChatRoute.post("/", summaraizeServices, async (c) => {
-  try {
-    // Set of messages to create vector embeddings on
-    const { messages = [] } = await c.req.json();
+  return streamSSE(
+    c,
+    async (s) => {
+      // Set of messages to create vector embeddings on
+      const data = await c.req.json();
+      const clerk = c.get("clerkAuth");
+      const userId = clerk?.userId;
 
-    const ai = c.get("ai");
-    const xata = c.get("xata");
-    const replicate = c.get("replicate");
+      if (!userId) {
+        throw new Error("Unauthorized");
+      }
 
-    const userMessages = messages.filter((i: Message) => i.role === "user");
-    const input = userMessages[userMessages.length - 1].content;
+      const response = askSchema.safeParse(data);
 
-    const embeddingData = await ai.generateEmbeddings(input);
+      if (!response.success) {
+        throw new Error("Invalid request", {
+          cause: response.error.issues,
+        });
+      }
 
-    const relevantRecords = await xata.db.Summary.vectorSearch(
-      "embedding",
-      embeddingData,
-      { size: 5 }
-    );
+      const { question, sessionId } = response.data;
 
-    const systemContext = relevantRecords.records
-      .map((i) =>
-        JSON.stringify({
-          title: i.name,
-          summary: i.summary,
-          url: i.video_url,
-        })
-      )
-      .join("\n");
+      const xata = c.get("xata");
 
-    const response = await replicate.predictions.create({
-      stream: true,
-      model: "meta/llama-2-70b-chat",
-      input: {
-        prompt: experimental_buildLlama2Prompt([
-          {
-            role: "system",
-            content: systemContext,
+      const resp = await xata.db.Summary.ask(question, {
+        rules: [
+          "Do not answer any questions unrelated to the users summaries.",
+          "When you give an example, this example must exist exactly in the context given.",
+          'Only answer questions that are relating to the defined context. If asked about a question outside of the context, you can respond with "I can only answer questions about the summaries you have requested silly! 😜"',
+          "Your name is Sandra, and you are a bot. But the best bot ever! 🤖",
+        ],
+        sessionId,
+        searchType: "vector",
+        vectorSearch: {
+          column: "embedding",
+          contentColumn: "summary",
+          filter: {
+            user_id: userId as string,
           },
-          {
-            role: "assistant",
-            content:
-              "When creating repsonses be sure to format the output as HTML and not text so that they can be rendered beautifully.",
-          },
-          // also, pass the whole conversation!
-          ...messages,
-        ]),
-      },
-    });
+        },
+      });
 
-    const stream = await ReplicateStream(response);
-    return new StreamingTextResponse(stream);
-  } catch (error) {
-    console.error("Failed to generate chat response", error);
-    return c.json({ error: "Failed to generate chat response " }, 500);
-  }
-  // Shoutout Xata for the sick tutorial on this
+      await s.writeSSE({
+        event: "message",
+        data: JSON.stringify(resp),
+        id: resp.sessionId,
+        retry: 1000,
+      });
+    },
+    async (err, stream) => {
+      console.error(err);
+      await stream.writeSSE({
+        event: "error",
+        data: JSON.stringify(err),
+      });
+    }
+  );
 });

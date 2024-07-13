@@ -1,6 +1,10 @@
-import { XataClient } from "../xata";
+import { XataClient } from "./src/xata";
+
+export type { AskResult } from "@xata.io/client";
 
 let instance: XataClient | undefined = undefined;
+
+export type { XataClient };
 
 export const getXataClient = () => {
   if (instance) return instance;

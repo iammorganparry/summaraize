@@ -101,11 +101,18 @@ const tables = [
         defaultValue: "CURRENT_TIMESTAMP",
       },
       {
+        name: "embedding",
+        type: "vector",
+        notNull: true,
+        unique: false,
+        defaultValue: null,
+      },
+      {
         name: "id",
         type: "text",
         notNull: true,
         unique: true,
-        defaultValue: null,
+        defaultValue: "('rec_'::text || (xata_private.xid())::text)",
       },
       {
         name: "name",
@@ -143,8 +150,17 @@ const tables = [
         defaultValue: null,
       },
       {
-        name: "videoId",
-        type: "text",
+        name: "user_id",
+        type: "link",
+        link: { table: "User" },
+        notNull: true,
+        unique: false,
+        defaultValue: null,
+      },
+      {
+        name: "video_id",
+        type: "link",
+        link: { table: "Video" },
         notNull: false,
         unique: false,
         defaultValue: null,
@@ -226,6 +242,14 @@ const tables = [
         defaultValue: null,
       },
       {
+        name: "user_id",
+        type: "link",
+        link: { table: "User" },
+        notNull: true,
+        unique: false,
+        defaultValue: null,
+      },
+      {
         name: "video_url",
         type: "text",
         notNull: true,
@@ -284,7 +308,7 @@ const tables = [
         type: "text",
         notNull: true,
         unique: true,
-        defaultValue: null,
+        defaultValue: "('rec_'::text || (xata_private.xid())::text)",
       },
       {
         name: "name",
@@ -376,14 +400,6 @@ const tables = [
         defaultValue: null,
       },
       {
-        name: "summary_id",
-        type: "link",
-        link: { table: "Summary" },
-        notNull: true,
-        unique: true,
-        defaultValue: null,
-      },
-      {
         name: "thumbnail",
         type: "text",
         notNull: true,
@@ -450,27 +466,6 @@ const tables = [
     ],
   },
   {
-    name: "_SummaryToUser",
-    columns: [
-      {
-        name: "A",
-        type: "link",
-        link: { table: "Summary" },
-        notNull: true,
-        unique: false,
-        defaultValue: null,
-      },
-      {
-        name: "B",
-        type: "link",
-        link: { table: "User" },
-        notNull: true,
-        unique: false,
-        defaultValue: null,
-      },
-    ],
-  },
-  {
     name: "_prisma_migrations",
     columns: [
       {
@@ -531,61 +526,6 @@ const tables = [
       },
     ],
   },
-  {
-    name: "embeddings",
-    columns: [
-      {
-        name: "content",
-        type: "text",
-        notNull: false,
-        unique: false,
-        defaultValue: null,
-      },
-      {
-        name: "embed",
-        type: "vector",
-        notNull: false,
-        unique: false,
-        defaultValue: null,
-      },
-      {
-        name: "summary",
-        type: "link",
-        link: { table: "Summary" },
-        notNull: false,
-        unique: false,
-        defaultValue: null,
-      },
-      {
-        name: "xata_createdat",
-        type: "timestamp(6) with time zone",
-        notNull: true,
-        unique: false,
-        defaultValue: "CURRENT_TIMESTAMP",
-      },
-      {
-        name: "xata_id",
-        type: "text",
-        notNull: true,
-        unique: true,
-        defaultValue: "('rec_'::text || (xata_private.xid())::text)",
-      },
-      {
-        name: "xata_updatedat",
-        type: "timestamp(6) with time zone",
-        notNull: true,
-        unique: false,
-        defaultValue: "CURRENT_TIMESTAMP",
-      },
-      {
-        name: "xata_version",
-        type: "int",
-        notNull: true,
-        unique: false,
-        defaultValue: "0",
-      },
-    ],
-  },
 ] as const;
 
 export type SchemaTables = typeof tables;
@@ -606,14 +546,8 @@ export type UserRecord = User & XataRecord;
 export type Video = InferredTypes["Video"];
 export type VideoRecord = Video & XataRecord;
 
-export type SummaryToUser = InferredTypes["_SummaryToUser"];
-export type SummaryToUserRecord = SummaryToUser & XataRecord;
-
 export type PrismaMigrations = InferredTypes["_prisma_migrations"];
 export type PrismaMigrationsRecord = PrismaMigrations & XataRecord;
-
-export type Embeddings = InferredTypes["embeddings"];
-export type EmbeddingsRecord = Embeddings & XataRecord;
 
 export type DatabaseSchema = {
   Author: AuthorRecord;
@@ -621,9 +555,7 @@ export type DatabaseSchema = {
   SummaryRequest: SummaryRequestRecord;
   User: UserRecord;
   Video: VideoRecord;
-  _SummaryToUser: SummaryToUserRecord;
   _prisma_migrations: PrismaMigrationsRecord;
-  embeddings: EmbeddingsRecord;
 };
 
 const DatabaseClient = buildClient();

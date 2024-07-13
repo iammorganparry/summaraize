@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { VideoService } from "../video";
 import { db } from "@summaraize/prisma";
-import { xata } from "../xata";
 import ytdl from "@distube/ytdl-core";
 import Ffmpeg from "fluent-ffmpeg";
 import { pusher } from "@summaraize/pusher";
 import { logger } from "../../lib/logger";
 import { fa, faker } from "@faker-js/faker";
+import { xata } from "@summaraize/xata";
+
 const service = new VideoService(db, xata, ytdl, Ffmpeg, pusher, logger);
 describe("Video Service", () => {
   it("should save a summary", async () => {

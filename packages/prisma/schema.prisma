@@ -9,42 +9,42 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(uuid())
+  id             String           @id @unique(map: "User__pgroll_new_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
   name           String
-  email          String    @unique
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @default(now()) @updatedAt
-  xata_createdat DateTime  @default(now()) @db.Timestamptz(6)
-  xata_id        String    @unique(map: "User__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
-  xata_updatedat DateTime  @default(now()) @db.Timestamptz(6)
-  xata_version   Int       @default(0)
+  email          String           @unique
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @default(now()) @updatedAt
+  xata_createdat DateTime         @default(now()) @db.Timestamptz(6)
+  xata_id        String           @unique(map: "User__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  xata_updatedat DateTime         @default(now()) @db.Timestamptz(6)
+  xata_version   Int              @default(0)
+  Summary        Summary[]
+  SummaryRequest SummaryRequest[]
   Video          Video[]
-  Summary        Summary[] @relation("SummaryToUser")
 
   @@index([email])
   @@index([id])
 }
 
 model Video {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   name           String
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
-  url            String   @unique
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  url            String    @unique
   user_id        String
   data_raw       Json
   thumbnail      String
   duration       String
   views          String?
   likes          Int?
-  xata_createdat DateTime @default(now()) @db.Timestamptz(6)
-  xata_id        String   @unique(map: "Video__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
-  xata_updatedat DateTime @default(now()) @db.Timestamptz(6)
-  xata_version   Int      @default(0)
-  summary_id     String   @unique
+  xata_createdat DateTime  @default(now()) @db.Timestamptz(6)
+  xata_id        String    @unique(map: "Video__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  xata_updatedat DateTime  @default(now()) @db.Timestamptz(6)
+  xata_version   Int       @default(0)
   authors        Author[]
-  summary        Summary  @relation(fields: [summary_id], references: [id])
-  user           User     @relation(fields: [user_id], references: [id])
+  summary        Summary[]
+  user           User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([url])
   @@index([user_id])
@@ -63,7 +63,7 @@ model Author {
   xata_id        String   @unique(map: "Author__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
   xata_updatedat DateTime @default(now()) @db.Timestamptz(6)
   xata_version   Int      @default(0)
-  video          Video    @relation(fields: [video_id], references: [id])
+  video          Video    @relation(fields: [video_id], references: [id], onDelete: Cascade)
 
   @@index([video_id])
 }
@@ -80,10 +80,12 @@ model Summary {
   xata_updatedat         DateTime @default(now()) @db.Timestamptz(6)
   xata_version           Int      @default(0)
   summary_html_formatted String
-  id                     String   @id @default(uuid())
-  videoId                String?
-  video                  Video?
-  users                  User[]   @relation("SummaryToUser")
+  id                     String   @id @unique(map: "Summary__pgroll_new_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  user_id                String
+  video_id               String?
+  embedding              Float[]  @ignore @db.Real
+  user                   User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  video                  Video?   @relation(fields: [video_id], references: [id])
 
   @@index([name])
   @@index([video_url])
@@ -100,20 +102,11 @@ model SummaryRequest {
   xata_version   Int          @default(0)
   xata_createdat DateTime     @default(now()) @db.Timestamptz(6)
   xata_updatedat DateTime     @default(now()) @db.Timestamptz(6)
+  user_id        String
+  user           User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([video_url])
   @@index([id])
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model embeddings {
-  xata_id        String                @unique(map: "_pgroll_new_embeddings_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
-  xata_version   Int                   @default(0)
-  xata_createdat DateTime              @default(now()) @db.Timestamptz(6)
-  xata_updatedat DateTime              @default(now()) @db.Timestamptz(6)
-  content        String?
-  embedding      Unsupported("vector")
 }
 
 enum SummaryStage {

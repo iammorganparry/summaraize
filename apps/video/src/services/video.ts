@@ -10,8 +10,9 @@ import type { z } from "zod";
 import type { downloadOptions } from "@distube/ytdl-core";
 import type Pusher from "pusher";
 import type { SummarySchema } from "../schema/summary";
-import type { XataClient } from "../xata";
 import type { Prisma, PrismaClient } from "@prisma/client";
+import type { XataClient } from "@summaraize/xata";
+import { randomUUID } from "node:crypto";
 export class VideoService {
   private videoFilePath: string;
   private audioFilePath: string;
@@ -138,35 +139,11 @@ export class VideoService {
     );
   }
 
-  private findSuitableAudioFormat(
-    formats: AdaptiveFormat[]
-  ): AdaptiveFormat | undefined {
-    return formats.find(
-      (f) =>
-        f.mimeType.includes("audio/mp4") &&
-        f.audioQuality === "AUDIO_QUALITY_MEDIUM"
-    );
-  }
-
-  public async addUserToSummry(userId: string) {
-    return await this.db.summary.update({
-      where: {
-        video_url: this.videoFilePath,
-      },
-      data: {
-        users: {
-          connect: {
-            id: userId,
-          },
-        },
-      },
-    });
-  }
-
-  public async getSummaryByVideoUrl(url: string) {
+  public async getSummaryByVideoUrl(url: string, userId: string) {
     return await this.db.summary.findFirst({
       where: {
         video_url: url,
+        user_id: userId,
       },
       include: {
         video: {
@@ -308,56 +285,40 @@ export class VideoService {
     embeddings: number[];
   }) {
     try {
-      await this.xata.db.embeddings.create({
-        embed: embeddings,
-        content: `${transcription}\n${summary.summary}`,
-      });
-      return await this.db.summary.upsert({
+      const video = await this.db.video.upsert({
         where: {
-          video_url: videoUrl,
+          url: videoUrl,
         },
-        update: {}, // Not going to change
         create: {
-          users: {
-            connect: {
-              id: userId,
-            },
-          },
-          video_url: videoUrl,
+          id: videoMetaData.videoId,
+          data_raw: JSON.stringify(videoMetaData),
           name: videoMetaData.title,
-          summary: summary.summary,
-          summary_html_formatted: summary.summaryFormatted,
-          transcription,
-          video: {
-            connectOrCreate: {
-              where: {
-                id: videoMetaData.videoId,
-                url: videoUrl,
-              },
-              create: {
-                user: {
-                  connect: {
-                    id: userId,
-                  },
-                },
-                id: videoMetaData.videoId,
-                data_raw: JSON.stringify(videoMetaData),
-                name: videoMetaData.title,
-                duration: videoMetaData.lengthSeconds,
-                thumbnail: videoMetaData.thumbnails[0]?.url,
-                url: videoUrl,
-                views: videoMetaData.viewCount,
-                authors: {
-                  create: {
-                    name: videoMetaData.author.name,
-                    avatar: videoMetaData.author.avatar || "",
-                    channel_url: videoMetaData.author.channel_url || "",
-                  },
-                },
-              },
+          duration: videoMetaData.lengthSeconds,
+          thumbnail: videoMetaData.thumbnails[0]?.url,
+          url: videoUrl,
+          user_id: userId,
+          views: videoMetaData.viewCount,
+          authors: {
+            create: {
+              name: videoMetaData.author.name,
+              avatar: videoMetaData.author.avatar || "",
+              channel_url: videoMetaData.author.channel_url || "",
             },
           },
         },
+        update: {},
+      });
+      return await this.xata.db.Summary.create({
+        embedding: embeddings,
+        name: summary.title,
+        summary: summary.summary,
+        transcription,
+        user_id: userId,
+        video_id: video.id,
+        video_url: videoUrl,
+        summary_html_formatted: summary.summaryFormatted,
+        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
       });
     } catch (error) {
       const err = error as Prisma.PrismaClientKnownRequestError;

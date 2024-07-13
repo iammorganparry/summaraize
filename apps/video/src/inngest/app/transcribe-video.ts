@@ -9,17 +9,8 @@ export const _transcribeVideo = async ({
 }: GetFunctionInput<typeof inngest, "app/transcribe-video">) => {
   const { src, userId, videoId } = event.data;
 
-  const { existing } = await step.run("check-existing-summary", async () => {
-    const existing = await services.video.getSummaryByVideoUrl(src);
-    if (existing) {
-      const summary = await services.video.addUserToSummry(userId);
-      return {
-        existing: summary,
-      };
-    }
-    return {
-      existing: null,
-    };
+  const existing = await step.run("check-existing-summary", async () => {
+    return await services.video.getSummaryByVideoUrl(src, userId);
   });
 
   if (existing) {

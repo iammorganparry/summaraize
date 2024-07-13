@@ -37,6 +37,7 @@
     "@prisma/client": "^5.16.1",
     "@summaraize/prisma": "*",
     "@summaraize/trpc": "*",
+    "@summaraize/xata": "*",
     "@xata.io/client": "^0.29.5",
     "ai": "^3.2.22",
     "dotenv": "^16.4.5",

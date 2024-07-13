@@ -1,9 +1,17 @@
-import { Container, IconButton, Input, styled } from "@mui/material";
+import {
+  Container,
+  IconButton,
+  Input,
+  Typography,
+  styled,
+} from "@mui/material";
 import { Send01 } from "@untitled-ui/icons-react";
 import { useChat } from "ai/react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getBaseUrl } from "~lib/trpc/react";
 import { getAuthToken } from "~lib/trpc/vanilla-client";
+import { useAskXataDocs } from "./hooks";
+import { AnswerSkeleton } from "./components/answer-skeleton";
 
 const StyledFormContainer = styled("form")(({ theme }) => ({
   position: "fixed",
@@ -17,28 +25,18 @@ const StyledFormContainer = styled("form")(({ theme }) => ({
   boxShadow: theme.shadows[2],
 }));
 
-const token = getAuthToken();
-
 export const ChatWithSummaraize = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [question, setQuestion] = useState("");
+  const { answer, askQuestion, clearAnswer, isLoading } = useAskXataDocs();
 
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
-    api: `${getBaseUrl()}/api/chat`,
-    streamMode: "text",
-    // credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const onSubmit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    handleSubmit();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    askQuestion(question);
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleInputChange(e);
+    setQuestion(e.target.value);
   };
 
   const stopPropagation = useCallback((e: KeyboardEvent) => {
@@ -58,12 +56,8 @@ export const ChatWithSummaraize = () => {
         position: "relative",
       }}
     >
-      {messages.map((message) => (
-        <div key={message.id}>
-          {message.role === "user" ? "User: " : "AI: "}
-          {message.content}
-        </div>
-      ))}
+      {isLoading ? <AnswerSkeleton /> : <Typography>{answer}</Typography>}
+
       <StyledFormContainer onSubmit={handleSubmit}>
         <input ref={inputRef} name="prompt" onChange={onChange} id="input" />
         <IconButton type="submit">

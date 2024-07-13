@@ -8,12 +8,11 @@ import { db } from "@summaraize/prisma";
 import { pusher } from "@summaraize/pusher";
 import { ImageService } from "../services/images";
 import { utapi } from "../services/uploadthing";
-import { getXataClient } from "../services/xata";
+import { xata } from "@summaraize/xata";
 
 export const servicesMiddleware = new InngestMiddleware({
   name: "Summaraize Services Middleware",
   init() {
-    const xata = getXataClient();
     const ai = getOpenAI();
     const videoService = new VideoService(
       db,

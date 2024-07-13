@@ -1,5 +1,5 @@
 import { CacheProvider, ThemeProvider } from "@emotion/react";
-import { CircularProgress, createTheme } from "@mui/material";
+import { Chip, CircularProgress, createTheme } from "@mui/material";
 import type {
   PlasmoCSConfig,
   PlasmoGetInlineAnchor,
@@ -72,6 +72,13 @@ function RequestSummaryButton() {
     queryKey: ["summary", window.location.href],
     queryFn: () =>
       client.summary.getSummaryByVideoUrl.query({ url: window.location.href }),
+  });
+  const { data: summaryRequest, refetch: refetchSummaryRequest } = useQuery({
+    queryKey: ["summary-request", window.location.href],
+    queryFn: () =>
+      client.summary.getSummaryRequestByUrl.query({
+        url: window.location.href,
+      }),
   });
 
   const { mutateAsync: requestSummary, isLoading: loading } = useMutation(
@@ -188,7 +195,8 @@ function RequestSummaryButton() {
       videoToLong: true,
     });
     await refetch();
-  }, [refetch]);
+    await refetchSummaryRequest();
+  }, [refetch, refetchSummaryRequest]);
 
   // const handleTabChange = useCallback(() => {
   //   chrome.tabs.onUpdated.addListener((_, changeInfo, __) => {
@@ -235,7 +243,7 @@ function RequestSummaryButton() {
     );
   }
 
-  if (requested) {
+  if (requested || summaryRequest) {
     return (
       <>
         <OutlinedButton
@@ -248,6 +256,7 @@ function RequestSummaryButton() {
           }}
           onClick={handleCancelRequest}
           endIcon={<XClose />}
+          startIcon={<Chip label={`${summaryRequest?.stage}%`} />}
           variant="outlined"
         >
           Cancel summary
