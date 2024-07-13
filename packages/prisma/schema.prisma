@@ -1,11 +1,13 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider          = "postgresql"
   url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  extensions        = [uuid_ossp(map: "uuid-ossp", schema: "xata"), vector]
 }
 
 model User {
@@ -21,6 +23,7 @@ model User {
   Summary        Summary[]
   SummaryRequest SummaryRequest[]
   Video          Video[]
+  Vectors        Vectors[]
 
   @@index([email])
   @@index([id])
@@ -83,9 +86,12 @@ model Summary {
   id                     String   @id @unique(map: "Summary__pgroll_new_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
   user_id                String
   video_id               String?
-  embedding              Float[]  @ignore @db.Real
-  user                   User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  video                  Video?   @relation(fields: [video_id], references: [id])
+  embedding              Float[]
+
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  video     Video?   @relation(fields: [video_id], references: [id])
+  Vectors   Vectors? @relation(fields: [vectorsId], references: [id])
+  vectorsId String?
 
   @@index([name])
   @@index([video_url])
@@ -106,6 +112,24 @@ model SummaryRequest {
   user           User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([video_url])
+  @@index([id])
+}
+
+model Vectors {
+  id             String                 @id @default(uuid())
+  created_at     DateTime               @default(now())
+  updated_at     DateTime               @updatedAt
+  embedding      Unsupported("vector")?
+  content        String
+  xata_createdat DateTime               @default(now()) @db.Timestamptz(6)
+  xata_id        String                 @unique(map: "Vectors__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
+  xata_updatedat DateTime               @default(now()) @db.Timestamptz(6)
+  xata_version   Int                    @default(0)
+  user_id        String
+  user           User                   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  summary Summary[]
+
   @@index([id])
 }
 

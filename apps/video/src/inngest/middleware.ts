@@ -9,6 +9,7 @@ import { pusher } from "@summaraize/pusher";
 import { ImageService } from "../services/images";
 import { utapi } from "../services/uploadthing";
 import { xata } from "@summaraize/xata";
+import { XataService } from "../services/xata";
 
 export const servicesMiddleware = new InngestMiddleware({
   name: "Summaraize Services Middleware",
@@ -23,6 +24,8 @@ export const servicesMiddleware = new InngestMiddleware({
       logger
     );
 
+    const xataService = new XataService(xata, db, logger);
+
     const openai = new OpenAiService(ai, logger);
 
     const images = new ImageService(utapi, logger);
@@ -33,6 +36,7 @@ export const servicesMiddleware = new InngestMiddleware({
             return {
               ctx: {
                 services: {
+                  xata: xataService,
                   pusher: pusher,
                   video: videoService,
                   images,

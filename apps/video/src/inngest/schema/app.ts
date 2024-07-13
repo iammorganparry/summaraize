@@ -4,6 +4,7 @@ type TranscribeVideoEvent = {
     src: string;
     userId: string;
     videoId: string;
+    summaryRequestId: string;
   };
 };
 
@@ -11,8 +12,7 @@ type CancelTranscriptionEvent = {
   name: "app/cancel-transcription";
   data: {
     userId: string;
-    src: string;
-    videoId: string;
+    requestId: string;
   };
 };
 

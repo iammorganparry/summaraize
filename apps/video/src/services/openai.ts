@@ -23,6 +23,10 @@ export class OpenAiService {
     private readonly logger: winston.Logger
   ) {}
 
+  get api() {
+    return this.ai;
+  }
+
   public async transcribe(filePath: string) {
     try {
       this.logger.info("Transcribing audio:", { filePath });
@@ -103,8 +107,9 @@ export class OpenAiService {
     try {
       this.logger.info("Generating embeddings for transcription and summary");
       const embeddings = await this.ai.embeddings.create({
-        model: "text-embedding-ada-002",
+        model: "text-embedding-3-small",
         input: input,
+        dimensions: 1536,
       });
       this.logger.info("Embeddings generated successfully");
       return embeddings.data[0].embedding;

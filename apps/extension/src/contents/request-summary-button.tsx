@@ -25,6 +25,8 @@ import { pusher } from "~lib/socket/pusher";
 import { getClerkJs } from "~lib/clerk/vanilla";
 import type { Channel } from "pusher-js";
 import { PusherEvents } from "@summaraize/pusher";
+import { SmallChip } from "~components/chips";
+import { SummaryStage } from "@summaraize/prisma";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -69,6 +71,7 @@ function RequestSummaryButton() {
   }, [clerk]);
 
   const { data: summary, refetch } = useQuery({
+    refetchOnWindowFocus: true,
     queryKey: ["summary", window.location.href],
     queryFn: () =>
       client.summary.getSummaryByVideoUrl.query({ url: window.location.href }),
@@ -79,6 +82,7 @@ function RequestSummaryButton() {
       client.summary.getSummaryRequestByUrl.query({
         url: window.location.href,
       }),
+    refetchOnWindowFocus: true,
   });
 
   const { mutateAsync: requestSummary, isLoading: loading } = useMutation(
@@ -94,9 +98,14 @@ function RequestSummaryButton() {
     ["cancel-summary", window.location.href],
     () => {
       return client.summary.cancelSummary.mutate({
-        src: window.location.href,
-        videoId: getYoutuveVideoId(window.location.href) as string,
+        requestId: summaryRequest?.id as string,
       });
+    },
+    {
+      onSuccess: () => {
+        refetch();
+        refetchSummaryRequest();
+      },
     }
   );
 
@@ -198,18 +207,6 @@ function RequestSummaryButton() {
     await refetchSummaryRequest();
   }, [refetch, refetchSummaryRequest]);
 
-  // const handleTabChange = useCallback(() => {
-  //   chrome.tabs.onUpdated.addListener((_, changeInfo, __) => {
-  //     if (changeInfo.status === "complete") {
-  //       resetState();
-  //     }
-  //   });
-  // }, [resetState]);
-
-  // useEffect(() => {
-  //   handleTabChange();
-  // }, [handleTabChange]);
-
   const refresh = useCallback(() => {
     resetState();
   }, [resetState]);
@@ -235,7 +232,7 @@ function RequestSummaryButton() {
     };
   }, [refresh, setProgressFromWS]);
 
-  if (summary) {
+  if (summary || summaryRequest?.stage === SummaryStage.DONE) {
     return (
       <OutlinedButton variant="outlined" endIcon={<Eye />}>
         View summary
@@ -256,7 +253,6 @@ function RequestSummaryButton() {
           }}
           onClick={handleCancelRequest}
           endIcon={<XClose />}
-          startIcon={<Chip label={`${summaryRequest?.stage}%`} />}
           variant="outlined"
         >
           Cancel summary

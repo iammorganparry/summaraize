@@ -1,9 +1,10 @@
-import { Box, Skeleton } from "@mui/material";
+import { Skeleton } from "@mui/material";
+import { Message } from "./messages";
 
 export const AnswerSkeleton = () => {
   return (
-    <Box>
-      {Array.from({ length: 5 }).map(() => (
+    <Message type="assistant">
+      {Array.from({ length: 3 }).map(() => (
         <Skeleton
           key={window.crypto.randomUUID()}
           variant="text"
@@ -11,6 +12,6 @@ export const AnswerSkeleton = () => {
           height={20}
         />
       ))}
-    </Box>
+    </Message>
   );
 };

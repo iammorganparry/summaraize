@@ -49,7 +49,7 @@ export const summaryRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      await ctx.db.summaryRequest.create({
+      const summaryRequest = await ctx.db.summaryRequest.create({
         data: {
           name: `Summary request for video ${input.videoId}`,
           stage: SummaryStage.DOWNLOADING,
@@ -63,22 +63,21 @@ export const summaryRouter = createTRPCRouter({
           src: input.src,
           videoId: input.videoId,
           userId: ctx.auth.userId,
+          summaryRequestId: summaryRequest.id,
         },
       });
     }),
   cancelSummary: protectedProcedure
     .input(
       z.object({
-        videoId: z.string(),
-        src: z.string(),
+        requestId: z.string(),
       })
     )
     .mutation(({ input, ctx }) => {
       return ctx.inngest.send({
         name: "app/cancel-transcription",
         data: {
-          src: input.src,
-          videoId: input.videoId,
+          requestId: input.requestId,
           userId: ctx.auth.userId,
         },
       });
@@ -90,14 +89,22 @@ export const summaryRouter = createTRPCRouter({
       })
     )
     .mutation(({ input, ctx }) => {
-      return ctx.db.summary.deleteMany({
-        where: {
-          video_url: input.url,
-          user: {
-            id: ctx.auth.userId,
+      return ctx.db.$transaction([
+        ctx.db.summary.deleteMany({
+          where: {
+            video_url: input.url,
+            user: {
+              id: ctx.auth.userId,
+            },
           },
-        },
-      });
+        }),
+        ctx.db.summaryRequest.deleteMany({
+          where: {
+            video_url: input.url,
+            user_id: ctx.auth.userId,
+          },
+        }),
+      ]);
     }),
   getLatest: protectedProcedure
     .input(

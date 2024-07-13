@@ -1,22 +1,19 @@
-import {
-  Container,
-  IconButton,
-  Input,
-  Typography,
-  styled,
-} from "@mui/material";
-import { Send01 } from "@untitled-ui/icons-react";
+import { Box, Container, IconButton, Input, styled } from "@mui/material";
 import { useChat } from "ai/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+
+import { Send01 } from "@untitled-ui/icons-react";
+import { useCallback, useEffect, useRef } from "react";
+
 import { getBaseUrl } from "~lib/trpc/react";
 import { getAuthToken } from "~lib/trpc/vanilla-client";
-import { useAskXataDocs } from "./hooks";
+import { useUser } from "@clerk/chrome-extension";
+import { useQuery } from "@tanstack/react-query";
+import { Message, WelcomeMessage } from "./components/messages";
 import { AnswerSkeleton } from "./components/answer-skeleton";
 
 const StyledFormContainer = styled("form")(({ theme }) => ({
   position: "fixed",
   bottom: "100px",
-  height: 150,
   width: "80%",
   display: "flex",
   alignItems: "center",
@@ -25,18 +22,42 @@ const StyledFormContainer = styled("form")(({ theme }) => ({
   boxShadow: theme.shadows[2],
 }));
 
-export const ChatWithSummaraize = () => {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [question, setQuestion] = useState("");
-  const { answer, askQuestion, clearAnswer, isLoading } = useAskXataDocs();
+const StyledInput = styled(Input)(({ theme }) => ({
+  width: "100%",
+  background: "transparent",
+  outline: "none",
+  border: "none",
+  color: theme.palette.common.white,
+}));
 
-  const handleSubmit = (e: React.FormEvent) => {
+export const ChatWithSummaraize = () => {
+  const { data: token } = useQuery({
+    queryKey: ["token"],
+    queryFn: getAuthToken,
+  });
+  const { user } = useUser();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+    useChat({
+      api: `${getBaseUrl()}/api/chat`,
+      streamMode: "text",
+      // credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+  // const { answer, askQuestion, clearAnswer, isLoading } = useAskXataDocs();
+
+  const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    askQuestion(question);
+    handleSubmit();
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuestion(e.target.value);
+    handleInputChange(e);
   };
 
   const stopPropagation = useCallback((e: KeyboardEvent) => {
@@ -51,18 +72,57 @@ export const ChatWithSummaraize = () => {
   return (
     <Container
       sx={{
+        overflowY: "auto",
         width: "100%",
-        height: "100vh",
+        height: "80vh",
+        display: "flex",
+        gap: 1,
+        flexDirection: "column-reverse",
         position: "relative",
       }}
     >
-      {isLoading ? <AnswerSkeleton /> : <Typography>{answer}</Typography>}
+      {isLoading && <AnswerSkeleton />}
+      {messages.length === 0 ? (
+        <WelcomeMessage />
+      ) : (
+        <>
+          {messages.map((message) => (
+            <Message
+              key={message.id}
+              message={message.content}
+              type={message.role}
+            />
+          ))}
+        </>
+      )}
 
-      <StyledFormContainer onSubmit={handleSubmit}>
-        <input ref={inputRef} name="prompt" onChange={onChange} id="input" />
-        <IconButton type="submit">
-          <Send01 />
-        </IconButton>
+      <StyledFormContainer onSubmit={onSubmit}>
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            height: "100%",
+          }}
+        >
+          <StyledInput
+            inputRef={inputRef}
+            name="prompt"
+            value={input}
+            onChange={onChange}
+            id="input"
+          />
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          <IconButton type="submit">
+            <Send01 />
+          </IconButton>
+        </Box>
       </StyledFormContainer>
     </Container>
   );

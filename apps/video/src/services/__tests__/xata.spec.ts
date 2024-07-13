@@ -1,15 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { VideoService } from "../video";
 import { db } from "@summaraize/prisma";
-import ytdl from "@distube/ytdl-core";
-import Ffmpeg from "fluent-ffmpeg";
-import { pusher } from "@summaraize/pusher";
-import { logger } from "../../lib/logger";
-import { fa, faker } from "@faker-js/faker";
-import { xata } from "@summaraize/xata";
 
-const service = new VideoService(db, xata, ytdl, Ffmpeg, pusher, logger);
-describe("Video Service", () => {
+import { logger } from "../../lib/logger";
+import { faker } from "@faker-js/faker";
+import { xata } from "@summaraize/xata";
+import { XataService } from "../xata";
+
+const service = new XataService(xata, db, logger);
+describe("Xata Service", () => {
   it("should save a summary", async () => {
     const summary = await service.saveSummary({
       embeddings: Array.from({ length: 1536 }, () => faker.number.float()),

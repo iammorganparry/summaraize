@@ -1,13 +1,13 @@
 import { type GetFunctionInput, NonRetriableError } from "inngest";
 import { inngest } from "../client";
-import { PusherEvents } from "@summaraize/pusher";
+import { SummaryStage } from "@prisma/client";
 
 export const _transcribeVideo = async ({
   event,
   services,
   step,
 }: GetFunctionInput<typeof inngest, "app/transcribe-video">) => {
-  const { src, userId, videoId } = event.data;
+  const { src, userId, videoId, summaryRequestId } = event.data;
 
   const existing = await step.run("check-existing-summary", async () => {
     return await services.video.getSummaryByVideoUrl(src, userId);
@@ -64,13 +64,17 @@ export const _transcribeVideo = async ({
     const embeddings = await services.ai.generateEmbeddings(
       `${transcription}\n${summary.summary}`
     );
-    await services.video.saveSummary({
+    await services.xata.saveSummary({
       userId,
       summary: summary,
       transcription,
       videoMetaData,
       videoUrl: src,
       embeddings,
+    });
+
+    await services.xata.updateSummaryRequest(summaryRequestId, {
+      stage: SummaryStage.DONE,
     });
   });
 
@@ -130,7 +134,12 @@ export const cancelSummary = inngest.createFunction(
   },
   { event: "app/cancel-transcription" },
   async ({ event, services }) => {
-    const { userId } = event.data;
-    await services.video.cleanup({ userId });
+    const { userId, requestId } = event.data;
+    try {
+      await services.xata.deleteSummaryRequest(requestId);
+      await services.video.cleanup({ userId });
+    } catch (error) {
+      return;
+    }
   }
 );
