@@ -39,7 +39,9 @@ RUN adduser --system --uid 1001 hono
 COPY --from=builder --chown=hono:nodejs /app/node_modules /app/node_modules
 COPY --from=builder --chown=hono:nodejs /app/apps/video /app/apps/video
 COPY --from=builder --chown=hono:nodejs /app/packages/prisma /app/packages/prisma
+COPY --from=builder --chown=hono:nodejs /app/packages/trpc /app/packages/trpc
 COPY --from=builder --chown=hono:nodejs /app/packages/pusher /app/packages/pusher
+COPY --from=builder --chown=hono:nodejs /app/packages/xata /app/packages/xata
 COPY --from=builder --chown=hono:nodejs /app/package.json /app/package.json
 
 USER hono
