@@ -1,7 +1,13 @@
 {
   "extends": "plasmo/templates/tsconfig.base",
-  "exclude": ["dist"],
-  "include": [".plasmo/index.d.ts", "./**/*.ts", "./**/*.tsx", "global.d.ts", "tailwind.config.js"],
+  "exclude": ["build", "node_modules", "public", "../video"],
+  "include": [
+    ".plasmo/index.d.ts",
+    "./**/*.ts",
+    "./**/*.tsx",
+    "global.d.ts",
+    "tailwind.config.js",
+  ],
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -23,8 +29,9 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "strict": true,
+    "rootDir": "./",
     "paths": {
-      "~*": ["./src/*"]
-    }
-  }
+      "~*": ["./src/*"],
+    },
+  },
 }

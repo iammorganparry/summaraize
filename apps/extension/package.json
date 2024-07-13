@@ -9,7 +9,8 @@
     "build": "plasmo build",
     "package": "plasmo package",
     "lint": "biome lint --fix",
-    "format": "biome format --fix"
+    "format": "biome format --fix",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@clerk/chrome-extension": "^1.1.2",
@@ -71,7 +72,13 @@
     "typescript": "5.4.5"
   },
   "manifest": {
-    "host_permissions": ["https://*/*"],
-    "permissions": ["cookies", "storage", "tabs"]
+    "host_permissions": [
+      "https://*/*"
+    ],
+    "permissions": [
+      "cookies",
+      "storage",
+      "tabs"
+    ]
   }
 }

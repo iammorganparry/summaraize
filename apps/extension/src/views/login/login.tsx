@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Button from "@mui/material/Button";
 import { useSignIn } from "@clerk/chrome-extension";
 import type { OAuthStrategy } from "@clerk/types";
@@ -27,7 +27,8 @@ export const LoginPage = () => {
           setAuthError(err?.errors?.[0]?.message);
         });
 
-      const redirectUrl = url?.firstFactorVerification.externalVerificationRedirectURL;
+      const redirectUrl =
+        url?.firstFactorVerification.externalVerificationRedirectURL;
 
       if (!redirectUrl) {
         console.warn("No redirect URL found");

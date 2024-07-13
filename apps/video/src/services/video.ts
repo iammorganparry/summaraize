@@ -1,18 +1,14 @@
 import fs from "node:fs";
-import type OpenAI from "openai";
 import type winston from "winston";
 import type Ffmpeg from "fluent-ffmpeg";
 import type ytdl from "@distube/ytdl-core";
 import progress from "progress-stream";
 import path from "node:path";
 import type { AdaptiveFormat, YoutubeVideoResponse } from "../types/youtube";
-import type { z } from "zod";
 import type { downloadOptions } from "@distube/ytdl-core";
 import type Pusher from "pusher";
-import type { SummarySchema } from "../schema/summary";
-import type { Prisma, PrismaClient } from "@prisma/client";
-import type { XataClient } from "@summaraize/xata";
-import { randomUUID } from "node:crypto";
+import type { PrismaClient } from "@summaraize/prisma";
+import { PusherEvents } from "@summaraize/pusher";
 export class VideoService {
   private videoFilePath: string;
   private audioFilePath: string;
@@ -20,11 +16,10 @@ export class VideoService {
   readonly API_KEY = process.env.YOUTUBE_API_KEY;
   constructor(
     private readonly db: PrismaClient,
-    private readonly xata: XataClient,
     private readonly youtube: typeof ytdl,
     private readonly ffmpeg: typeof Ffmpeg,
     private readonly socket: Pusher,
-    private logger: winston.Logger,
+    private logger: winston.Logger
   ) {
     this.videoFilePath = "";
     this.audioFilePath = "";
@@ -34,7 +29,8 @@ export class VideoService {
       "X-YouTube-Client-Name": "5",
       "X-YouTube-Client-Version": "19.09.3",
       Origin: "https://www.youtube.com",
-      "User-Agent": "com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)",
+      "User-Agent":
+        "com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)",
       "content-type": "application/json",
     };
   }
@@ -51,14 +47,16 @@ export class VideoService {
     format: downloadOptions["format"],
     outputFilePath: string,
     userId: string,
-    isAudio = false,
+    isAudio = false
   ): Promise<{ outputFilePath: string }> {
     // if the file already exists, return the path
     this.logger.info("Format chosen:", { format });
 
     if (!format?.approxDurationMs) {
       this.logger.error("Failed to get target duration:", { info });
-      throw new Error(`[VideoService] Failed to get target duration from format: ${JSON.stringify(format)}`);
+      throw new Error(
+        `[VideoService] Failed to get target duration from format: ${JSON.stringify(format)}`
+      );
     }
 
     const progressStream = progress({
@@ -68,12 +66,12 @@ export class VideoService {
 
     progressStream.on("progress", async (progress) => {
       this.logger.info("Downloading video:", { progress });
-      // const eventToUse = isAudio
-      //   ? PusherEvents.SummaryProgressAudio
-      //   : PusherEvents.SummaryProgressVideo;
-      // await this.socket.sendToUser(userId, eventToUse, {
-      //   progress: progress.percentage,
-      // });
+      const eventToUse = isAudio
+        ? PusherEvents.SummaryProgressAudio
+        : PusherEvents.SummaryProgressVideo;
+      await this.socket.sendToUser(userId, eventToUse, {
+        progress: progress.percentage,
+      });
     });
     const writeStream = fs.createWriteStream(outputFilePath);
 
@@ -99,7 +97,8 @@ export class VideoService {
           clientName: "IOS",
           clientVersion: "19.09.3",
           deviceModel: "iPhone14,3",
-          userAgent: "com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)",
+          userAgent:
+            "com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)",
           hl: "en",
           timeZone: "UTC",
           utcOffsetMinutes: 0,
@@ -113,16 +112,23 @@ export class VideoService {
       racyCheckOk: true,
     };
 
-    return fetch(`https://www.youtube.com/youtubei/v1/player?key${this.API_KEY}&prettyPrint=false`, {
-      method: "POST",
-      body: JSON.stringify(body),
-      headers: this.reliableHeaders,
-    }).then((r) => r.json());
+    return fetch(
+      `https://www.youtube.com/youtubei/v1/player?key${this.API_KEY}&prettyPrint=false`,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: this.reliableHeaders,
+      }
+    ).then((r) => r.json());
   }
 
-  private findSuitableVideoFormat(formats: AdaptiveFormat[]): AdaptiveFormat | undefined {
+  private findSuitableVideoFormat(
+    formats: AdaptiveFormat[]
+  ): AdaptiveFormat | undefined {
     return formats.find(
-      (f) => (f.mimeType.includes("video/mp4") && f.qualityLabel === "720p60") || f.qualityLabel === "720p",
+      (f) =>
+        (f.mimeType.includes("video/mp4") && f.qualityLabel === "720p60") ||
+        f.qualityLabel === "720p"
     );
   }
 
@@ -144,7 +150,7 @@ export class VideoService {
 
   public async createFilesFromYoutubeUrl(
     url: string,
-    userId: string,
+    userId: string
   ): Promise<{
     outputFilePath: string;
     audioFilePath: string;
@@ -155,7 +161,7 @@ export class VideoService {
     if (!id) {
       this.logger.error("Failed to extract video id from URL:", { url });
       throw new Error(
-        `[VideoService] Failed to extract video id from URL, invalid URL: ${url}. Please provide a valid URL. Example: https://youtu.be/221F55VPp2M or https://www.youtube.com/watch?v=221F55VPp2M`,
+        `[VideoService] Failed to extract video id from URL, invalid URL: ${url}. Please provide a valid URL. Example: https://youtu.be/221F55VPp2M or https://www.youtube.com/watch?v=221F55VPp2M`
       );
     }
 
@@ -177,11 +183,11 @@ export class VideoService {
 
     const outputFilePath = path.join(
       userId,
-      `video_${this.sanitizeFileName(resp.videoDetails.title)}.${videoFormat.container}`,
+      `video_${this.sanitizeFileName(resp.videoDetails.title)}.${videoFormat.container}`
     );
     const audioFilePath = path.join(
       userId,
-      `audio_${this.sanitizeFileName(resp.videoDetails.title)}.${audioFormat.container}`,
+      `audio_${this.sanitizeFileName(resp.videoDetails.title)}.${audioFormat.container}`
     );
 
     this.videoFilePath = outputFilePath;
@@ -196,10 +202,17 @@ export class VideoService {
       };
     }
 
-    const [{ outputFilePath: video }, { outputFilePath: audio }] = await Promise.all([
-      this.getItemFromYoutube(resp, videoFormat, outputFilePath, userId, false),
-      this.getItemFromYoutube(resp, audioFormat, audioFilePath, userId, true),
-    ]);
+    const [{ outputFilePath: video }, { outputFilePath: audio }] =
+      await Promise.all([
+        this.getItemFromYoutube(
+          resp,
+          videoFormat,
+          outputFilePath,
+          userId,
+          false
+        ),
+        this.getItemFromYoutube(resp, audioFormat, audioFilePath, userId, true),
+      ]);
 
     return {
       outputFilePath: video,
@@ -212,12 +225,18 @@ export class VideoService {
     return path.replace(/[^a-zA-Z0-9]/g, "-");
   }
 
-  public async extractFrames(filePath: string, userId: string): Promise<string> {
+  public async extractFrames(
+    filePath: string,
+    userId: string
+  ): Promise<string> {
     this.logger.info("Extracting frames:", { filePath });
     return new Promise((resolve, reject) => {
       // create a directory to store the frames
 
-      const outputDir = path.join(`${userId}/frames`, this.slugifyPath(filePath));
+      const outputDir = path.join(
+        `${userId}/frames`,
+        this.slugifyPath(filePath)
+      );
       fs.mkdirSync(outputDir, { recursive: true });
       // extract a frame every X seconds based on Y length of the video
       const command = this.ffmpeg(filePath)

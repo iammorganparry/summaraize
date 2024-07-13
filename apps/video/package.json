@@ -24,6 +24,7 @@
     "lint": "biome lint --write ./src",
     "format": "biome format --write ./src",
     "postinstall": "prisma generate",
+    "typecheck": "tsc --noEmit",
     "test": "vitest"
   },
   "dependencies": {

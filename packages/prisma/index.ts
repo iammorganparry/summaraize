@@ -1,10 +1,10 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient as InternalPrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 
 export * from "@prisma/client";
 
 const getPrismaSingleton = () => {
-  return new PrismaClient({
+  return new InternalPrismaClient({
     log:
       process.env.NODE_ENV === "development"
         ? ["query", "error", "warn"]
@@ -35,3 +35,5 @@ declare const globalThisForPrisma: {
 export const db = (globalThisForPrisma.prisma ??= getPrismaSingleton());
 
 if (process.env.NODE_ENV !== "production") globalThisForPrisma.prisma = db;
+
+export type PrismaClient = ReturnType<typeof getPrismaSingleton>;

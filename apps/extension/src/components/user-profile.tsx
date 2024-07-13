@@ -1,4 +1,3 @@
-import React from "react";
 import { useUser } from "@clerk/chrome-extension";
 import Avatar from "@mui/material/Avatar";
 import Card from "@mui/material/Card";

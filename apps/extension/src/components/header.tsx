@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { UserProfile } from "./user-profile";
 import { ChevronLeft } from "@untitled-ui/icons-react";
 import { useNavigate } from "react-router-dom";
@@ -34,7 +34,10 @@ export const Header = ({
         }}
       >
         {showBackBtn && (
-          <OutlinedButton startIcon={<ChevronLeft />} onClick={() => navigate("/")}>
+          <OutlinedButton
+            startIcon={<ChevronLeft />}
+            onClick={() => navigate("/")}
+          >
             Back
           </OutlinedButton>
         )}
