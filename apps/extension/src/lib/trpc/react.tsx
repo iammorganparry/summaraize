@@ -58,10 +58,11 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
 
         loggerLink({
           enabled: (opts) =>
-            process.env.NODE_ENV === "development" || (opts.direction === "down" && opts.result instanceof Error),
+            process.env.NODE_ENV === "development" ||
+            (opts.direction === "down" && opts.result instanceof Error),
         }),
       ],
-    }),
+    })
   );
 
   return (
@@ -77,5 +78,5 @@ export function getBaseUrl() {
   if (process.env.PLASMO_PUBLIC_API_URL) {
     return process.env.PLASMO_PUBLIC_API_URL;
   }
-  return "http://localhost:3001";
+  // return "http://localhost:3001";
 }

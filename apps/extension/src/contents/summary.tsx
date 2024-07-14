@@ -15,13 +15,11 @@ import { SummaraizeSheet } from "~views/summary/sheet";
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import type { PlasmoGetStyle } from "plasmo";
-import { createTheme, ThemeProvider } from "@mui/material";
-
-import { createSummaraizeTheme } from "~theme";
 import { TRPCReactProvider } from "~lib/trpc/react";
 import { ToasterBoi } from "~components/toaster";
-import { getSystemTheme } from "~utils";
-import { PusherProvider } from "~providers/pusher";
+
+import { useCallback, useEffect, useState } from "react";
+import { SummaraizeThemeProvider } from "~providers/theme";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -56,7 +54,25 @@ export const createShadowRoot: PlasmoCreateShadowRoot = (shadowHost) =>
   shadowHost.attachShadow({ mode: "open" });
 
 function SummaraizeExtension() {
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleOpen = useCallback(() => {
+    setOpen(true);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("navigate.to.summary", (event) => {
+      navigate(event.detail.path);
+      handleOpen();
+    });
+    chrome.storage.sync.clear();
+  }, [navigate, handleOpen]);
+
   return (
     <ClerkProvider
       publishableKey={process.env.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY || ""}
@@ -64,25 +80,28 @@ function SummaraizeExtension() {
       routerReplace={(to) => navigate(to, { replace: true })}
     >
       <TRPCReactProvider>
-        <PusherProvider>
-          <SummaraizeSheet shadowHost={container} />
-        </PusherProvider>
+        {/* <PusherProvider> */}
+        <SummaraizeSheet
+          shadowHost={container}
+          open={open}
+          onClose={handleClose}
+          onOpen={handleOpen}
+        />
+        {/* </PusherProvider> */}
       </TRPCReactProvider>
     </ClerkProvider>
   );
 }
 
 export default function Summary() {
-  const systemTheme = getSystemTheme();
-  const theme = createSummaraizeTheme({}, systemTheme) ?? createTheme();
   return (
     <CacheProvider value={styleCache}>
-      <ThemeProvider theme={theme || createTheme()}>
+      <SummaraizeThemeProvider>
         <MemoryRouter>
           <SummaraizeExtension />
           <ToasterBoi />
         </MemoryRouter>
-      </ThemeProvider>
+      </SummaraizeThemeProvider>
     </CacheProvider>
   );
 }

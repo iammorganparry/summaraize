@@ -1,0 +1,39 @@
+name: Build and Package Chrome Extension
+
+on:
+  push:
+    branches:
+      - main # Adjust this as necessary
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build Chrome Extension
+        run: yarn workspace @summaraize/extension build
+        env:
+          PLASMO_PUBLIC_API_URL: ${{ vars.PLASMO_PUBLIC_API_URL }}
+          PLASMO_PUBLIC_PUSHER_APP_ID: ${{ vars.PLASMO_PUBLIC_PUSHER_APP_ID }}
+          PLASMO_PUBLIC_PUSHER_APP_KEY: ${{ vars.PLASMO_PUBLIC_PUSHER_APP_KEY }}
+          PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+
+      - name: Package Chrome Extension
+        run: yarn workspace @summaraize/extension package
+        env:
+          PLASMO_PUBLIC_API_URL: ${{ vars.PLASMO_PUBLIC_API_URL }}
+          PLASMO_PUBLIC_PUSHER_APP_ID: ${{ vars.PLASMO_PUBLIC_PUSHER_APP_ID }}
+          PLASMO_PUBLIC_PUSHER_APP_KEY: ${{ vars.PLASMO_PUBLIC_PUSHER_APP_KEY }}
+          PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY }}

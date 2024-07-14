@@ -34,7 +34,7 @@ export const FooterNav = () => {
         boxShadow: (theme) => theme.shadows[1],
         bottom: 30,
         width: 400,
-        position: "fixed",
+        position: "absolute",
         zIndex: 1300,
         // center
         left: "50%",

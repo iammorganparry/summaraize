@@ -1,5 +1,4 @@
 import { SignedIn, SignedOut } from "@clerk/chrome-extension";
-import { useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import Button from "@mui/material/Button";
 
@@ -12,32 +11,33 @@ import { ViewSummary } from "./view-summary";
 import { Typography } from "@mui/material";
 import { FooterNav } from "~components/footer";
 import { ChatWithSummaraize } from "~views/chat/chat";
+import { Settings } from "~views/settings/settings";
 
 export function SummaraizeSheet({
   shadowHost,
+  open,
+  onClose,
+  onOpen,
 }: {
   shadowHost: Element | null;
+  open: boolean;
+  onClose: () => void;
+  onOpen: () => void;
 }) {
   const location = useLocation();
 
-  const [state, setState] = useState({
-    open: false,
-  });
-
-  const container = shadowHost?.shadowRoot?.querySelector(Selectors.SHADOW_CONTAINER);
-
-  const handleClose = () => {
-    setState({ open: false });
-  };
+  const container = shadowHost?.shadowRoot?.querySelector(
+    Selectors.SHADOW_CONTAINER
+  );
 
   return (
     <>
       <Button
-        onClick={() => setState((ps) => ({ open: !ps.open }))}
+        onClick={onOpen}
         variant="contained"
         color="primary"
         sx={{
-          opacity: state.open ? 0 : 1,
+          opacity: open ? 0 : 1,
           position: "fixed",
           top: "1rem",
           zIndex: 1300,
@@ -45,7 +45,7 @@ export function SummaraizeSheet({
           minWidth: "unset",
           // vertical text
           height: "100px",
-          right: state.open ? Sizes.SLIDER_WIDTH : 0,
+          right: open ? Sizes.SLIDER_WIDTH : 0,
           transition: "right 225ms cubic-bezier(0, 0, 0.2, 1) 0ms",
           boxShadow: (theme) => theme.shadows[2],
           "&:hover": {
@@ -60,12 +60,14 @@ export function SummaraizeSheet({
       <Drawer
         container={container}
         anchor="right"
-        open={state.open}
-        onClose={handleClose}
+        open={open}
+        onClose={onClose}
         PaperProps={{
           sx: {
+            width: Sizes.SLIDER_WIDTH,
             maxWidth: Sizes.SLIDER_WIDTH,
-            boxShadow: (theme) => (state.open ? `"-12px 20px 0 0 ${theme.palette.common.black}"` : "none"),
+            boxShadow: (theme) =>
+              open ? `"-12px 20px 0 0 ${theme.palette.common.black}"` : "none",
             borderLeft: (theme) => `4px solid ${theme.palette.common.white}`,
           },
         }}
@@ -76,10 +78,10 @@ export function SummaraizeSheet({
               <Route path="/" element={<SummaryList />} />
               <Route path="/summary/:videoUrl" element={<ViewSummary />} />
               <Route path="/chat" element={<ChatWithSummaraize />} />
-              <Route path="/search" element={<>Search</>} />
+              <Route path="/settings" element={<Settings />} />
             </Routes>
-            <FooterNav />
           </RouteContainer>
+          <FooterNav />
         </SignedIn>
         <SignedOut>
           <LoginPage />

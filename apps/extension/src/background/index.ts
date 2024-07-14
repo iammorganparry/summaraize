@@ -1,7 +1,7 @@
 /**
  * @description Handles sending tab updates to the content scripts
  */
-
+console.log("Background script running 🚀");
 chrome.tabs.onUpdated.addListener(async (_, changeInfo, tab) => {
   try {
     if (changeInfo.url) {

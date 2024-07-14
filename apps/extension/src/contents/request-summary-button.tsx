@@ -1,30 +1,39 @@
 import { CacheProvider, ThemeProvider } from "@emotion/react";
 import { CircularProgress, createTheme } from "@mui/material";
-import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo";
+import type {
+  PlasmoCSConfig,
+  PlasmoGetInlineAnchor,
+  PlasmoGetStyle,
+} from "plasmo";
 import { createSummaraizeTheme } from "~theme";
 import createCache from "@emotion/cache";
 import { AlertCircle, Eye, Stars01, XClose } from "@untitled-ui/icons-react";
-import { getSystemTheme } from "~utils";
-import { createToastMessage } from "~api/messages";
+import { getSystemTheme, removeExtraParams } from "~utils";
+import { createToastMessage, openFlyout } from "~api/messages";
 import { useCallback, useState } from "react";
 import { useObserver } from "~lib/hooks/useObserver";
 import { getYoutuveVideoId } from "~lib/utils";
 import { client } from "~lib/trpc/vanilla-client";
 import { ContainedButton, OutlinedButton } from "~components/buttons/outlined";
-import { QueryClientProvider, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  QueryClientProvider,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
 import { createQueryClient } from "~lib/trpc/query-client";
-import { SummaryStage } from "@summaraize/prisma";
+import type { SummaryStage } from "@summaraize/prisma";
 import { useBackgroundMessages } from "~lib/messages/hooks";
 import { useGetUser } from "~lib/hooks/useGetUser";
 import { useWebsocketEvents } from "~lib/hooks/useWebsocketEvents";
+import { SummaraizeThemeProvider } from "~providers/theme";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
 };
 
 export const getInlineAnchor = async () => ({
-  element: document.querySelector("#content #container"),
-  insertPosition: "afterbegin",
+  element: document.querySelector("#chat-container"),
+  insertPosition: "beforebegin",
 });
 
 const styleElement = document.createElement("style");
@@ -59,7 +68,10 @@ function RequestSummaryButton() {
   } = useQuery({
     refetchOnWindowFocus: true,
     queryKey: ["summary", window.location.href],
-    queryFn: () => client.summary.getSummaryByVideoUrl.query({ url: window.location.href }),
+    queryFn: () =>
+      client.summary.getSummaryByVideoUrl.query({
+        url: removeExtraParams(window.location.href),
+      }),
   });
   const {
     data: summaryRequest,
@@ -69,17 +81,20 @@ function RequestSummaryButton() {
     queryKey: ["summary-request", window.location.href],
     queryFn: () =>
       client.summary.getSummaryRequestByUrl.query({
-        url: window.location.href,
+        url: removeExtraParams(window.location.href),
       }),
     refetchOnWindowFocus: true,
   });
 
-  const { mutateAsync: requestSummary, isLoading: loading } = useMutation(["summary", window.location.href], () => {
-    return client.summary.requestSummary.mutate({
-      src: window.location.href,
-      videoId: getYoutuveVideoId(window.location.href) as string,
-    });
-  });
+  const { mutateAsync: requestSummary, isLoading: loading } = useMutation(
+    ["summary", window.location.href],
+    () => {
+      return client.summary.requestSummary.mutate({
+        src: window.location.href,
+        videoId: getYoutuveVideoId(window.location.href) as string,
+      });
+    }
+  );
   const { mutateAsync: cancelSummary } = useMutation(
     ["cancel-summary", window.location.href],
     () => {
@@ -92,7 +107,7 @@ function RequestSummaryButton() {
         refetch();
         refetchSummaryRequest();
       },
-    },
+    }
   );
 
   useObserver(
@@ -101,7 +116,9 @@ function RequestSummaryButton() {
       subtree: true,
     },
     (_, observer) => {
-      const video = document.querySelector<HTMLVideoElement>("#player-container video");
+      const video = document.querySelector<HTMLVideoElement>(
+        "#player-container video"
+      );
       if (video?.duration) {
         const minutes = video.duration / 60;
         setState((prev) => ({
@@ -110,34 +127,43 @@ function RequestSummaryButton() {
         }));
         observer.disconnect();
       }
-    },
+    }
   );
 
   const handleRequestSummary = async () => {
     try {
       const videoId = getYoutuveVideoId(window.location.href);
       if (!videoId) {
-        createToastMessage("Failed to get video ID, please try again. 🙁", "error");
+        createToastMessage(
+          "Failed to get video ID, please try again. 🙁",
+          "error"
+        );
         return;
       }
 
       const resp = await requestSummary();
 
       if (!resp.ids) {
-        createToastMessage("Failed to schedule request summary, please try again. 🙁", "error");
+        createToastMessage(
+          "Failed to schedule request summary, please try again. 🙁",
+          "error"
+        );
         return;
       }
 
       createToastMessage(
         "Scheduled request summary, check back in a few moments after a tasty beverage. 🍺",
-        "success",
+        "success"
       );
       setState((prev) => ({
         ...prev,
         requested: true,
       }));
     } catch (error) {
-      createToastMessage("Failed to schedule request summary, please try again. 🙁", "error");
+      createToastMessage(
+        "Failed to schedule request summary, please try again. 🙁",
+        "error"
+      );
     }
   };
 
@@ -145,18 +171,27 @@ function RequestSummaryButton() {
     const videoId = getYoutuveVideoId(window.location.href);
 
     if (!videoId) {
-      createToastMessage("Failed to get video ID, please try again. 🙁", "error");
+      createToastMessage(
+        "Failed to get video ID, please try again. 🙁",
+        "error"
+      );
       return;
     }
 
     const resp = await cancelSummary();
 
     if (!resp.ids) {
-      createToastMessage("Failed to cancel request summary, please try again. 🙁", "error");
+      createToastMessage(
+        "Failed to cancel request summary, please try again. 🙁",
+        "error"
+      );
       return;
     }
 
-    createToastMessage("Canceled request summary, you can request again. 😉", "success");
+    createToastMessage(
+      "Canceled request summary, you can request again. 😉",
+      "success"
+    );
     setState((prev) => ({
       ...prev,
       requested: false,
@@ -195,17 +230,37 @@ function RequestSummaryButton() {
         progress: data.progress,
       }));
     },
-    [refresh],
+    [refresh]
   );
+
+  const handleNavigateToSummary = () => {
+    if (!summary?.video_url) {
+      return;
+    }
+    openFlyout(`/summary/${encodeURIComponent(summary?.video_url)}`);
+  };
 
   useWebsocketEvents({
     onSummaryCompleted: refresh,
     onSummaryProgress: setProgressFromWS,
   });
 
+  if (summary || summaryRequest?.stage === "DONE") {
+    return (
+      <OutlinedButton
+        variant="outlined"
+        endIcon={<Eye />}
+        fullWidth
+        onClick={handleNavigateToSummary}
+      >
+        View summary
+      </OutlinedButton>
+    );
+  }
+
   if (isOutOfRequests) {
     return (
-      <ContainedButton disabled variant="contained">
+      <ContainedButton disabled variant="contained" fullWidth>
         Out of requests (5 per day)
       </ContainedButton>
     );
@@ -213,7 +268,7 @@ function RequestSummaryButton() {
 
   if (isLoading || isLoadingRequestSummary) {
     return (
-      <ContainedButton disabled variant="contained">
+      <ContainedButton disabled variant="contained" fullWidth>
         <CircularProgress
           size="14px"
           sx={{
@@ -224,15 +279,7 @@ function RequestSummaryButton() {
     );
   }
 
-  if (summary || summaryRequest?.stage === SummaryStage.DONE) {
-    return (
-      <OutlinedButton variant="outlined" endIcon={<Eye />}>
-        View summary
-      </OutlinedButton>
-    );
-  }
-
-  if (requested || summaryRequest?.stage === SummaryStage.DOWNLOADING) {
+  if (requested || summaryRequest?.stage === "DOWNLOADING") {
     return (
       <>
         <OutlinedButton
@@ -255,7 +302,12 @@ function RequestSummaryButton() {
 
   if (videoToLong) {
     return (
-      <OutlinedButton disabled endIcon={<AlertCircle />} variant="outlined">
+      <OutlinedButton
+        disabled
+        endIcon={<AlertCircle />}
+        variant="outlined"
+        fullWidth
+      >
         Too long to summarize
       </OutlinedButton>
     );
@@ -280,14 +332,12 @@ function RequestSummaryButton() {
 
 export default function RequestButton() {
   const [queryClient] = useState(createQueryClient());
-  const systemTheme = getSystemTheme();
-  const theme = createSummaraizeTheme({}, systemTheme) ?? createTheme();
   return (
     <QueryClientProvider client={queryClient}>
       <CacheProvider value={styleCache}>
-        <ThemeProvider theme={theme}>
+        <SummaraizeThemeProvider>
           <RequestSummaryButton />
-        </ThemeProvider>
+        </SummaraizeThemeProvider>
       </CacheProvider>
     </QueryClientProvider>
   );
