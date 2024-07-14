@@ -4,6 +4,16 @@ import { protectedProcedure, createTRPCRouter } from "../trpc";
 import { SummaryStage } from ".prisma/client";
 
 export const summaryRouter = createTRPCRouter({
+  getSummaryRequests: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.summaryRequest.findMany({
+      where: {
+        user_id: ctx.auth.userId,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+  }),
   getSummaryRequestByUrl: protectedProcedure
     .input(
       z.object({
@@ -51,7 +61,7 @@ export const summaryRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const summaryRequest = await ctx.db.summaryRequest.create({
         data: {
-          name: `Summary request for video ${input.videoId}`,
+          name: `Summary request for video ${input.src}`,
           stage: SummaryStage.DOWNLOADING,
           video_url: input.src,
           user_id: ctx.auth.userId,
@@ -73,12 +83,17 @@ export const summaryRouter = createTRPCRouter({
         requestId: z.string(),
       })
     )
-    .mutation(({ input, ctx }) => {
-      return ctx.inngest.send({
+    .mutation(async ({ input, ctx }) => {
+      await ctx.inngest.send({
         name: "app/cancel-transcription",
         data: {
           requestId: input.requestId,
           userId: ctx.auth.userId,
+        },
+      });
+      return await ctx.db.summaryRequest.delete({
+        where: {
+          id: input.requestId,
         },
       });
     }),

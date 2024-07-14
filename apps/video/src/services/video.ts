@@ -69,8 +69,9 @@ export class VideoService {
       const eventToUse = isAudio
         ? PusherEvents.SummaryProgressAudio
         : PusherEvents.SummaryProgressVideo;
-      await this.socket.sendToUser(userId, eventToUse, {
+      await this.socket.trigger(`private-${userId}`, eventToUse, {
         progress: progress.percentage,
+        videoId: info.videoDetails.videoId,
       });
     });
     const writeStream = fs.createWriteStream(outputFilePath);

@@ -1,5 +1,10 @@
-import { Button, Card, styled, type ButtonProps } from "@mui/material";
-import { Home01, MessageCircle01, Settings01 } from "@untitled-ui/icons-react";
+import { Button, Card, styled, type ButtonProps, Tooltip } from "@mui/material";
+import {
+  Home01,
+  List,
+  MessageCircle01,
+  Settings01,
+} from "@untitled-ui/icons-react";
 import { Link, useLocation } from "react-router-dom";
 import { Sizes } from "~views/summary/constants";
 
@@ -48,21 +53,27 @@ export const FooterNav = () => {
         background: (theme) => theme.palette.background.paper,
       }}
     >
-      <Link to="/" style={{ width: "100%" }}>
-        <NavButton isActive={isActive(["/", "/summary"], location.pathname)}>
-          <Home01 />
-        </NavButton>
-      </Link>
-      <Link to="/chat" style={{ width: "100%" }}>
-        <NavButton isActive={isActive("/chat", location.pathname)}>
-          <MessageCircle01 />
-        </NavButton>
-      </Link>
-      <Link to="/settings" style={{ width: "100%" }}>
-        <NavButton isActive={isActive("/settings", location.pathname)}>
-          <Settings01 />
-        </NavButton>
-      </Link>
+      <Tooltip title="Settings" placement="top">
+        <Link to="/" style={{ width: "100%" }}>
+          <NavButton isActive={isActive(["/", "/summary"], location.pathname)}>
+            <Home01 />
+          </NavButton>
+        </Link>
+      </Tooltip>
+      <Tooltip title="Settings" placement="top">
+        <Link to="/chat" style={{ width: "100%" }}>
+          <NavButton isActive={isActive("/chat", location.pathname)}>
+            <MessageCircle01 />
+          </NavButton>
+        </Link>
+      </Tooltip>
+      <Tooltip title="Requests" placement="top">
+        <Link to="/requests" style={{ width: "100%" }}>
+          <NavButton isActive={isActive("/requests", location.pathname)}>
+            <List />
+          </NavButton>
+        </Link>
+      </Tooltip>
     </Card>
   );
 };

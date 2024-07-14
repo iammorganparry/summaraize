@@ -1,36 +1,36 @@
-import { PusherEvents } from "@summaraize/pusher";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { getClerkJs } from "~lib/clerk/vanilla";
-import type { Channel } from "pusher-js";
-import { getPusher } from "~lib/socket/pusher";
+import { usePusherClient } from "./usePusherClient";
+import type { SummaryStage } from "@summaraize/prisma";
 
-const pusher = getPusher();
 export const useWebsocketEvents = ({
   onSummaryProgress,
   onSummaryCompleted,
+  onSummaryStep,
 }: {
-  onSummaryProgress: (data: { progress: number }) => void;
+  onSummaryProgress: (data: { progress: number; videoId: string }) => void;
   onSummaryCompleted: () => void;
+  onSummaryStep: (data: { step: SummaryStage; videoId: string }) => void;
 }) => {
   const { data: clerk } = useQuery({
     queryKey: ["clerk"],
     queryFn: () => getClerkJs(),
   });
 
-  const channel = useRef<Channel | null>(null);
-  useEffect(() => {
-    if (clerk?.user) {
-      channel.current = pusher.subscribe(`private-${clerk.user.id}`);
+  const userId = clerk?.user?.id;
+
+  const { data: pusher } = usePusherClient();
+  const channel = useMemo(() => {
+    if (!userId || !pusher) {
+      return null;
     }
-  }, [clerk]);
+    return pusher.subscribe(`private-${userId}`);
+  }, [userId, pusher]);
 
   useEffect(() => {
-    channel.current?.bind(PusherEvents.SummaryProgressVideo, onSummaryProgress);
-    channel.current?.bind(PusherEvents.SummaryCompleted, onSummaryCompleted);
-
-    return () => {
-      channel.current?.unbind_all();
-    };
-  }, [onSummaryProgress, onSummaryCompleted]);
+    channel?.bind("summary.step", onSummaryStep);
+    channel?.bind("summary.progress.video", onSummaryProgress);
+    channel?.bind("summary.completed", onSummaryCompleted);
+  }, [onSummaryProgress, onSummaryCompleted, channel, onSummaryStep]);
 };

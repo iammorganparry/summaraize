@@ -8,8 +8,8 @@ import { getBaseUrl } from "~lib/trpc/react";
 import { getAuthToken } from "~lib/trpc/vanilla-client";
 import { useQuery } from "@tanstack/react-query";
 import { Message, WelcomeMessage } from "./components/messages";
-import { AnswerSkeleton } from "./components/answer-skeleton";
 import { Header } from "~components/header";
+import { isMostRecentMessage } from "~utils";
 
 const StyledFormContainer = styled("form")(({ theme }) => ({
   position: "fixed",
@@ -50,7 +50,7 @@ export const ChatWithSummaraize = () => {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleSubmit();
+    !isLoading && handleSubmit();
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,7 +90,11 @@ export const ChatWithSummaraize = () => {
           <>
             {reversedMessages.map((message) => (
               <Message
-                loading={isLoading && message.role === "assistant"}
+                loading={
+                  isLoading &&
+                  message.role === "assistant" &&
+                  isMostRecentMessage(message, messages)
+                }
                 key={message.id}
                 message={message.content}
                 type={message.role}

@@ -1,7 +1,7 @@
 import { useUser } from "@clerk/chrome-extension";
 import type { Channel } from "pusher-js";
-import { createContext, useContext, useMemo, useState } from "react";
-import { getPusher } from "~lib/socket/pusher";
+import { createContext, useContext, useEffect, useMemo } from "react";
+import { usePusherClient } from "~lib/hooks/usePusherClient";
 
 const PusherContext = createContext<Channel | null>(null);
 
@@ -13,17 +13,22 @@ export const usePusher = () => {
   return context;
 };
 
-const pusher = getPusher();
 export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useUser();
   const userId = user?.id;
-
+  const { data: pusher } = usePusherClient();
   const channel = useMemo(() => {
-    if (!userId) {
+    if (!userId || !pusher) {
       return null;
     }
     return pusher.subscribe(`private-${userId}`);
-  }, [userId]);
+  }, [userId, pusher]);
+
+  // useEffect(() => {
+  //   channel?.bind("summary.progress.video", (e) => {
+  //     console.log("SummaryProgressVideo", e);
+  //   });
+  // }, [channel]);
 
   return (
     <PusherContext.Provider value={channel}>{children}</PusherContext.Provider>

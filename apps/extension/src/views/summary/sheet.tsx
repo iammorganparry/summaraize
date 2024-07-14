@@ -12,6 +12,7 @@ import { Typography } from "@mui/material";
 import { FooterNav } from "~components/footer";
 import { ChatWithSummaraize } from "~views/chat/chat";
 import { Settings } from "~views/settings/settings";
+import { RequestListPage } from "~views/requests/requests";
 
 export function SummaraizeSheet({
   shadowHost,
@@ -78,7 +79,7 @@ export function SummaraizeSheet({
               <Route path="/" element={<SummaryList />} />
               <Route path="/summary/:videoUrl" element={<ViewSummary />} />
               <Route path="/chat" element={<ChatWithSummaraize />} />
-              <Route path="/settings" element={<Settings />} />
+              <Route path="/requests" element={<RequestListPage />} />
             </Routes>
           </RouteContainer>
           <FooterNav />

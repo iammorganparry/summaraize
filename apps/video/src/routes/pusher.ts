@@ -1,24 +1,30 @@
 import { Hono } from "hono";
-import { getAuth } from "@hono/clerk-auth";
-import { createClerkClient } from "@clerk/backend";
 import { pusher } from "@summaraize/pusher";
 
 export const pusherAuthRoute = new Hono();
-const clerk = createClerkClient({});
 
 pusherAuthRoute.post("/", async (c) => {
   const data = await c.req.text();
-  const [socketId, channelName] = data.split("&").map((str) => str.split("=")[1]);
+  const [socketId, channelName] = data
+    .split("&")
+    .map((str) => str.split("=")[1]);
 
-  const userId = getAuth(c)?.userId;
+  const auth = c.get("clerkAuth");
+  const clerk = c.get("clerk");
+
+  const userId = auth?.userId;
+
   if (!userId) {
-    return c.json({ error: "Unauthorized" }, { status: 401 });
+    return c.json({ error: "Unauthorized - No user ID" }, { status: 401 });
   }
 
   const userIdFromChannel = channelName?.split("-")[1];
 
   if (userId !== userIdFromChannel) {
-    return c.json({ error: "Unauthorized" }, { status: 401 });
+    return c.json(
+      { error: "Unauthorized - UserID not the same as channel" },
+      { status: 401 }
+    );
   }
 
   console.log(`Authenticating user ${userId} for socket ${socketId}`);
@@ -36,13 +42,17 @@ pusherAuthRoute.post("/", async (c) => {
       {
         error: `Unable to establish socket connection, missing: ${missingItems.join(",")}`,
       },
-      { status: 400 },
+      { status: 400 }
     );
   }
+
+  console.log(
+    `Authenticating user ${user.id} for socket ${socketId}, channel ${channelName}`
+  );
 
   const authResponse = pusher.authorizeChannel(socketId, channelName, {
     user_id: user.id,
   });
 
-  return c.json(authResponse, { status: 200 });
+  return c.json(authResponse);
 });

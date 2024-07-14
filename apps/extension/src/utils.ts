@@ -1,3 +1,5 @@
+import type { Message } from "ai";
+
 export const getYoutubeTheme = () => {
   // Get the youtube theme => get the attribute darker-dark-theme from the html tag
   return document.documentElement.getAttribute("darker-dark-theme") === ""
@@ -55,4 +57,9 @@ export const removeExtraParams = (url: string) => {
   const urlObj = new URL(url);
   urlObj.searchParams.delete("t");
   return urlObj.toString();
+};
+
+export const isMostRecentMessage = (message: Message, messages: Message[]) => {
+  const mostRecentMessage = messages[0];
+  return mostRecentMessage.id === message.id;
 };

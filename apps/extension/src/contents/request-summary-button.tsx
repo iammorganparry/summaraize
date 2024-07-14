@@ -1,19 +1,14 @@
-import { CacheProvider, ThemeProvider } from "@emotion/react";
-import { CircularProgress, createTheme } from "@mui/material";
-import type {
-  PlasmoCSConfig,
-  PlasmoGetInlineAnchor,
-  PlasmoGetStyle,
-} from "plasmo";
-import { createSummaraizeTheme } from "~theme";
+import { CacheProvider } from "@emotion/react";
+import { CircularProgress, Tooltip } from "@mui/material";
+import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo";
 import createCache from "@emotion/cache";
 import { AlertCircle, Eye, Stars01, XClose } from "@untitled-ui/icons-react";
-import { getSystemTheme, removeExtraParams } from "~utils";
+import { removeExtraParams } from "~utils";
 import { createToastMessage, openFlyout } from "~api/messages";
 import { useCallback, useState } from "react";
 import { useObserver } from "~lib/hooks/useObserver";
 import { getYoutuveVideoId } from "~lib/utils";
-import { client, getAuthToken } from "~lib/trpc/vanilla-client";
+import { client } from "~lib/trpc/vanilla-client";
 import { ContainedButton, OutlinedButton } from "~components/buttons/outlined";
 import {
   QueryClientProvider,
@@ -26,6 +21,7 @@ import { useGetUser } from "~lib/hooks/useGetUser";
 import { useWebsocketEvents } from "~lib/hooks/useWebsocketEvents";
 import { SummaraizeThemeProvider } from "~providers/theme";
 import { useGetAuthToken } from "~lib/hooks/useGetAuthToken";
+import type { SummaryStage } from "@summaraize/prisma";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -54,7 +50,7 @@ function RequestSummaryButton() {
   const [{ requested, videoToLong, progress }, setState] = useState({
     progress: 0,
     requested: false,
-    videoToLong: true,
+    videoToLong: false,
   });
 
   const { data: token } = useGetAuthToken();
@@ -184,7 +180,7 @@ function RequestSummaryButton() {
 
     const resp = await cancelSummary();
 
-    if (!resp.ids) {
+    if (!resp.id) {
       createToastMessage(
         "Failed to cancel request summary, please try again. 🙁",
         "error"
@@ -225,14 +221,27 @@ function RequestSummaryButton() {
   });
 
   const setProgressFromWS = useCallback(
-    (data: { progress: number }) => {
-      if (data.progress === 100) {
+    (data: { progress: number; videoId: string }) => {
+      console.log(data);
+      if (+data.progress === 100) {
         return refresh();
       }
-      setState((prev) => ({
-        ...prev,
-        progress: data.progress,
-      }));
+      if (data.videoId === getYoutuveVideoId(window.location.href)) {
+        console.log("Setting progress", data.progress);
+        setState((prev) => ({
+          ...prev,
+          progress: prev.progress + data.progress,
+        }));
+      }
+    },
+    [refresh]
+  );
+
+  const handleSummaryStep = useCallback(
+    (data: { step: SummaryStage; videoId: string }) => {
+      if (data.videoId === getYoutuveVideoId(window.location.href)) {
+        refresh();
+      }
     },
     [refresh]
   );
@@ -245,6 +254,7 @@ function RequestSummaryButton() {
   };
 
   useWebsocketEvents({
+    onSummaryStep: handleSummaryStep,
     onSummaryCompleted: refresh,
     onSummaryProgress: setProgressFromWS,
   });
@@ -283,29 +293,6 @@ function RequestSummaryButton() {
     );
   }
 
-  if (requested || summaryRequest?.stage === "DOWNLOADING") {
-    return (
-      <>
-        <OutlinedButton
-          fullWidth
-          sx={{
-            mb: 5,
-            // fill up the background based on progress
-            background: (theme) =>
-              `linear-gradient(to right, ${theme.palette.primary.main} ${progress}%, ${theme.palette.action.disabled} ${progress}%)
-            `,
-            transition: "background 0.5s",
-          }}
-          onClick={handleCancelRequest}
-          endIcon={<XClose />}
-          variant="outlined"
-        >
-          Cancel summary
-        </OutlinedButton>
-      </>
-    );
-  }
-
   if (videoToLong) {
     return (
       <OutlinedButton
@@ -319,6 +306,30 @@ function RequestSummaryButton() {
       >
         Too long to summarize
       </OutlinedButton>
+    );
+  }
+
+  if (requested || !!summaryRequest) {
+    return (
+      <Tooltip title="Click to cancel">
+        <OutlinedButton
+          fullWidth
+          startIcon={<CircularProgress size="14px" color="inherit" />}
+          sx={{
+            mb: 5,
+            // fill up the background based on progress
+            background: (theme) =>
+              `linear-gradient(to right, ${theme.palette.primary.main} ${progress}%, ${theme.palette.action.disabled} ${progress}%)
+            `,
+            transition: "background 0.5s",
+          }}
+          onClick={handleCancelRequest}
+          endIcon={<XClose />}
+          variant="outlined"
+        >
+          {summaryRequest?.stage}
+        </OutlinedButton>
+      </Tooltip>
     );
   }
 

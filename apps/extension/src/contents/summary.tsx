@@ -81,14 +81,14 @@ function SummaraizeExtension() {
       routerReplace={(to) => navigate(to, { replace: true })}
     >
       <TRPCReactProvider>
-        <PusherProvider>
-          <SummaraizeSheet
-            shadowHost={container}
-            open={open}
-            onClose={handleClose}
-            onOpen={handleOpen}
-          />
-        </PusherProvider>
+        {/* <PusherProvider> */}
+        <SummaraizeSheet
+          shadowHost={container}
+          open={open}
+          onClose={handleClose}
+          onOpen={handleOpen}
+        />
+        {/* </PusherProvider> */}
       </TRPCReactProvider>
     </ClerkProvider>
   );

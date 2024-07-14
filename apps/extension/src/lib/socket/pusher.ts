@@ -1,8 +1,10 @@
 import PusherClient from "pusher-js";
+import { getAuthToken } from "~lib/trpc/vanilla-client";
 
 let pusherSingleton: PusherClient | null = null;
 
-export const getPusher = () => {
+export const getPusher = async () => {
+  const authToken = await getAuthToken();
   if (pusherSingleton) {
     return pusherSingleton;
   }
@@ -19,6 +21,9 @@ export const getPusher = () => {
       channelAuthorization: {
         endpoint: `${process.env.PLASMO_PUBLIC_API_URL}/api/pusher/auth`,
         transport: "ajax",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
       },
     }
   ));
