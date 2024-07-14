@@ -1,5 +1,6 @@
 import { Box, Card, Chip, Typography, styled } from "@mui/material";
 import type { Message as MessageType } from "ai";
+import { AnswerSkeleton } from "./answer-skeleton";
 
 const CardContainer = styled(Card)(({ theme }) => ({
   boxShadow: theme.shadows[2],
@@ -12,7 +13,9 @@ export const Message = ({
   message,
   type,
   children,
+  loading,
 }: {
+  loading?: boolean;
   message?: string;
   type: MessageType["role"];
   children?: React.ReactNode;
@@ -24,7 +27,14 @@ export const Message = ({
         label={type === "user" ? "You" : "Assistant"}
         sx={{ my: 1, borderRadius: 0, borderWidth: 2 }}
       />
-      <CardContainer>{message ? <Typography variant="body1">{message}</Typography> : children}</CardContainer>
+      <CardContainer>
+        {message ? (
+          <Typography variant="body1">{message}</Typography>
+        ) : (
+          children
+        )}
+        {loading ? <AnswerSkeleton /> : null}
+      </CardContainer>
     </Box>
   );
 };

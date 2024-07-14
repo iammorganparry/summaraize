@@ -313,7 +313,14 @@ function RequestSummaryButton() {
   }
 
   return (
-    <ContainedButton onClick={handleRequestSummary} variant="contained">
+    <ContainedButton
+      fullWidth
+      onClick={handleRequestSummary}
+      variant="contained"
+      sx={{
+        marginBottom: 5,
+      }}
+    >
       {loading ? (
         <CircularProgress
           size="14px"

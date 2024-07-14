@@ -33,6 +33,7 @@ export const servicesMiddleware = new InngestMiddleware({
                   pusher: pusher,
                   video: videoService,
                   images,
+                  prisma: db,
                   ai: openai,
                 },
               },

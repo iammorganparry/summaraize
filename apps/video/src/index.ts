@@ -16,6 +16,7 @@ import { logger as honorLogger } from "hono/logger";
 import { pusherAuthRoute } from "./routes/pusher";
 import { summaraizeServices } from "./middlware";
 import { aiChatRoute } from "./routes/chat";
+import { syncUser } from "./inngest/app/clerk-webhook";
 
 dotenv.config({
   path: "../../.env",
@@ -69,7 +70,7 @@ app.route("api/chat", aiChatRoute);
 app.on(["GET", "PUT", "POST"], "/api/inngest", (c) => {
   const handler = inngestServe({
     client: inngest,
-    functions: [transcribeVideo, cancelSummary],
+    functions: [transcribeVideo, cancelSummary, syncUser],
     signingKey: process.env.INNGEST_SIGNING_KEY,
   });
   return handler(c);

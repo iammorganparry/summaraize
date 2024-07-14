@@ -1,4 +1,4 @@
-import { buildClient } from "@xata.io/client";
+import { buildClient, getDeployPreviewBranch } from "@xata.io/client";
 import type {
   BaseClientOptions,
   SchemaInference,
@@ -124,6 +124,13 @@ const tables = [
         referencedColumns: ["id"],
         onDelete: "CASCADE",
       },
+      Summary_vectorsId_fkey: {
+        name: "Summary_vectorsId_fkey",
+        columns: ["vectorsId"],
+        referencedTable: "Vectors",
+        referencedColumns: ["id"],
+        onDelete: "SET NULL",
+      },
       Summary_video_id_fkey: {
         name: "Summary_video_id_fkey",
         columns: ["video_id"],
@@ -145,7 +152,7 @@ const tables = [
       },
       {
         name: "embedding",
-        type: "vector(1536)",
+        type: "double precision[]",
         notNull: false,
         unique: false,
         defaultValue: null,
@@ -204,6 +211,15 @@ const tables = [
         type: "link",
         link: { table: "User" },
         notNull: true,
+        unique: false,
+        defaultValue: null,
+        comment: "",
+      },
+      {
+        name: "vectorsId",
+        type: "link",
+        link: { table: "Vectors" },
+        notNull: false,
         unique: false,
         defaultValue: null,
         comment: "",
@@ -374,6 +390,14 @@ const tables = [
     uniqueConstraints: {},
     columns: [
       {
+        name: "avatar",
+        type: "text",
+        notNull: false,
+        unique: false,
+        defaultValue: null,
+        comment: "",
+      },
+      {
         name: "created_at",
         type: "timestamp(3) without time zone",
         notNull: true,
@@ -411,6 +435,104 @@ const tables = [
         notNull: true,
         unique: false,
         defaultValue: "CURRENT_TIMESTAMP",
+        comment: "",
+      },
+      {
+        name: "xata_createdat",
+        type: "timestamp(6) with time zone",
+        notNull: true,
+        unique: false,
+        defaultValue: "CURRENT_TIMESTAMP",
+        comment: "",
+      },
+      {
+        name: "xata_id",
+        type: "text",
+        notNull: true,
+        unique: true,
+        defaultValue: "('rec_'::text || (xata_private.xid())::text)",
+        comment: "",
+      },
+      {
+        name: "xata_updatedat",
+        type: "timestamp(6) with time zone",
+        notNull: true,
+        unique: false,
+        defaultValue: "CURRENT_TIMESTAMP",
+        comment: "",
+      },
+      {
+        name: "xata_version",
+        type: "int",
+        notNull: true,
+        unique: false,
+        defaultValue: "0",
+        comment: "",
+      },
+    ],
+  },
+  {
+    name: "Vectors",
+    checkConstraints: {},
+    foreignKeys: {
+      Vectors_user_id_fkey: {
+        name: "Vectors_user_id_fkey",
+        columns: ["user_id"],
+        referencedTable: "User",
+        referencedColumns: ["id"],
+        onDelete: "CASCADE",
+      },
+    },
+    primaryKey: ["id"],
+    uniqueConstraints: {},
+    columns: [
+      {
+        name: "content",
+        type: "text",
+        notNull: true,
+        unique: false,
+        defaultValue: null,
+        comment: "",
+      },
+      {
+        name: "created_at",
+        type: "timestamp(3) without time zone",
+        notNull: true,
+        unique: false,
+        defaultValue: "CURRENT_TIMESTAMP",
+        comment: "",
+      },
+      {
+        name: "embedding",
+        type: "vector",
+        notNull: false,
+        unique: false,
+        defaultValue: null,
+        comment: "",
+      },
+      {
+        name: "id",
+        type: "text",
+        notNull: true,
+        unique: true,
+        defaultValue: null,
+        comment: "",
+      },
+      {
+        name: "updated_at",
+        type: "timestamp(3) without time zone",
+        notNull: true,
+        unique: false,
+        defaultValue: null,
+        comment: "",
+      },
+      {
+        name: "user_id",
+        type: "link",
+        link: { table: "User" },
+        notNull: true,
+        unique: false,
+        defaultValue: null,
         comment: "",
       },
       {
@@ -667,6 +789,7 @@ export type DatabaseSchema = {
   Summary: SummaryRecord;
   SummaryRequest: SummaryRequestRecord;
   User: UserRecord;
+  Vectors: VectorsRecord;
   Video: VideoRecord;
   _prisma_migrations: PrismaMigrationsRecord;
 };
@@ -704,6 +827,9 @@ export type SummaryRequestRecord = SummaryRequest & XataRecord;
 
 export type User = InferredTypes["User"];
 export type UserRecord = User & XataRecord;
+
+export type Vectors = InferredTypes["Vectors"];
+export type VectorsRecord = Vectors & XataRecord;
 
 export type Video = InferredTypes["Video"];
 export type VideoRecord = Video & XataRecord;

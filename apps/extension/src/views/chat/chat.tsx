@@ -37,15 +37,16 @@ export const ChatWithSummaraize = () => {
   });
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
-    api: `${getBaseUrl()}/api/chat`,
-    streamMode: "text",
-    // credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+    useChat({
+      api: `${getBaseUrl()}/api/chat`,
+      streamMode: "text",
+      // credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +60,10 @@ export const ChatWithSummaraize = () => {
   const stopPropagation = useCallback((e: KeyboardEvent) => {
     e.stopPropagation();
   }, []);
+
+  const reversedMessages = [...messages].reverse();
+
+  console.log("messages", messages);
 
   useEffect(() => {
     window.addEventListener("keydown", stopPropagation, true);
@@ -79,13 +84,17 @@ export const ChatWithSummaraize = () => {
           position: "relative",
         }}
       >
-        {isLoading && <AnswerSkeleton />}
         {messages.length === 0 ? (
           <WelcomeMessage />
         ) : (
           <>
-            {messages.map((message) => (
-              <Message key={message.id} message={message.content} type={message.role} />
+            {reversedMessages.map((message) => (
+              <Message
+                loading={isLoading && message.role === "assistant"}
+                key={message.id}
+                message={message.content}
+                type={message.role}
+              />
             ))}
           </>
         )}
@@ -98,7 +107,13 @@ export const ChatWithSummaraize = () => {
               height: "100%",
             }}
           >
-            <StyledInput inputRef={inputRef} name="prompt" value={input} onChange={onChange} id="input" />
+            <StyledInput
+              inputRef={inputRef}
+              name="prompt"
+              value={input}
+              onChange={onChange}
+              id="input"
+            />
           </Box>
           <Box
             sx={{

@@ -7,7 +7,9 @@ type NavButtonProps = ButtonProps & {
   isActive?: boolean;
 };
 
-const NavButton = styled(Button)<NavButtonProps>(({ theme, isActive }) => ({
+const NavButton = styled(Button, {
+  shouldForwardProp: (prop) => prop !== "isActive",
+})<NavButtonProps>(({ theme, isActive }) => ({
   width: "100%",
   boxShadow: theme.shadows[0],
   border: "none",
