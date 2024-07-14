@@ -13,7 +13,7 @@ import { createToastMessage, openFlyout } from "~api/messages";
 import { useCallback, useState } from "react";
 import { useObserver } from "~lib/hooks/useObserver";
 import { getYoutuveVideoId } from "~lib/utils";
-import { client } from "~lib/trpc/vanilla-client";
+import { client, getAuthToken } from "~lib/trpc/vanilla-client";
 import { ContainedButton, OutlinedButton } from "~components/buttons/outlined";
 import {
   QueryClientProvider,
@@ -25,6 +25,7 @@ import { useBackgroundMessages } from "~lib/messages/hooks";
 import { useGetUser } from "~lib/hooks/useGetUser";
 import { useWebsocketEvents } from "~lib/hooks/useWebsocketEvents";
 import { SummaraizeThemeProvider } from "~providers/theme";
+import { useGetAuthToken } from "~lib/hooks/useGetAuthToken";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -56,7 +57,9 @@ function RequestSummaryButton() {
     videoToLong: true,
   });
 
-  const { data: user } = useGetUser();
+  const { data: token } = useGetAuthToken();
+
+  const { data: user } = useGetUser({ disabled: !token });
 
   const isOutOfRequests = user?.requestsRemaining === 0;
 
@@ -65,6 +68,7 @@ function RequestSummaryButton() {
     refetch,
     isLoading,
   } = useQuery({
+    enabled: !!token,
     refetchOnWindowFocus: true,
     queryKey: ["summary", window.location.href],
     queryFn: () =>
@@ -77,6 +81,7 @@ function RequestSummaryButton() {
     refetch: refetchSummaryRequest,
     isLoading: isLoadingRequestSummary,
   } = useQuery({
+    enabled: !!token,
     queryKey: ["summary-request", window.location.href],
     queryFn: () =>
       client.summary.getSummaryRequestByUrl.query({
@@ -282,7 +287,9 @@ function RequestSummaryButton() {
     return (
       <>
         <OutlinedButton
+          fullWidth
           sx={{
+            mb: 5,
             // fill up the background based on progress
             background: (theme) =>
               `linear-gradient(to right, ${theme.palette.primary.main} ${progress}%, ${theme.palette.action.disabled} ${progress}%)
@@ -306,6 +313,9 @@ function RequestSummaryButton() {
         endIcon={<AlertCircle />}
         variant="outlined"
         fullWidth
+        sx={{
+          mb: 5,
+        }}
       >
         Too long to summarize
       </OutlinedButton>
@@ -318,7 +328,7 @@ function RequestSummaryButton() {
       onClick={handleRequestSummary}
       variant="contained"
       sx={{
-        marginBottom: 5,
+        mb: 5,
       }}
     >
       {loading ? (

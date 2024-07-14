@@ -36,3 +36,18 @@ export const syncUser = inngest.createFunction(
     });
   }
 );
+
+export const deleteUser = inngest.createFunction(
+  { id: "sync-user-from-clerk" },
+  [{ event: "clerk/user.deleted" }],
+  async ({ event, logger, services }) => {
+    // The event payload's data will be the Clerk User json object
+    logger.info("Deleted user from clerk", event.data);
+
+    const { id } = event.data;
+
+    return await services.prisma.user.delete({
+      where: { id: id },
+    });
+  }
+);

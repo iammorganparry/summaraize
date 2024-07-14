@@ -9,7 +9,7 @@ export async function getAuthToken() {
     process.env.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY as string
   );
   await clerk.load();
-  return await clerk.session?.getToken();
+  return (await clerk.session?.getToken()) ?? null;
 }
 
 export const client = createTRPCProxyClient<AppRouter>({

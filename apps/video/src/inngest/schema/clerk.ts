@@ -10,7 +10,13 @@ type ClerkUserUpdatedEvent = {
   data: UserJSON;
 };
 
+type ClerkUserDeletedEvent = {
+  name: "clerk/user.deleted";
+  data: UserJSON;
+};
+
 export type ClerkEvents = {
   "clerk/user.created": ClerkUserCreatedEvent;
   "clerk/user.updated": ClerkUserUpdatedEvent;
+  "clerk/user.deleted": ClerkUserDeletedEvent;
 };

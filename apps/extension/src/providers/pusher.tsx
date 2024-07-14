@@ -13,17 +13,17 @@ export const usePusher = () => {
   return context;
 };
 
+const pusher = getPusher();
 export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useUser();
   const userId = user?.id;
-  const [pusher] = useState(getPusher());
 
   const channel = useMemo(() => {
     if (!userId) {
       return null;
     }
     return pusher.subscribe(`private-${userId}`);
-  }, [userId, pusher]);
+  }, [userId]);
 
   return (
     <PusherContext.Provider value={channel}>{children}</PusherContext.Provider>

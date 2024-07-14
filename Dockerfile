@@ -15,11 +15,15 @@ ARG XATA_WORKSPACE_URL
 ARG PLASMO_PUBLIC_PUSHER_APP_ID
 ARG PLASMO_PUBLIC_PUSHER_APP_KEY
 ARG PUSHER_SECRET
+ARG INNGEST_EVENT_KEY
 
 
 FROM base AS builder
 
-RUN apt-get update && apt-get install -y ffmpeg
+RUN apt-get -y update
+RUN apt-get -y upgrade
+RUN apt-get install -y ffmpeg
+
 RUN apt-get install -y python3
 
 WORKDIR /app

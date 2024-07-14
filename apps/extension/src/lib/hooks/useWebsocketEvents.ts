@@ -20,8 +20,8 @@ export const useWebsocketEvents = ({
 
   const channel = useRef<Channel | null>(null);
   useEffect(() => {
-    if (clerk) {
-      channel.current = pusher.subscribe(`private-${clerk.user?.id}`);
+    if (clerk?.user) {
+      channel.current = pusher.subscribe(`private-${clerk.user.id}`);
     }
   }, [clerk]);
 
