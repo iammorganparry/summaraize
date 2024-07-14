@@ -21,7 +21,6 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { createQueryClient } from "~lib/trpc/query-client";
-import type { SummaryStage } from "@summaraize/prisma";
 import { useBackgroundMessages } from "~lib/messages/hooks";
 import { useGetUser } from "~lib/hooks/useGetUser";
 import { useWebsocketEvents } from "~lib/hooks/useWebsocketEvents";
@@ -48,7 +47,7 @@ export const getShadowHostId = () => "summaraize-request-summary-button";
 
 export const getStyle: PlasmoGetStyle = () => styleElement;
 
-const MAX_VIDEO_LENGTH_IN_MINUTES = 15;
+const MAX_VIDEO_LENGTH_IN_MINUTES = 15; // TODO: should be server side
 
 function RequestSummaryButton() {
   const [{ requested, videoToLong, progress }, setState] = useState({

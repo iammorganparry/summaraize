@@ -29,14 +29,13 @@ export const app = new Hono();
 const port = 3001;
 
 app.use(honorLogger());
+app.use("*", clerkMiddleware());
 app.use(
   "*",
-  clerkMiddleware({
-    publishableKey: process.env.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY,
-    secretKey: process.env.CLERK_SECRET_KEY,
+  cors({
+    origin: "*",
   })
 );
-app.use("/api/*", cors());
 
 app.use("/api/*", summaraizeServices);
 
