@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { getClerkJs } from "~lib/clerk/vanilla";
 import type { Channel } from "pusher-js";
-import { pusher } from "~lib/socket/pusher";
+import { getPusher } from "~lib/socket/pusher";
 
+const pusher = getPusher();
 export const useWebsocketEvents = ({
   onSummaryProgress,
   onSummaryCompleted,

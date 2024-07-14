@@ -1,7 +1,7 @@
 import { useUser } from "@clerk/chrome-extension";
 import type { Channel } from "pusher-js";
-import { createContext, useContext, useMemo } from "react";
-import { pusher } from "~lib/socket/pusher";
+import { createContext, useContext, useMemo, useState } from "react";
+import { getPusher } from "~lib/socket/pusher";
 
 const PusherContext = createContext<Channel | null>(null);
 
@@ -16,13 +16,16 @@ export const usePusher = () => {
 export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useUser();
   const userId = user?.id;
+  const [pusher] = useState(getPusher());
 
   const channel = useMemo(() => {
     if (!userId) {
       return null;
     }
     return pusher.subscribe(`private-${userId}`);
-  }, [userId]);
+  }, [userId, pusher]);
 
-  return <PusherContext.Provider value={channel}>{children}</PusherContext.Provider>;
+  return (
+    <PusherContext.Provider value={channel}>{children}</PusherContext.Provider>
+  );
 };

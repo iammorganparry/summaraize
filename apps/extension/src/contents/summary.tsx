@@ -20,6 +20,7 @@ import { ToasterBoi } from "~components/toaster";
 
 import { useCallback, useEffect, useState } from "react";
 import { SummaraizeThemeProvider } from "~providers/theme";
+import { PusherProvider } from "~providers/pusher";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -80,14 +81,14 @@ function SummaraizeExtension() {
       routerReplace={(to) => navigate(to, { replace: true })}
     >
       <TRPCReactProvider>
-        {/* <PusherProvider> */}
-        <SummaraizeSheet
-          shadowHost={container}
-          open={open}
-          onClose={handleClose}
-          onOpen={handleOpen}
-        />
-        {/* </PusherProvider> */}
+        <PusherProvider>
+          <SummaraizeSheet
+            shadowHost={container}
+            open={open}
+            onClose={handleClose}
+            onOpen={handleOpen}
+          />
+        </PusherProvider>
       </TRPCReactProvider>
     </ClerkProvider>
   );

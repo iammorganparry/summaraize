@@ -11,6 +11,7 @@ const NavButton = styled(Button)<NavButtonProps>(({ theme, isActive }) => ({
   width: "100%",
   boxShadow: theme.shadows[0],
   border: "none",
+  color: theme.palette.common.white,
   backgroundColor: isActive ? theme.palette.primary.main : "transparent",
   "&:hover": {
     boxShadow: theme.shadows[0],
