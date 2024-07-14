@@ -1,36 +1,63 @@
-# Create T3 App
+![alt text](https://xata.io/_next/image?url=%2Fmdx%2Fdocs%2Fmdx-blog%2Fpxci-hackathon%402x.jpg&w=3840&q=75)
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+# Summaraize
 
-## What's next? How do I make an app with this?
+Easily summarize youtube videos with the power of AI. Get valuable insights in to your favourite content and increase productitivity.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
 
-## Learn More
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+## Installation
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+Install and run the extension in your favourite browser
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+#### Chromium based
 
-## How do I deploy this?
+Hit the button to download the extension
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+<button style="display: flex; align-items: center; gap: 8px; justify-content: center; width: 400px; height: 50px; border: 4px solid #fff; outline: none; text-transform:uppercase; background: transparent; font-size: 16px; color: white;" src="https://utfs.io/f/dd2c6c4d-c242-45a6-b397-3e3aad04c2c6-1jyp8g.crx">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Google_Chrome_icon_%28February_2022%29.svg/2048px-Google_Chrome_icon_%28February_2022%29.svg.png" width="30" >
+ Download for Chrome 
+ </button>
 
-## TODO
+ Once downloaded.. Drag n drop the extension in to your extensions screen via.
+ 
+ ```bash
+ chrome://extensions
+ ```
 
-- Create a micro-service to extract audio with ffmpeg
-- Add openai calls to generate the transcription using whisper
-- send back complete / failed with the transcription and meta data to save and serve
-- create inngest webhook to trigger events from the microservice
+#### Other browsers not supported yet
+## Run Locally
+
+Clone the project
+
+```bash
+  git clone https://link-to-project
+```
+
+Go to the project directory
+
+```bash
+  cd my-project
+```
+
+Install dependencies
+
+```bash
+  yarn install
+```
+
+Start the server
+
+```bash
+  yarn dev
+```
+
+
+## Tech Stack
+
+**Client:** [Plasmo](https://www.plasmo.com/), [tRpc](https://trpc.io/), [Clerk](https://clerk.dev/), [MUI](mui.com), [ai](https://sdk.vercel.ai/docs/introduction), 
+
+**Server:** [Inngest](https://www.inngest.com/), [Clerk](https://clerk.dev/), [Xata](https://xata.io/), [Prisma](prisma.io),[Pusher](https://pusher.com/), [Hono](https://hono.dev/), [tRpc](https://trpc.io/), [LangChain](langchain.com),[uploadthing](https://uploadthing.com/), [zod](https://zod.dev/), [ai](https://sdk.vercel.ai/docs/introduction)
+

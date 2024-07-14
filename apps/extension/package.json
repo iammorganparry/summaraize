@@ -1,7 +1,7 @@
 {
   "name": "@summaraize/extension",
   "displayName": "Summaraize 🧙‍♂️",
-  "version": "0.0.1",
+  "version": "2024.07.14",
   "description": "The main extension for summaraize",
   "author": "(Morgan Parry <morgan@trigify.io>)",
   "scripts": {
