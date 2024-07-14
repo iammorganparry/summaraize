@@ -1,7 +1,7 @@
 import { inngest } from "../client";
 
 export const syncUser = inngest.createFunction(
-  { id: "sync-user-from-clerk" },
+  { id: "sync-user-from-clerk", name: "Clerk Sync User Event" },
   [{ event: "clerk/user.created" }, { event: "clerk/user.updated" }],
   async ({ event, logger, services }) => {
     // The event payload's data will be the Clerk User json object
@@ -38,7 +38,7 @@ export const syncUser = inngest.createFunction(
 );
 
 export const deleteUser = inngest.createFunction(
-  { id: "sync-user-from-clerk" },
+  { id: "delete-user-from-clerk", name: "Clerk Delete User Event" },
   [{ event: "clerk/user.deleted" }],
   async ({ event, logger, services }) => {
     // The event payload's data will be the Clerk User json object
