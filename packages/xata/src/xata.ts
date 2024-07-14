@@ -1,4 +1,4 @@
-import { buildClient, getDeployPreviewBranch } from "@xata.io/client";
+import { buildClient } from "@xata.io/client";
 import type {
   BaseClientOptions,
   SchemaInference,

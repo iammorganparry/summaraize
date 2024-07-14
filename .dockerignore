@@ -12,5 +12,11 @@ helm-charts
 .env
 .editorconfig
 .idea
-coverage*
+coverage\*
 .xata
+
+build
+dist
+.github
+.turbo
+migrations
