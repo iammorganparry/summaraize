@@ -37,9 +37,9 @@ jobs:
           PLASMO_PUBLIC_PUSHER_APP_ID: ${{ vars.PLASMO_PUBLIC_PUSHER_APP_ID }}
           PLASMO_PUBLIC_PUSHER_APP_KEY: ${{ vars.PLASMO_PUBLIC_PUSHER_APP_KEY }}
           PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY }}
-      
+
       - name: Upload ZIP file
-          uses: actions/upload-artifact@v3
-          with:
-            name: chrome-extension-zip
-            path: ./apps/extension/build/chrome-mv3-prod.zip
+        uses: actions/upload-artifact@v3
+        with:
+          name: chrome-extension-zip
+          path: ./apps/extension/build/chrome-mv3-prod.zip
