@@ -6,13 +6,12 @@ Easily summarize youtube videos with the power of AI. Get valuable insights in t
 
 ## Installation
 
-Install and run the extension in your favourite browser
+Install and run the extension in your favorite chromium browser
 
 #### Chromium based
 
-Hit the button to download the extension
+Hit the link to download the extension
 
-[!TIP]
 [DOWNLOAD FOR CHROME](https://utfs.io/f/dd2c6c4d-c242-45a6-b397-3e3aad04c2c6-1jyp8g.crx)
 
 And then drag and drop the downloaded file to your extensions page via:
@@ -29,6 +28,12 @@ Clone the project
 
 ```bash
   git clone https://link-to-project
+```
+
+Install Turbo globally
+
+```bash
+  npm install -g turbo
 ```
 
 Go to the project directory
@@ -48,6 +53,10 @@ Start the server
 ```bash
   yarn dev
 ```
+
+Drag the dev build of the extension in `apps/extension/build` to your extensions page in a chromium based browser.
+
+Get all required ENV vars in the `.env.example` and move to `.env`
 
 ## Tech Stack
 
