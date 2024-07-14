@@ -12,10 +12,10 @@ Install and run the extension in your favourite browser
 
 Hit the button to download the extension
 
-`<a style="display: flex; align-items: center; gap: 8px; justify-content: center; width: 400px; height: 50px; border: 4px solid #fff; outline: none; text-transform:uppercase; background: transparent; font-size: 16px; color: white;" src="https://utfs.io/f/dd2c6c4d-c242-45a6-b397-3e3aad04c2c6-1jyp8g.crx">`
-`<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Google_Chrome_icon_%28February_2022%29.svg/2048px-Google_Chrome_icon_%28February_2022%29.svg.png" width="30" >`
+<a style="display: flex; align-items: center; gap: 8px; justify-content: center; width: 400px; height: 50px; border: 4px solid #fff; outline: none; text-transform:uppercase; background: transparent; font-size: 16px; color: white;" src="https://utfs.io/f/dd2c6c4d-c242-45a6-b397-3e3aad04c2c6-1jyp8g.crx">`
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Google_Chrome_icon_%28February_2022%29.svg/2048px-Google_Chrome_icon_%28February_2022%29.svg.png" width="30" >
 Download for Chrome
-`</a>`
+</a>
 
 Once downloaded.. Drag n drop the extension in to your extensions screen via.
 
