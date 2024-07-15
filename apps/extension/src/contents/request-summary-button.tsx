@@ -10,7 +10,11 @@ import { useObserver } from "~lib/hooks/useObserver";
 import { getYoutuveVideoId } from "~lib/utils";
 import { client } from "~lib/trpc/vanilla-client";
 import { ContainedButton, OutlinedButton } from "~components/buttons/outlined";
-import { QueryClientProvider, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  QueryClientProvider,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
 import { createQueryClient } from "~lib/trpc/query-client";
 import { useBackgroundMessages } from "~lib/messages/hooks";
 import { useGetUser } from "~lib/hooks/useGetUser";
@@ -83,12 +87,21 @@ function RequestSummaryButton() {
     refetchOnWindowFocus: true,
   });
 
-  const { mutateAsync: requestSummary, isLoading: loading } = useMutation(["summary", window.location.href], () => {
-    return client.summary.requestSummary.mutate({
-      src: window.location.href,
-      videoId: getYoutuveVideoId(window.location.href) as string,
-    });
-  });
+  const { mutateAsync: requestSummary, isLoading: loading } = useMutation(
+    ["summary", window.location.href],
+    () => {
+      return client.summary.requestSummary.mutate({
+        src: window.location.href,
+        videoId: getYoutuveVideoId(window.location.href) as string,
+      });
+    },
+    {
+      onSuccess: () => {
+        refetch();
+        refetchSummaryRequest();
+      },
+    }
+  );
   const { mutateAsync: cancelSummary } = useMutation(
     ["cancel-summary", window.location.href],
     () => {
@@ -101,7 +114,7 @@ function RequestSummaryButton() {
         refetch();
         refetchSummaryRequest();
       },
-    },
+    }
   );
 
   useObserver(
@@ -110,7 +123,9 @@ function RequestSummaryButton() {
       subtree: true,
     },
     (_, observer) => {
-      const video = document.querySelector<HTMLVideoElement>("#player-container video");
+      const video = document.querySelector<HTMLVideoElement>(
+        "#player-container video"
+      );
       if (video?.duration) {
         const minutes = video.duration / 60;
         setState((prev) => ({
@@ -119,34 +134,43 @@ function RequestSummaryButton() {
         }));
         observer.disconnect();
       }
-    },
+    }
   );
 
   const handleRequestSummary = async () => {
     try {
       const videoId = getYoutuveVideoId(window.location.href);
       if (!videoId) {
-        createToastMessage("Failed to get video ID, please try again. 🙁", "error");
+        createToastMessage(
+          "Failed to get video ID, please try again. 🙁",
+          "error"
+        );
         return;
       }
 
       const resp = await requestSummary();
 
       if (!resp.ids) {
-        createToastMessage("Failed to schedule request summary, please try again. 🙁", "error");
+        createToastMessage(
+          "Failed to schedule request summary, please try again. 🙁",
+          "error"
+        );
         return;
       }
 
       createToastMessage(
         "Scheduled request summary, check back in a few moments after a tasty beverage. 🍺",
-        "success",
+        "success"
       );
       setState((prev) => ({
         ...prev,
         requested: true,
       }));
     } catch (error) {
-      createToastMessage("Failed to schedule request summary, please try again. 🙁", "error");
+      createToastMessage(
+        "Failed to schedule request summary, please try again. 🙁",
+        "error"
+      );
     }
   };
 
@@ -154,18 +178,27 @@ function RequestSummaryButton() {
     const videoId = getYoutuveVideoId(window.location.href);
 
     if (!videoId) {
-      createToastMessage("Failed to get video ID, please try again. 🙁", "error");
+      createToastMessage(
+        "Failed to get video ID, please try again. 🙁",
+        "error"
+      );
       return;
     }
 
     const resp = await cancelSummary();
 
     if (!resp.id) {
-      createToastMessage("Failed to cancel request summary, please try again. 🙁", "error");
+      createToastMessage(
+        "Failed to cancel request summary, please try again. 🙁",
+        "error"
+      );
       return;
     }
 
-    createToastMessage("Canceled request summary, you can request again. 😉", "success");
+    createToastMessage(
+      "Canceled request summary, you can request again. 😉",
+      "success"
+    );
     setState((prev) => ({
       ...prev,
       requested: false,
@@ -204,7 +237,7 @@ function RequestSummaryButton() {
         }));
       }
     },
-    [refresh],
+    [refresh]
   );
 
   const handleSummaryStep = useCallback(() => {
@@ -226,7 +259,12 @@ function RequestSummaryButton() {
 
   if (summary || summaryRequest?.stage === "DONE") {
     return (
-      <OutlinedButton variant="outlined" endIcon={<Eye />} fullWidth onClick={handleNavigateToSummary}>
+      <OutlinedButton
+        variant="outlined"
+        endIcon={<Eye />}
+        fullWidth
+        onClick={handleNavigateToSummary}
+      >
         View summary
       </OutlinedButton>
     );
