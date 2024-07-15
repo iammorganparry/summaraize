@@ -16,11 +16,17 @@ Hit the link to download the extension
 
 [DOWNLOAD FOR CHROME](https://utfs.io/f/dd2c6c4d-c242-45a6-b397-3e3aad04c2c6-1jyp8g.crx)
 
-And then drag and drop the downloaded file to your extensions page via:
+Navigate to:
 
 ```bash
  chrome://extensions
 ```
+
+Enabled development mode:
+
+![toggle-switch](https://i.imgur.com/kL8W7T4.png)
+
+And then drag and drop the downloaded file
 
 #### Other browsers not supported yet
 

@@ -23,9 +23,9 @@
     "@mui/material": "^5.16.0",
     "@plasmohq/messaging": "^0.6.2",
     "@plasmohq/storage": "^1.11.0",
+    "@tanstack/react-query": "4.36.1",
     "@thatrundown/prisma": "*",
     "@thatrundown/xata": "*",
-    "@tanstack/react-query": "4.36.1",
     "@trpc/client": "^10.45.2",
     "@trpc/react": "^9.27.4",
     "@trpc/react-query": "^10.45.2",
@@ -57,7 +57,8 @@
     "@xata.io/client": "^0.29.5",
     "autoprefixer": "^10.4.19",
     "prettier": "3.2.4",
-    "typescript": "5.4.5"
+    "typescript": "5.4.5",
+    "vitest": "^2.0.2"
   },
   "manifest": {
     "host_permissions": [

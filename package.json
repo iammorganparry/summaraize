@@ -6,7 +6,6 @@
   "author": "Morgan Parry <morgan@trigify.io>",
   "license": "MIT",
   "private": true,
-  "packageManager": "yarn@1.22.22",
   "licenses": [
     {
       "type": "CC BY-ND 4.0",
@@ -28,9 +27,7 @@
     "install:ce": "turbo install:ce"
   },
   "devDependencies": {
-    "path-browserify": "^1.0.0",
-    "turbo": "^2.0.6",
-    "url": "^0.11.0"
+    "turbo": "^2.0.6"
   },
   "prisma": {
     "schema": "packages/prisma/schema.prisma"
