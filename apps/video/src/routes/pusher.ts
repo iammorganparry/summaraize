@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { pusher } from "@summaraize/pusher";
+import { pusher } from "@thatrundown/pusher";
 
 export const pusherAuthRoute = new Hono();
 

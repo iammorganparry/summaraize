@@ -1,7 +1,7 @@
 import { type GetFunctionInput, NonRetriableError } from "inngest";
 import { inngest } from "../client";
 import { SummaryStage } from "@prisma/client";
-import { PusherEvents } from "@summaraize/pusher";
+import { PusherEvents } from "@thatrundown/pusher";
 
 export const _transcribeVideo = async ({
   event,

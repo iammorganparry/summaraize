@@ -43,7 +43,7 @@ export const WelcomeMessage = () => {
   return (
     <Message
       type="assistant"
-      message="Welcome to Summaraize! 👋🏻 I'm here to help you with your video summaries. Just ask me anything about your previous summaries!"
+      message="Welcome to that rundown! 👋🏻 I'm here to help you with your video summaries. Just ask me anything about your previous summaries!"
     />
   );
 };

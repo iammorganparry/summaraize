@@ -68,7 +68,7 @@ export const LoginPage = () => {
             textTransform: "uppercase",
           }}
         >
-          Summaraize
+          That Rundown
         </Typography>
       </Stack>
       <Stack spacing={2} gap={3}>

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { db } from "@summaraize/prisma";
+import { db } from "@thatrundown/prisma";
 
 import { logger } from "../../lib/logger";
 import { faker } from "@faker-js/faker";
-import { xata } from "@summaraize/xata";
+import { xata } from "@thatrundown/xata";
 import { XataService } from "../xata";
 
 const service = new XataService(xata, db, logger);
@@ -12,6 +12,7 @@ describe("Xata Service", () => {
     const summary = await service.saveSummary({
       embeddings: Array.from({ length: 1536 }, () => faker.number.float()),
       summary: {
+        chapters: [],
         authors: ["Author 1", "Author 2"],
         createdAt: new Date().toISOString(),
         summary: "This is a summary",

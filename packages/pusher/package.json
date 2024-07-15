@@ -1,5 +1,5 @@
 {
-  "name": "@summaraize/pusher",
+  "name": "@thatrundown/pusher",
   "version": "1.0.0",
   "main": "./index.ts",
   "types": "./index.ts",

@@ -1,5 +1,5 @@
 {
-  "name": "@summaraize/trpc",
+  "name": "@thatrundown/trpc",
   "version": "0.0.1",
   "main": "./index.ts",
   "types": "./index.ts",

@@ -1,7 +1,7 @@
-# @summaraize/prisma
+# @thatrundown/prisma
 
 To Use:
 
 ```ts
-import { Prisma } from "@summaraize/prisma";
+import { Prisma } from "@thatrundown/prisma";
 ```

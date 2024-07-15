@@ -1,12 +1,12 @@
 import { Hono } from "hono";
-import { summaraizeServices } from "../middlware";
+import { thatrundownServices } from "../middlware";
 import type { Message } from "openai/resources/beta/threads/messages.mjs";
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "hono/streaming";
 import { streamText as streamTextResponse } from "ai";
 
 export const aiChatRoute = new Hono();
-aiChatRoute.post("/", summaraizeServices, async (c) => {
+aiChatRoute.post("/", thatrundownServices, async (c) => {
   try {
     return streamText(c, async (stream) => {
       // Set of messages to create vector embeddings on

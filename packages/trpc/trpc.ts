@@ -9,9 +9,9 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { db } from "@summaraize/prisma";
+import { db } from "@thatrundown/prisma";
 import type { getAuth } from "@hono/clerk-auth";
-import type { inngest as inngestClient } from "@summaraize/video";
+import type { inngest as inngestClient } from "@thatrundown/video";
 /**
  * 1. CONTEXT
  *

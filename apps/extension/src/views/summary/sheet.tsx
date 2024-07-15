@@ -10,11 +10,10 @@ import { RouteContainer } from "~components/containers";
 import { ViewSummary } from "./view-summary";
 import { Typography } from "@mui/material";
 import { FooterNav } from "~components/footer";
-import { ChatWithSummaraize } from "~views/chat/chat";
-import { Settings } from "~views/settings/settings";
+import { ChatWithThatRundown } from "~views/chat/chat";
 import { RequestListPage } from "~views/requests/requests";
 
-export function SummaraizeSheet({
+export function ThatRundownSheet({
   shadowHost,
   open,
   onClose,
@@ -55,7 +54,7 @@ export function SummaraizeSheet({
         }}
       >
         <Typography sx={{ transform: "rotate(90deg)" }} variant="caption">
-          Summaraize
+          That Rundown
         </Typography>
       </Button>
       <Drawer
@@ -78,7 +77,7 @@ export function SummaraizeSheet({
             <Routes location={location} key={location.key}>
               <Route path="/" element={<SummaryList />} />
               <Route path="/summary/:videoUrl" element={<ViewSummary />} />
-              <Route path="/chat" element={<ChatWithSummaraize />} />
+              <Route path="/chat" element={<ChatWithThatRundown />} />
               <Route path="/requests" element={<RequestListPage />} />
             </Routes>
           </RouteContainer>

@@ -17,7 +17,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import { childVariants } from "~utils";
 import { useCallback } from "react";
-import type { Prisma } from "@summaraize/prisma";
+import type { Prisma } from "@thatrundown/prisma";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "sonner";

@@ -1,8 +1,10 @@
-![alt text](https://xata.io/_next/image?url=%2Fmdx%2Fdocs%2Fmdx-blog%2Fpxci-hackathon%402x.jpg&w=3840&q=75)
+![hero](https://xata.io/_next/image?url=%2Fmdx%2Fdocs%2Fmdx-blog%2Fpxci-hackathon%402x.jpg&w=3840&q=75)
 
-# Summaraize
+# That Rundown
 
 Easily summarize youtube videos with the power of AI. Get valuable insights in to your favourite content and increase productitivity.
+
+![gif](https://i.makeagif.com/media/6-16-2021/ldSzfr.gif)
 
 ## Installation
 

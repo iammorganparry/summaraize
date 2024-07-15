@@ -1,7 +1,7 @@
 {
-  "name": "summaraize",
+  "name": "thatrundown",
   "version": "2024.07.05",
-  "description": "A youtube summaraize extension 🧙‍♂️",
+  "description": "Unlike Jim.. I know what a rundown is. Easily create rundowns for your videos. 👨🏻‍💼",
   "main": "index.js",
   "author": "Morgan Parry <morgan@trigify.io>",
   "license": "MIT",
@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "check-types": "tsc --noEmit",
-    "start:video": "yarn workspace @summaraize/video start",
+    "start:video": "yarn workspace @thatrundown/video start",
     "postinstall": "prisma generate",
     "format": "turbo format",
     "build": "turbo build",

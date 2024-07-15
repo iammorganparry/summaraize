@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import { getClerkJs } from "~lib/clerk/vanilla";
 import { usePusherClient } from "./usePusherClient";
-import type { SummaryStage } from "@summaraize/prisma";
+import type { SummaryStage } from "@thatrundown/prisma";
 
 export const useWebsocketEvents = ({
   onSummaryProgress,

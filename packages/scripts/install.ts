@@ -3,8 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 // Adjust these paths as necessary
-const buildCommand = "yarn workspace @summaraize/extension build";
-const packageCommand = "yarn workspace @summaraize/extension package";
+const buildCommand = "yarn workspace @thatrundown/extension build";
+const packageCommand = "yarn workspace @thatrundown/extension package";
 const sourceZipPath = "./apps/extension/build/chrome-mv3-prod.zip"; // Adjust based on your actual output path
 // Common Chrome extension directory on Windows. Adjust for macOS or Linux, and specific Chrome profile
 

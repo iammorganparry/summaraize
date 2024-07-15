@@ -10,7 +10,7 @@ import type {
 } from "plasmo";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 
-import { SummaraizeSheet } from "~views/summary/sheet";
+import { ThatRundownSheet } from "~views/summary/sheet";
 
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
@@ -19,7 +19,7 @@ import { TRPCReactProvider } from "~lib/trpc/react";
 import { ToasterBoi } from "~components/toaster";
 
 import { useCallback, useEffect, useState } from "react";
-import { SummaraizeThemeProvider } from "~providers/theme";
+import { ThatRundownThemeProvider } from "~providers/theme";
 import { PusherProvider } from "~providers/pusher";
 
 export const config: PlasmoCSConfig = {
@@ -27,7 +27,7 @@ export const config: PlasmoCSConfig = {
   all_frames: false,
 };
 
-export const getShadowHostId = () => "summaraize-slider";
+export const getShadowHostId = () => "thatrundown-slider";
 
 const styleElement = document.createElement("style");
 
@@ -54,7 +54,7 @@ export const mountShadowHost: PlasmoMountShadowHost = ({
 export const createShadowRoot: PlasmoCreateShadowRoot = (shadowHost) =>
   shadowHost.attachShadow({ mode: "open" });
 
-function SummaraizeExtension() {
+function ThatRundownExtension() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -81,28 +81,28 @@ function SummaraizeExtension() {
       routerReplace={(to) => navigate(to, { replace: true })}
     >
       <TRPCReactProvider>
-        {/* <PusherProvider> */}
-        <SummaraizeSheet
-          shadowHost={container}
-          open={open}
-          onClose={handleClose}
-          onOpen={handleOpen}
-        />
-        {/* </PusherProvider> */}
+        <PusherProvider>
+          <ThatRundownSheet
+            shadowHost={container}
+            open={open}
+            onClose={handleClose}
+            onOpen={handleOpen}
+          />
+        </PusherProvider>
       </TRPCReactProvider>
     </ClerkProvider>
   );
 }
 
-export default function Summary() {
+export default function TheRundown() {
   return (
     <CacheProvider value={styleCache}>
-      <SummaraizeThemeProvider>
+      <ThatRundownThemeProvider>
         <MemoryRouter>
-          <SummaraizeExtension />
+          <ThatRundownExtension />
           <ToasterBoi />
         </MemoryRouter>
-      </SummaraizeThemeProvider>
+      </ThatRundownThemeProvider>
     </CacheProvider>
   );
 }

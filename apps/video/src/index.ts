@@ -8,13 +8,13 @@ import { cancelSummary, transcribeVideo } from "./inngest/app/transcribe-video";
 
 import { Hono } from "hono";
 import { trpcServer } from "@hono/trpc-server";
-import { appRouter } from "@summaraize/trpc";
-import { createTRPCContext } from "@summaraize/trpc/trpc";
+import { appRouter } from "@thatrundown/trpc";
+import { createTRPCContext } from "@thatrundown/trpc/trpc";
 import dotenv from "dotenv";
 import { cors } from "hono/cors";
 import { logger as honorLogger } from "hono/logger";
 import { pusherAuthRoute } from "./routes/pusher";
-import { summaraizeServices } from "./middlware";
+import { thatrundownServices } from "./middlware";
 import { aiChatRoute } from "./routes/chat";
 import { deleteUser, syncUser } from "./inngest/app/clerk-webhook";
 
@@ -38,7 +38,7 @@ app.use(
   })
 );
 
-app.use("/api/*", summaraizeServices);
+app.use("/api/*", thatrundownServices);
 
 app.use(
   "/api/trpc/*",

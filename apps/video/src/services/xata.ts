@@ -1,4 +1,4 @@
-import type { XataClient } from "@summaraize/xata";
+import type { XataClient } from "@thatrundown/xata";
 import type winston from "winston";
 import type { z } from "zod";
 import type { SummarySchema } from "../schema/summary";
@@ -7,7 +7,7 @@ import type { AskResult, AskTableError } from "@xata.io/client";
 import { PrismaVectorStore } from "@langchain/community/vectorstores/prisma";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { Prisma } from "@prisma/client";
-import type { PrismaClient } from "@summaraize/prisma";
+import type { PrismaClient } from "@thatrundown/prisma";
 
 export class XataService {
   constructor(

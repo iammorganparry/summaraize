@@ -1,5 +1,5 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import type { AppRouter } from "@summaraize/trpc";
+import type { AppRouter } from "@thatrundown/trpc";
 import SuperJSON from "superjson";
 import { getBaseUrl } from "./react";
 import { Clerk } from "@clerk/clerk-js/headless";

@@ -8,6 +8,6 @@ export const logger = winston.createLogger({
     bigint: false,
   }),
   exitOnError: false,
-  defaultMeta: { service: "summaraize" },
+  defaultMeta: { service: "thatrundown" },
   transports: [new winston.transports.Console()],
 });

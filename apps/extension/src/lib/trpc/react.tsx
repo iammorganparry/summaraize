@@ -3,7 +3,7 @@ import { loggerLink, httpLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import SuperJSON from "superjson";
-import type { AppRouter } from "@summaraize/trpc";
+import type { AppRouter } from "@thatrundown/trpc";
 import { createQueryClient } from "./query-client";
 import { useState } from "react";
 import { useAuth } from "@clerk/chrome-extension";

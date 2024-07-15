@@ -19,9 +19,8 @@ import { createQueryClient } from "~lib/trpc/query-client";
 import { useBackgroundMessages } from "~lib/messages/hooks";
 import { useGetUser } from "~lib/hooks/useGetUser";
 import { useWebsocketEvents } from "~lib/hooks/useWebsocketEvents";
-import { SummaraizeThemeProvider } from "~providers/theme";
+import { ThatRundownThemeProvider } from "~providers/theme";
 import { useGetAuthToken } from "~lib/hooks/useGetAuthToken";
-import type { SummaryStage } from "@summaraize/prisma";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -40,7 +39,7 @@ const styleCache = createCache({
   container: styleElement,
 });
 
-export const getShadowHostId = () => "summaraize-request-summary-button";
+export const getShadowHostId = () => "thatrundown-request-summary-button";
 
 export const getStyle: PlasmoGetStyle = () => styleElement;
 
@@ -355,9 +354,9 @@ export default function RequestButton() {
   return (
     <QueryClientProvider client={queryClient}>
       <CacheProvider value={styleCache}>
-        <SummaraizeThemeProvider>
+        <ThatRundownThemeProvider>
           <RequestSummaryButton />
-        </SummaraizeThemeProvider>
+        </ThatRundownThemeProvider>
       </CacheProvider>
     </QueryClientProvider>
   );

@@ -7,8 +7,8 @@ import path from "node:path";
 import type { AdaptiveFormat, YoutubeVideoResponse } from "../types/youtube";
 import type { downloadOptions } from "@distube/ytdl-core";
 import type Pusher from "pusher";
-import type { PrismaClient } from "@summaraize/prisma";
-import { PusherEvents } from "@summaraize/pusher";
+import type { PrismaClient } from "@thatrundown/prisma";
+import { PusherEvents } from "@thatrundown/pusher";
 export class VideoService {
   private videoFilePath: string;
   private audioFilePath: string;

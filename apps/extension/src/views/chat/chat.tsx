@@ -30,7 +30,7 @@ const StyledInput = styled(Input)(({ theme }) => ({
   color: theme.palette.common.white,
 }));
 
-export const ChatWithSummaraize = () => {
+export const ChatWithThatRundown = () => {
   const { data: token } = useQuery({
     queryKey: ["token"],
     queryFn: getAuthToken,

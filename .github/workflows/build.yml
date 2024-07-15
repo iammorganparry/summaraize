@@ -24,7 +24,7 @@ jobs:
         run: yarn install
 
       - name: Build Chrome Extension
-        run: yarn workspace @summaraize/extension build
+        run: yarn workspace @thatrundown/extension build
         env:
           PLASMO_PUBLIC_API_URL: ${{ vars.PLASMO_PUBLIC_API_URL }}
           PLASMO_PUBLIC_PUSHER_APP_ID: ${{ vars.PLASMO_PUBLIC_PUSHER_APP_ID }}
@@ -32,7 +32,7 @@ jobs:
           PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY }}
 
       - name: Package Chrome Extension
-        run: yarn workspace @summaraize/extension package
+        run: yarn workspace @thatrundown/extension package
         env:
           PLASMO_PUBLIC_API_URL: ${{ vars.PLASMO_PUBLIC_API_URL }}
           PLASMO_PUBLIC_PUSHER_APP_ID: ${{ vars.PLASMO_PUBLIC_PUSHER_APP_ID }}

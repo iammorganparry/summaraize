@@ -6,7 +6,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import type { SummaryRequest } from "@summaraize/prisma";
+import type { SummaryRequest } from "@thatrundown/prisma";
 import { Calendar } from "@untitled-ui/icons-react";
 import dayjs from "dayjs";
 import { useCallback } from "react";
