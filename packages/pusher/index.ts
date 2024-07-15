@@ -1,9 +1,4 @@
 import PusherServer from "pusher";
-import { config } from "dotenv";
-
-config({
-  path: "../../.env",
-});
 
 export enum PusherEvents {
   SummaryCreated = "summary.created",
