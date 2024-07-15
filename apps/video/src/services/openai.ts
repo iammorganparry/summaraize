@@ -36,6 +36,8 @@ export class OpenAiService {
         file: file,
         model: this.AUDIO_MODEL,
         language: "en",
+        prompt:
+          "Transcribe the following audio file.. Be sure to include important timestamps of the audio that can be used to create chapters.",
       });
     } catch (error) {
       const err = error as OpenAIError;
