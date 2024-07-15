@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@fontsource/public-sans": "^5.0.18",
-    "@prisma/client": "^5.14.0",
+    "@prisma/client": "^5.16.2",
     "@t3-oss/env-nextjs": "^0.10.1",
     "@tanstack/react-query": "^5.50.0",
     "@thatrundown/prisma": "*",
