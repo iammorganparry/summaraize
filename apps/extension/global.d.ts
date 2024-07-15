@@ -27,7 +27,7 @@ declare global {
     addEventListener<TMessage extends EventTypes[keyof EventTypes]>(
       type: TMessage,
       listener: (this: Element, ev: ElementEventMap[TMessage]) => void,
-      options?: boolean | AddEventListenerOptions
+      options?: boolean | AddEventListenerOptions,
     ): void;
   }
 }

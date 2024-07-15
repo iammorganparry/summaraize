@@ -37,16 +37,15 @@ export const ChatWithThatRundown = () => {
   });
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      api: `${getBaseUrl()}/api/chat`,
-      streamMode: "text",
-      // credentials: "same-origin",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    api: `${getBaseUrl()}/api/chat`,
+    streamMode: "text",
+    // credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,11 +89,7 @@ export const ChatWithThatRundown = () => {
           <>
             {reversedMessages.map((message) => (
               <Message
-                loading={
-                  isLoading &&
-                  message.role === "assistant" &&
-                  isMostRecentMessage(message, messages)
-                }
+                loading={isLoading && message.role === "assistant" && isMostRecentMessage(message, messages)}
                 key={message.id}
                 message={message.content}
                 type={message.role}
@@ -111,13 +106,7 @@ export const ChatWithThatRundown = () => {
               height: "100%",
             }}
           >
-            <StyledInput
-              inputRef={inputRef}
-              name="prompt"
-              value={input}
-              onChange={onChange}
-              id="input"
-            />
+            <StyledInput inputRef={inputRef} name="prompt" value={input} onChange={onChange} id="input" />
           </Box>
           <Box
             sx={{

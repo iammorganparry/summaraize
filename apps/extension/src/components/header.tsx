@@ -35,10 +35,7 @@ export const Header = ({
         }}
       >
         {showBackBtn && (
-          <OutlinedButton
-            startIcon={<ChevronLeft />}
-            onClick={() => navigate("/")}
-          >
+          <OutlinedButton startIcon={<ChevronLeft />} onClick={() => navigate("/")}>
             Back
           </OutlinedButton>
         )}

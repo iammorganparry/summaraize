@@ -3,11 +3,7 @@ import "@fontsource/public-sans/400.css";
 import "@fontsource/public-sans/500.css";
 import "@fontsource/public-sans/700.css";
 import { ClerkProvider } from "@clerk/chrome-extension";
-import type {
-  PlasmoCreateShadowRoot,
-  PlasmoCSConfig,
-  PlasmoMountShadowHost,
-} from "plasmo";
+import type { PlasmoCreateShadowRoot, PlasmoCSConfig, PlasmoMountShadowHost } from "plasmo";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 
 import { ThatRundownSheet } from "~views/summary/sheet";
@@ -43,16 +39,12 @@ export const getStyle: PlasmoGetStyle = () => styleElement;
  * @description Mount the shadow host and take a reference to the container so we can mount overlays etc in app
  */
 let container: Element | null = null;
-export const mountShadowHost: PlasmoMountShadowHost = ({
-  shadowHost,
-  anchor,
-}) => {
+export const mountShadowHost: PlasmoMountShadowHost = ({ shadowHost, anchor }) => {
   anchor?.element.appendChild(shadowHost);
   container = shadowHost;
 };
 
-export const createShadowRoot: PlasmoCreateShadowRoot = (shadowHost) =>
-  shadowHost.attachShadow({ mode: "open" });
+export const createShadowRoot: PlasmoCreateShadowRoot = (shadowHost) => shadowHost.attachShadow({ mode: "open" });
 
 function ThatRundownExtension() {
   const [open, setOpen] = useState(false);
@@ -82,12 +74,7 @@ function ThatRundownExtension() {
     >
       <TRPCReactProvider>
         <PusherProvider>
-          <ThatRundownSheet
-            shadowHost={container}
-            open={open}
-            onClose={handleClose}
-            onOpen={handleOpen}
-          />
+          <ThatRundownSheet shadowHost={container} open={open} onClose={handleClose} onOpen={handleOpen} />
         </PusherProvider>
       </TRPCReactProvider>
     </ClerkProvider>

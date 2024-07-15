@@ -20,7 +20,7 @@ export class OpenAiService {
 
   constructor(
     private ai: OpenAI,
-    private readonly logger: winston.Logger
+    private readonly logger: winston.Logger,
   ) {}
 
   get api() {
@@ -49,7 +49,7 @@ export class OpenAiService {
   public async summarize(
     videoMetaData: ytdl.MoreVideoDetails,
     transcription: string,
-    uploadedImages: UploadFileResult[]
+    uploadedImages: UploadFileResult[],
   ) {
     try {
       const response = await this.ai.chat.completions.create({

@@ -21,3 +21,13 @@ chrome.tabs.onUpdated.addListener(async (_, changeInfo, tab) => {
     console.warn("Error sending tab update", error);
   }
 });
+
+chrome.runtime.onInstalled.addListener(() => {
+  console.log("Extension installed 🚀");
+  // send to youtube.com
+  if (process.env.NODE_ENV !== "development") {
+    chrome.tabs.create({
+      url: "https://www.youtube.com/watch?v=UqWJ6uf8AGE&rundownState=onboarding",
+    });
+  }
+});

@@ -29,6 +29,7 @@
   "devDependencies": {
     "turbo": "^2.0.6"
   },
+  "packageManager": "yarn@1.22.22",
   "prisma": {
     "schema": "packages/prisma/schema.prisma"
   }

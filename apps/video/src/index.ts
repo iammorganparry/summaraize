@@ -35,7 +35,7 @@ app.use(
   "*",
   cors({
     origin: "*",
-  })
+  }),
 );
 
 app.use("/api/*", thatrundownServices);
@@ -48,7 +48,7 @@ app.use(
     createContext: (_opts, c) => {
       return createTRPCContext({ auth: getAuth(c), inngest });
     },
-  })
+  }),
 );
 
 app.get("/", (c) => {

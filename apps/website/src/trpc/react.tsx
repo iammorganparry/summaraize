@@ -63,7 +63,8 @@ export function TRPCReactProvider({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <api.Provider client={trpcClient} queryClient={queryClient}>
-        {children}
+        {/* biome-ignore lint/complexity/noUselessFragments: <explanation> */}
+        <>{children}</>
       </api.Provider>
     </QueryClientProvider>
   );

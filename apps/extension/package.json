@@ -21,6 +21,7 @@
     "@fontsource/fustat": "^5.0.1",
     "@fontsource/public-sans": "^5.0.18",
     "@mui/material": "^5.16.0",
+    "@mui/styles": "^5.16.1",
     "@plasmohq/messaging": "^0.6.2",
     "@plasmohq/storage": "^1.11.0",
     "@tanstack/react-query": "4.36.1",
@@ -44,6 +45,7 @@
     "react-dom": "18.3.1",
     "react-icons": "^5.2.1",
     "react-router-dom": "^6.24.1",
+    "react-shepherd": "^6.0.5",
     "sonner": "^1.5.0",
     "zod": "^3.23.8"
   },
@@ -61,13 +63,7 @@
     "vitest": "^2.0.2"
   },
   "manifest": {
-    "host_permissions": [
-      "https://*/*"
-    ],
-    "permissions": [
-      "cookies",
-      "storage",
-      "tabs"
-    ]
+    "host_permissions": ["https://*/*"],
+    "permissions": ["cookies", "storage", "tabs"]
   }
 }

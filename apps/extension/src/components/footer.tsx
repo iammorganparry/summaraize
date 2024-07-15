@@ -1,10 +1,5 @@
 import { Button, Card, styled, type ButtonProps, Tooltip } from "@mui/material";
-import {
-  Home01,
-  List,
-  MessageCircle01,
-  Settings01,
-} from "@untitled-ui/icons-react";
+import { Home01, List, MessageCircle01, Settings01 } from "@untitled-ui/icons-react";
 import { Link, useLocation } from "react-router-dom";
 import { Sizes } from "~views/summary/constants";
 

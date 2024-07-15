@@ -30,7 +30,5 @@ export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
   //   });
   // }, [channel]);
 
-  return (
-    <PusherContext.Provider value={channel}>{children}</PusherContext.Provider>
-  );
+  return <PusherContext.Provider value={channel}>{children}</PusherContext.Provider>;
 };

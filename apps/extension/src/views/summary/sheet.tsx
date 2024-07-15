@@ -26,13 +26,12 @@ export function ThatRundownSheet({
 }) {
   const location = useLocation();
 
-  const container = shadowHost?.shadowRoot?.querySelector(
-    Selectors.SHADOW_CONTAINER
-  );
+  const container = shadowHost?.shadowRoot?.querySelector(Selectors.SHADOW_CONTAINER);
 
   return (
     <>
       <Button
+        id="that-rundown-sheet-button"
         onClick={onOpen}
         variant="contained"
         color="primary"
@@ -66,8 +65,7 @@ export function ThatRundownSheet({
           sx: {
             width: Sizes.SLIDER_WIDTH,
             maxWidth: Sizes.SLIDER_WIDTH,
-            boxShadow: (theme) =>
-              open ? `"-12px 20px 0 0 ${theme.palette.common.black}"` : "none",
+            boxShadow: (theme) => (open ? `"-12px 20px 0 0 ${theme.palette.common.black}"` : "none"),
             borderLeft: (theme) => `4px solid ${theme.palette.common.white}`,
           },
         }}

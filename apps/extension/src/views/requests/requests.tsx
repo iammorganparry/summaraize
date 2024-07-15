@@ -1,11 +1,4 @@
-import {
-  Box,
-  Card,
-  CardActions,
-  CircularProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Card, CardActions, CircularProgress, Stack, Typography } from "@mui/material";
 import type { SummaryRequest } from "@thatrundown/prisma";
 import { Calendar } from "@untitled-ui/icons-react";
 import dayjs from "dayjs";
@@ -18,28 +11,23 @@ import { api } from "~lib/trpc/react";
 import { ListSkeleton } from "~views/summary/skeleton";
 
 export const RequestListPage = () => {
-  const {
-    data: requests,
-    isLoading,
-    refetch,
-  } = api.summary.getSummaryRequests.useQuery();
+  const { data: requests, isLoading, refetch } = api.summary.getSummaryRequests.useQuery();
 
-  const { mutateAsync: cancelRequest, isLoading: isDeleting } =
-    api.summary.cancelSummary.useMutation({
-      onSuccess: () => {
-        toast.success("Request cancelled successfully 👍");
-        refetch();
-      },
-      onError: () => {
-        toast.error("Failed to cancel request 😢");
-      },
-    });
+  const { mutateAsync: cancelRequest, isLoading: isDeleting } = api.summary.cancelSummary.useMutation({
+    onSuccess: () => {
+      toast.success("Request cancelled successfully 👍");
+      refetch();
+    },
+    onError: () => {
+      toast.error("Failed to cancel request 😢");
+    },
+  });
 
   const handleCancelRequest = useCallback(
     (request: SummaryRequest) => async () => {
       await cancelRequest({ requestId: request.id });
     },
-    [cancelRequest]
+    [cancelRequest],
   );
 
   if (isLoading) {
@@ -65,9 +53,7 @@ export const RequestListPage = () => {
               <SmallChip label={request.stage} />
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Calendar style={{ width: 12 }} />
-                <Typography variant="caption">
-                  {dayjs(request.created_at).format("MMM DD, YYYY")}
-                </Typography>
+                <Typography variant="caption">{dayjs(request.created_at).format("MMM DD, YYYY")}</Typography>
               </Box>
             </Box>
             <CardActions

@@ -10,7 +10,5 @@ export const ThatRundownThemeProvider = ({
 }) => {
   const systemTheme = getSystemTheme();
   const theme = createThatRundownTheme({}, systemTheme) ?? createTheme();
-  return (
-    <ThemeProvider theme={theme || createTheme()}>{children}</ThemeProvider>
-  );
+  return <ThemeProvider theme={theme || createTheme()}>{children}</ThemeProvider>;
 };

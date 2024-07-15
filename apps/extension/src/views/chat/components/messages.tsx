@@ -28,11 +28,7 @@ export const Message = ({
         sx={{ my: 1, borderRadius: 0, borderWidth: 2 }}
       />
       <CardContainer>
-        {message ? (
-          <Typography variant="body1">{message}</Typography>
-        ) : (
-          children
-        )}
+        {message ? <Typography variant="body1">{message}</Typography> : children}
         {loading ? <AnswerSkeleton /> : null}
       </CardContainer>
     </Box>
