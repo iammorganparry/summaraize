@@ -1,6 +1,3 @@
-import "shepherd.js/dist/css/shepherd.css";
-import "~lib/tour/styles.css";
-
 import { CacheProvider } from "@emotion/react";
 import {
   Box,
