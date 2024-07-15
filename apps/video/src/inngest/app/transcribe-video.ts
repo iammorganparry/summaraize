@@ -93,13 +93,13 @@ export const _transcribeVideo = async ({
       embeddings,
     });
 
+    await services.xata.updateSummaryRequest(summaryRequestId, {
+      stage: SummaryStage.DONE,
+    });
+
     await services.pusher.sendToUser(userId, PusherEvents.SummaryCompleted, {
       summaryRequestId,
       videoUrl: summary.videoUrl,
-    });
-
-    await services.xata.updateSummaryRequest(summaryRequestId, {
-      stage: SummaryStage.DONE,
     });
   });
 

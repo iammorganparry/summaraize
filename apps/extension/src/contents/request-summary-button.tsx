@@ -46,12 +46,14 @@ export const getStyle: PlasmoGetStyle = () => styleElement;
 
 const MAX_VIDEO_LENGTH_IN_MINUTES = 15; // TODO: should be server side
 
+const initState = {
+  progress: 0,
+  requested: false,
+  videoToLong: false,
+};
+
 function RequestSummaryButton() {
-  const [{ requested, videoToLong, progress }, setState] = useState({
-    progress: 0,
-    requested: false,
-    videoToLong: false,
-  });
+  const [{ requested, videoToLong, progress }, setState] = useState(initState);
 
   const { data: token } = useGetAuthToken();
 
@@ -199,11 +201,7 @@ function RequestSummaryButton() {
   };
 
   const resetState = useCallback(async () => {
-    setState({
-      progress: 0,
-      requested: false,
-      videoToLong: true,
-    });
+    setState(initState);
     await refetch();
     await refetchSummaryRequest();
   }, [refetch, refetchSummaryRequest]);
@@ -237,14 +235,9 @@ function RequestSummaryButton() {
     [refresh]
   );
 
-  const handleSummaryStep = useCallback(
-    (data: { step: SummaryStage; videoId: string }) => {
-      if (data.videoId === getYoutuveVideoId(window.location.href)) {
-        refresh();
-      }
-    },
-    [refresh]
-  );
+  const handleSummaryStep = useCallback(() => {
+    refresh();
+  }, [refresh]);
 
   const handleNavigateToSummary = () => {
     if (!summary?.video_url) {
