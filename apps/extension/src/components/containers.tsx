@@ -16,13 +16,21 @@ const Container = styled(Box)(({ theme }) => ({
   "& > *": {
     marginBottom: theme.spacing(2),
   },
+  "& a": {
+    color: theme.palette.info.main,
+  },
 }));
 
 export const RouteContainer = ({ children }: { children: React.ReactNode }) => {
   return (
     <AnimatePresence>
       <Container>
-        <motion.div variants={routeVariants} initial="initial" animate="final" style={{ height: "100%" }}>
+        <motion.div
+          variants={routeVariants}
+          initial="initial"
+          animate="final"
+          style={{ height: "100%" }}
+        >
           {children}
         </motion.div>
       </Container>

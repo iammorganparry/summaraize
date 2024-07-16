@@ -251,9 +251,20 @@ function RequestSummaryButton() {
     openFlyout(`/summary/${encodeURIComponent(summary?.video_url)}`);
   };
 
+  const handleErrorsFromWS = useCallback(
+    (data: { error: string; videoId: string }) => {
+      if (data.videoId === getYoutuveVideoId(window.location.href)) {
+        createToastMessage(data.error, "error");
+        resetState();
+      }
+    },
+    [resetState]
+  );
+
   useWebsocketEvents({
     onSummaryStep: handleSummaryStep,
-    onSummaryCompleted: refresh,
+    onSummaryCompleted: handleSummaryStep,
+    onSummaryError: handleErrorsFromWS,
     onSummaryProgress: setProgressFromWS,
   });
 

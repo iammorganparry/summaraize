@@ -11,6 +11,7 @@ export enum PusherEvents {
   SummaryProgressVideo = "summary.progress.video",
   SummaryProgressAudio = "summary.progress.audio",
   SummaryStep = "summary.step",
+  SummaryError = "summary.error",
 }
 
 let pusherSingleton: PusherServer | null = null;

@@ -118,7 +118,7 @@ export const transcribeVideo = inngest.createFunction(
     name: "Transcribe Video",
     retries: 3,
     throttle: {
-      limit: process.env.NODE_ENV !== "development" ? 3 : 10,
+      limit: process.env.NODE_ENV !== "development" ? 5 : 10,
       period: "30s",
     },
     concurrency: {
@@ -128,7 +128,15 @@ export const transcribeVideo = inngest.createFunction(
     },
     onFailure: async ({ services, event, logger }) => {
       const { event: originalEvent } = event.data;
-      logger.error("Failed to transcribe video", event.data.error);
+      logger.error("Failed to get that rundown", event.data.error);
+      await services.pusher.sendToUser(
+        originalEvent.data.userId,
+        PusherEvents.SummaryError,
+        {
+          error: `Failed to get that rundown.. ${event.data.error.message}`,
+          videoId: originalEvent.data.videoId,
+        }
+      );
       await services.video.cleanup({
         userId: originalEvent.data.userId,
       });

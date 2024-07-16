@@ -8,7 +8,9 @@ export const useWebsocketEvents = ({
   onSummaryProgress,
   onSummaryCompleted,
   onSummaryStep,
+  onSummaryError,
 }: {
+  onSummaryError: (data: { error: string; videoId: string }) => void;
   onSummaryProgress: (data: { progress: number; videoId: string }) => void;
   onSummaryCompleted: () => void;
   onSummaryStep: (data: { step: SummaryStage; videoId: string }) => void;
@@ -32,5 +34,12 @@ export const useWebsocketEvents = ({
     channel?.bind("summary.step", onSummaryStep);
     channel?.bind("summary.progress.video", onSummaryProgress);
     channel?.bind("summary.completed", onSummaryCompleted);
-  }, [onSummaryProgress, onSummaryCompleted, channel, onSummaryStep]);
+    channel?.bind("summary.error", onSummaryError);
+  }, [
+    onSummaryProgress,
+    onSummaryCompleted,
+    channel,
+    onSummaryStep,
+    onSummaryError,
+  ]);
 };
