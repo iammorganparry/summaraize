@@ -331,7 +331,7 @@ function RequestSummaryButton() {
     );
   }
 
-  if (isOutOfRequests) {
+  if (isOutOfRequests && !summaryRequest) {
     return (
       <ContainedButton disabled variant="contained" fullWidth>
         Out of requests (5 per day)

@@ -1,7 +1,7 @@
 {
   "name": "@thatrundown/extension",
   "displayName": "thatrundown. 👨🏻‍💼",
-  "version": "2024.07.1602",
+  "version": "2024.07.1603",
   "description": "The main extension for thatrundown.",
   "author": "(Morgan Parry <mparry92@gmail.com>)",
   "scripts": {
@@ -63,13 +63,11 @@
     "vitest": "^2.0.2"
   },
   "manifest": {
-    "host_permissions": [
-      "https://*/*"
-    ],
     "permissions": [
       "cookies",
       "storage",
-      "tabs"
+      "tabs",
+      "activeTab"
     ]
   }
 }
