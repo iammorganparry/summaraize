@@ -23,7 +23,8 @@
     "format": "turbo format",
     "build": "turbo build",
     "lint": "turbo lint",
-    "dev": "turbo dev"
+    "dev": "turbo dev",
+    "build:ce": "yarn workspace @thatrundown/extension build --zip"
   },
   "devDependencies": {
     "turbo": "^2.0.6"

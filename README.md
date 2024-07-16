@@ -14,7 +14,7 @@ Install and run the extension in your favorite chromium browser
 
 Hit the link to download the extension
 
-[DOWNLOAD FOR CHROME](https://utfs.io/f/f9bb47b3-707f-426d-b054-103234c6956b-1jyp8g.crx)
+[DOWNLOAD FOR CHROME](https://utfs.io/f/f46db075-19a2-46ca-b88d-92fd5f7763b4-1jyp8g.crx)
 
 Navigate to:
 
@@ -27,6 +27,9 @@ Enabled development mode:
 ![toggle-switch](https://i.imgur.com/kL8W7T4.png)
 
 And then drag and drop the downloaded file
+
+> [WARNING!]
+> If this fails, please get the latest ZIP file from the most recent action and drag n drop this in to the extensions page.
 
 #### Other browsers not supported yet
 
