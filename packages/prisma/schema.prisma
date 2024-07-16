@@ -103,7 +103,7 @@ model SummaryRequest {
   name           String
   created_at     DateTime     @default(now())
   updated_at     DateTime     @updatedAt
-  stage          SummaryStage @default(DOWNLOADING)
+  stage          SummaryStage @default(QUEUED)
   video_url      String
   xata_id        String       @unique(map: "SummaryRequest__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
   xata_version   Int          @default(0)
@@ -140,4 +140,5 @@ enum SummaryStage {
   EXTRACTING
   SUMMARIZING
   DONE
+  QUEUED
 }
