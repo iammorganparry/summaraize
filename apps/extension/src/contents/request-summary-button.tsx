@@ -2,10 +2,16 @@ import { CacheProvider } from "@emotion/react";
 import { CircularProgress, Tooltip } from "@mui/material";
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo";
 import createCache from "@emotion/cache";
-import { AlertCircle, Eye, Stars01, XClose } from "@untitled-ui/icons-react";
+import {
+  AlertCircle,
+  Eye,
+  LinkExternal02,
+  Stars01,
+  XClose,
+} from "@untitled-ui/icons-react";
 import { removeExtraParams } from "~utils";
 import { createToastMessage, openFlyout } from "~api/messages";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useObserver } from "~lib/hooks/useObserver";
 import { getYoutuveVideoId } from "~lib/utils";
 import { client } from "~lib/trpc/vanilla-client";
@@ -39,6 +45,8 @@ const styleCache = createCache({
   container: styleElement,
 });
 
+const queryClient = createQueryClient();
+
 export const getShadowHostId = () => "thatrundown-request-summary-button";
 
 export const getStyle: PlasmoGetStyle = () => styleElement;
@@ -49,14 +57,27 @@ const initState = {
   progress: 0,
   requested: false,
   videoToLong: false,
+  token: null as string | null | undefined,
 };
 
 function RequestSummaryButton() {
-  const [{ requested, videoToLong, progress }, setState] = useState(initState);
+  const [{ requested, videoToLong, progress, token }, setState] =
+    useState(initState);
 
-  const { data: token } = useGetAuthToken();
+  const handleTokenState = useCallback((token?: string | null) => {
+    setState((prev) => ({
+      ...prev,
+      token,
+    }));
+  }, []);
 
-  const { data: user } = useGetUser({ disabled: !token });
+  useGetAuthToken({
+    onTokenFetch: handleTokenState,
+  });
+
+  const { data: user, isFetching: isUserFetching } = useGetUser({
+    disabled: !token,
+  });
 
   const isOutOfRequests = user?.requestsRemaining === 0;
 
@@ -250,6 +271,9 @@ function RequestSummaryButton() {
     }
     openFlyout(`/summary/${encodeURIComponent(summary?.video_url)}`);
   };
+  const handleOpenFlyout = () => {
+    openFlyout("/");
+  };
 
   const handleErrorsFromWS = useCallback(
     (data: { error: string; videoId: string }) => {
@@ -261,12 +285,35 @@ function RequestSummaryButton() {
     [resetState]
   );
 
+  const handleSignOut = useCallback(async () => {
+    console.log("Sign out");
+    setState(initState);
+  }, []);
+
   useWebsocketEvents({
     onSummaryStep: handleSummaryStep,
     onSummaryCompleted: handleSummaryStep,
     onSummaryError: handleErrorsFromWS,
     onSummaryProgress: setProgressFromWS,
   });
+
+  useEffect(() => {
+    window.addEventListener("thatrundown.signout", handleSignOut);
+  }, [handleSignOut]);
+
+  if (!token) {
+    return (
+      <OutlinedButton
+        disabled={isUserFetching}
+        variant="outlined"
+        endIcon={<LinkExternal02 style={{ width: 14 }} />}
+        fullWidth
+        onClick={handleOpenFlyout}
+      >
+        Log in to thatrundown.
+      </OutlinedButton>
+    );
+  }
 
   if (summary || summaryRequest?.stage === "DONE") {
     return (
@@ -368,7 +415,6 @@ function RequestSummaryButton() {
 }
 
 export default function RequestButton() {
-  const [queryClient] = useState(createQueryClient());
   return (
     <QueryClientProvider client={queryClient}>
       <CacheProvider value={styleCache}>

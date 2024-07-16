@@ -19,6 +19,10 @@ import { useEffect, useState } from "react";
 import { tourSteps } from "~lib/tour/steps";
 import { Selectors } from "~views/summary/constants";
 import { getSystemTheme } from "~utils";
+import { useGetUser } from "~lib/hooks/useGetUser";
+import { useGetAuthToken } from "~lib/hooks/useGetAuthToken";
+import { createQueryClient } from "~lib/trpc/query-client";
+import { QueryClientProvider } from "@tanstack/react-query";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://youtube.com/*", "https://www.youtube.com/*"],
@@ -161,18 +165,21 @@ export const mountShadowHost: PlasmoMountShadowHost = ({
   container = shadowHost;
 };
 
-export default function OnboardingModal() {
+function OnboardingModal() {
   const [open, setOpen] = useState(false);
+
+  const { data: token } = useGetAuthToken();
+  const { data: user } = useGetUser({ disabled: !token });
 
   const c = container?.shadowRoot?.querySelector(Selectors.SHADOW_CONTAINER);
 
   useEffect(() => {
     const open = localStorage.getItem("thatrundown-demo-done");
     console.log("GOT STATE", open);
-    if (!open) {
+    if (!open && user) {
       setOpen(true);
     }
-  }, []);
+  }, [user]);
 
   return (
     <CacheProvider value={styleCache}>
@@ -213,5 +220,15 @@ export default function OnboardingModal() {
         </Box>
       </ThatRundownThemeProvider>
     </CacheProvider>
+  );
+}
+
+export default function Onboarding() {
+  const [queryClient] = useState(createQueryClient());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <OnboardingModal />
+    </QueryClientProvider>
   );
 }

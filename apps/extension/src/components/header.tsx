@@ -3,7 +3,7 @@ import { UserProfile } from "./user-profile";
 import { ChevronLeft } from "@untitled-ui/icons-react";
 import { useNavigate } from "react-router-dom";
 import { OutlinedButton } from "./buttons/outlined";
-import { useAuth, useUser } from "@clerk/chrome-extension";
+import { useAuth } from "@clerk/chrome-extension";
 
 export const Header = ({
   title,
@@ -14,6 +14,13 @@ export const Header = ({
 }) => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+
+  const handleSignout = async () => {
+    const signoutEvent = new CustomEvent("thatrundown.signout");
+    window.dispatchEvent(signoutEvent);
+    signOut();
+  };
+
   // Call the goBack method to go back to the previous page
   return (
     <Box
@@ -35,12 +42,15 @@ export const Header = ({
         }}
       >
         {showBackBtn && (
-          <OutlinedButton startIcon={<ChevronLeft />} onClick={() => navigate("/")}>
+          <OutlinedButton
+            startIcon={<ChevronLeft />}
+            onClick={() => navigate("/")}
+          >
             Back
           </OutlinedButton>
         )}
         <UserProfile />
-        <OutlinedButton onClick={() => signOut()}>Sign Out</OutlinedButton>
+        <OutlinedButton onClick={handleSignout}>Sign Out</OutlinedButton>
       </Box>
       <Typography
         variant="h3"
