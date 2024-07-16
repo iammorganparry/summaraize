@@ -28,8 +28,9 @@ Enabled development mode:
 
 And then drag and drop the downloaded file
 
-> [WARNING!]
+> [!WARNING]
 > If this fails, please get the latest ZIP file from the most recent action and drag n drop this in to the extensions page.
+> [Found here](https://github.com/iammorganparry/thatrundown/actions)
 
 #### Other browsers not supported yet
 
