@@ -150,30 +150,31 @@ export class VideoService {
   }
 
   public async createFilesFromYoutubeUrl(
-    url: string,
+    videoId: string,
     userId: string
   ): Promise<{
     outputFilePath: string;
     audioFilePath: string;
     videoMetaData: ytdl.MoreVideoDetails;
   }> {
-    const id = url.split("v=").pop() || url.split("/").pop();
+    // make sure the videoId is valid
+    const validId = this.youtube.validateID(videoId);
 
-    if (!id) {
-      this.logger.error("Failed to extract video id from URL:", { url });
+    if (!validId) {
+      this.logger.error("Failed to extract video id from URL:", { videoId });
       throw new Error(
-        `[VideoService] Failed to extract video id from URL, invalid URL: ${url}. Please provide a valid URL. Example: https://youtu.be/221F55VPp2M or https://www.youtube.com/watch?v=221F55VPp2M`
+        `[VideoService] Failed to extract video id from URL, invalid videoId: ${videoId}. Please provide a valid URL. Example: https://youtu.be/221F55VPp2M or https://www.youtube.com/watch?v=221F55VPp2M`
       );
     }
 
-    this.logger.info("Fetching video info:", { id });
+    this.logger.info("Fetching video info:", { videoId });
 
     // const resp = await this.getInfo(id).catch((error: Error) => {
     //   this.logger.error("Failed to fetch file:", { error });
     //   throw new Error(`[VideoService] Failed to fetch file: ${error.message}`);
     // })
 
-    const resp = await this.youtube.getInfo(id).catch((error: Error) => {
+    const resp = await this.youtube.getInfo(videoId).catch((error: Error) => {
       this.logger.error("Failed to fetch file:", { error });
       throw new Error(`[VideoService] Failed to fetch file: ${error.message}`);
     });

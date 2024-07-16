@@ -23,7 +23,7 @@ export const _transcribeVideo = async ({
   const { audioFilePath, outputFilePath, videoMetaData } = await step.run(
     "download-audio-video-file",
     async () => {
-      return await services.video.createFilesFromYoutubeUrl(src, userId);
+      return await services.video.createFilesFromYoutubeUrl(videoId, userId);
     }
   );
 
