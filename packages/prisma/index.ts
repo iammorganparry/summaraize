@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 
 export * from "@prisma/client";
 
+const MAX_REQUESTS = 5; // TODO: long term this is driven via user plan
+
 const getPrismaSingleton = () => {
   return new InternalPrismaClient({
     log:
@@ -21,7 +23,7 @@ const getPrismaSingleton = () => {
               },
             },
           });
-          return Math.max(0, 20 - count);
+          return Math.max(0, MAX_REQUESTS - count);
         },
       },
     },

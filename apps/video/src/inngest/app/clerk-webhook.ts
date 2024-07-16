@@ -23,7 +23,7 @@ export const syncUser = inngest.createFunction(
     }
 
     if (event.name === "clerk/user.created") {
-      const summaryId = "";
+      const summaryId = "rec_cqb0phdqrj62qa0f6b2g";
       const preSeedSummary = await services.prisma.summary.findUniqueOrThrow({
         where: {
           id: summaryId,
