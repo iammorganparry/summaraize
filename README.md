@@ -14,7 +14,7 @@ Install and run the extension in your favorite chromium browser
 
 Hit the link to download the extension
 
-[DOWNLOAD FOR CHROME](https://utfs.io/f/dd2c6c4d-c242-45a6-b397-3e3aad04c2c6-1jyp8g.crx)
+[DOWNLOAD FOR CHROME](https://utfs.io/f/f9bb47b3-707f-426d-b054-103234c6956b-1jyp8g.crx)
 
 Navigate to:
 
