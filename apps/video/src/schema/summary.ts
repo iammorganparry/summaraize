@@ -24,11 +24,6 @@ export const SummarySchema = z.object({
     })
   ).describe(`The chapters of the video.. heres is an example of chapters: \n
     The chapters should be formatted as follows: (timestamp) Chapter title: Chapter content \n
-    Example: \n
-    - Chapters -
-    (0:00) This is a chapter
-    (0:20) This is another chapter
-    (1:52) This is another chapter \n
     These are examples of chapters that you can create for the video. 
     The chapters should be based on the content of the video and should be formatted as follows: (timestamp) Chapter title: Chapter content and should adhere strictly to the duration of the video.
     `),

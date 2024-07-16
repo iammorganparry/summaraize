@@ -20,7 +20,7 @@ export class OpenAiService {
 
   constructor(
     private ai: OpenAI,
-    private readonly logger: winston.Logger,
+    private readonly logger: winston.Logger
   ) {}
 
   get api() {
@@ -49,7 +49,7 @@ export class OpenAiService {
   public async summarize(
     videoMetaData: ytdl.MoreVideoDetails,
     transcription: string,
-    uploadedImages: UploadFileResult[],
+    uploadedImages: UploadFileResult[]
   ) {
     try {
       const response = await this.ai.chat.completions.create({
@@ -59,9 +59,10 @@ export class OpenAiService {
         messages: [
           {
             role: "system",
-            content: `You are a helpful assistant that summarizes and creates chapters of a video from a transcription and image frames. Please summarize who is in the video, what they are doing, who is talking to who, and any other important details. Then create chapters that align to the events in the video.\
+            content: `You are a helpful assistant that summarizes and creates chapters of a video from a transcription and image frames. Please summarize who is in the video, what they are doing, who is talking to who, and any other important details. 
+                Then create chapters that align to the events in the video.\
                 The summary should include the video information, transcription, and any images that were uploaded and any relevant timestamps. \n
-                You must return the summary in a json format. Please refer to the required format below. When creating the html summary.. including any newlines, bullet points, or other formatting that you think would be helpful for the user to understand the video.
+                You must return the summary in a json format. Please refer to the required format below. \n
                 output the message in the following format: ${printNode(zodToTs(SummarySchema).node)} \n
                 you must at all times generate a html formatted summary that adheres to the provided format. with no markdown formatting at all. \n
                  \n`,

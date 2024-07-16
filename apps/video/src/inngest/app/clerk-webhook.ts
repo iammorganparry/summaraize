@@ -7,11 +7,52 @@ export const syncUser = inngest.createFunction(
     // The event payload's data will be the Clerk User json object
     logger.info("Syncing user from Clerk", event.data);
 
-    const { id, first_name, last_name, email_addresses, primary_email_address_id } = event.data;
-    const email = email_addresses?.find((e) => e.id === primary_email_address_id)?.email_address;
+    const {
+      id,
+      first_name,
+      last_name,
+      email_addresses,
+      primary_email_address_id,
+    } = event.data;
+    const email = email_addresses?.find(
+      (e) => e.id === primary_email_address_id
+    )?.email_address;
 
     if (!email) {
       throw new Error(`No email found for user: ${id}`);
+    }
+
+    if (event.name === "clerk/user.created") {
+      const summaryId = "";
+      const preSeedSummary = await services.prisma.summary.findUniqueOrThrow({
+        where: {
+          id: summaryId,
+        },
+        include: {
+          video: true,
+          Vectors: true,
+        },
+      });
+      const videoId = preSeedSummary?.video?.id;
+      const vectorId = preSeedSummary?.Vectors?.id;
+      if (!videoId || !vectorId) {
+        throw new Error(
+          `Failed to find video or vector for pre-seeding summary: ${summaryId}`
+        );
+      }
+      // pre seed the user
+      await services.prisma.summary.create({
+        data: {
+          name: preSeedSummary.name,
+          summary: preSeedSummary.summary,
+          summary_html_formatted: preSeedSummary.summary_html_formatted,
+          transcription: preSeedSummary.transcription,
+          video_url: preSeedSummary.video_url,
+          video_id: videoId,
+          vectorsId: vectorId,
+          user_id: id,
+        },
+      });
     }
 
     return await services.prisma.user.upsert({
@@ -26,7 +67,7 @@ export const syncUser = inngest.createFunction(
         email: email,
       },
     });
-  },
+  }
 );
 
 export const deleteUser = inngest.createFunction(
@@ -41,5 +82,5 @@ export const deleteUser = inngest.createFunction(
     return await services.prisma.user.delete({
       where: { id: id },
     });
-  },
+  }
 );
