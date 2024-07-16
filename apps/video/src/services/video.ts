@@ -166,6 +166,8 @@ export class VideoService {
       );
     }
 
+    this.logger.info("Fetching video info:", { id });
+
     // const resp = await this.getInfo(id).catch((error: Error) => {
     //   this.logger.error("Failed to fetch file:", { error });
     //   throw new Error(`[VideoService] Failed to fetch file: ${error.message}`);
