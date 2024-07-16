@@ -22,39 +22,6 @@ export const syncUser = inngest.createFunction(
       throw new Error(`No email found for user: ${id}`);
     }
 
-    if (event.name === "clerk/user.created") {
-      const summaryId = "rec_cqb0phdqrj62qa0f6b2g";
-      const preSeedSummary = await services.prisma.summary.findUniqueOrThrow({
-        where: {
-          id: summaryId,
-        },
-        include: {
-          video: true,
-          Vectors: true,
-        },
-      });
-      const videoId = preSeedSummary?.video?.id;
-      const vectorId = preSeedSummary?.Vectors?.id;
-      if (!videoId || !vectorId) {
-        throw new Error(
-          `Failed to find video or vector for pre-seeding summary: ${summaryId}`
-        );
-      }
-      // pre seed the user
-      await services.prisma.summary.create({
-        data: {
-          name: preSeedSummary.name,
-          summary: preSeedSummary.summary,
-          summary_html_formatted: preSeedSummary.summary_html_formatted,
-          transcription: preSeedSummary.transcription,
-          video_url: preSeedSummary.video_url,
-          video_id: videoId,
-          vectorsId: vectorId,
-          user_id: id,
-        },
-      });
-    }
-
     return await services.prisma.user.upsert({
       where: { id: id },
       update: {
