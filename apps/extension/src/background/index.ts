@@ -2,7 +2,11 @@
  * @description Handles sending tab updates to the content scripts
  */
 console.log("Background script running 🚀");
+
 chrome.tabs.onUpdated.addListener(async (_, changeInfo, tab) => {
+  if (chrome.runtime.lastError) {
+    console.log("error: ", chrome.runtime.lastError); // These are dumb
+  }
   try {
     if (changeInfo.url) {
       // only send to active tab
@@ -18,7 +22,7 @@ chrome.tabs.onUpdated.addListener(async (_, changeInfo, tab) => {
     }
   } catch (error) {
     // silence the error as its usually just an inactive connection to a tab
-    console.warn("Error sending tab update", error);
+    console.log("Error sending tab update", error);
   }
 });
 

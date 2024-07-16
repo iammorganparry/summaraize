@@ -6,6 +6,7 @@ import { SummarySchema } from "../schema/summary";
 import type { OpenAIError } from "openai/error.mjs";
 import type winston from "winston";
 import fs from "node:fs";
+import type { VideoDetails } from "../types/youtube";
 
 export const getOpenAI = () =>
   new OpenAI({
@@ -47,7 +48,7 @@ export class OpenAiService {
   }
 
   public async summarize(
-    videoMetaData: ytdl.MoreVideoDetails,
+    videoMetaData: VideoDetails,
     transcription: string,
     uploadedImages: UploadFileResult[]
   ) {
@@ -74,7 +75,7 @@ export class OpenAiService {
                 type: "text",
                 text: `Here is the video information: 
               Title: ${videoMetaData.title}
-              Description: ${videoMetaData.description}
+              Description: ${videoMetaData.shortDescription}
               Channel: ${videoMetaData.author}
               Duration: ${videoMetaData.lengthSeconds}
               `,

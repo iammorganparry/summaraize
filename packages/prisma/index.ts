@@ -21,7 +21,7 @@ const getPrismaSingleton = () => {
               },
             },
           });
-          return Math.max(0, 5 - count);
+          return Math.max(0, 20 - count);
         },
       },
     },

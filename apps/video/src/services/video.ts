@@ -4,11 +4,17 @@ import type Ffmpeg from "fluent-ffmpeg";
 import type ytdl from "@distube/ytdl-core";
 import progress from "progress-stream";
 import path from "node:path";
-import type { AdaptiveFormat, YoutubeVideoResponse } from "../types/youtube";
-import type { downloadOptions } from "@distube/ytdl-core";
+import type {
+  AdaptiveFormat,
+  VideoDetails,
+  YoutubeVideoResponse,
+} from "../types/youtube";
+import { getVideoID, type downloadOptions } from "@distube/ytdl-core";
 import type Pusher from "pusher";
 import type { PrismaClient } from "@thatrundown/prisma";
 import { PusherEvents } from "@thatrundown/pusher";
+import { Readable } from "node:stream";
+
 export class VideoService {
   private videoFilePath: string;
   private audioFilePath: string;
@@ -43,24 +49,24 @@ export class VideoService {
   }
 
   public async getItemFromYoutube(
-    info: ytdl.videoInfo,
-    format: downloadOptions["format"],
+    data: AdaptiveFormat,
+    url: string,
     outputFilePath: string,
     userId: string,
     isAudio = false
   ): Promise<{ outputFilePath: string }> {
     // if the file already exists, return the path
-    this.logger.info("Format chosen:", { format });
+    // this.logger.info("Format chosen:", { format });
 
-    if (!format?.approxDurationMs) {
-      this.logger.error("Failed to get target duration:", { info });
+    if (!data?.approxDurationMs) {
+      this.logger.error("Failed to get target duration:", { data });
       throw new Error(
-        `[VideoService] Failed to get target duration from format: ${JSON.stringify(format)}`
+        `[VideoService] Failed to get target duration from format: ${JSON.stringify(data)}`
       );
     }
 
     const progressStream = progress({
-      length: Number.parseInt(format.contentLength),
+      length: Number.parseInt(data.contentLength),
       time: 1000,
     });
 
@@ -71,21 +77,23 @@ export class VideoService {
         : PusherEvents.SummaryProgressVideo;
       await this.socket.trigger(`private-${userId}`, eventToUse, {
         progress: progress.percentage,
-        videoId: info.videoDetails.videoId,
+        videoId: getVideoID(url),
       });
     });
     const writeStream = fs.createWriteStream(outputFilePath);
 
-    const command = this.youtube
-      .downloadFromInfo(info, {
-        format,
-      })
+    const response = await fetch(data.url);
+    if (!response.ok) throw new Error("Response is not ok.");
+    if (!response.body) throw new Error("Response body is empty.");
+
+    // @ts-expect-error - body is fine
+    const readable = Readable.fromWeb(response.body)
       .pipe(progressStream)
       .pipe(writeStream);
 
     return await new Promise((resolve, reject) => {
-      command.on("finish", () => resolve({ outputFilePath }));
-      command.on("error", reject);
+      readable.on("finish", () => resolve({ outputFilePath }));
+      readable.on("error", reject);
     });
   }
 
@@ -149,13 +157,24 @@ export class VideoService {
     });
   }
 
+  private findSuitableAudioFormat(
+    formats: AdaptiveFormat[]
+  ): AdaptiveFormat | undefined {
+    return formats.find(
+      (f) =>
+        f.mimeType.includes("audio/mp4") &&
+        f.audioQuality === "AUDIO_QUALITY_MEDIUM"
+    );
+  }
+
   public async createFilesFromYoutubeUrl(
     videoId: string,
+    url: string,
     userId: string
   ): Promise<{
     outputFilePath: string;
     audioFilePath: string;
-    videoMetaData: ytdl.MoreVideoDetails;
+    videoMetaData: VideoDetails;
   }> {
     // make sure the videoId is valid
     const validId = this.youtube.validateID(videoId);
@@ -169,36 +188,39 @@ export class VideoService {
 
     this.logger.info("Fetching video info:", { videoId });
 
-    // const resp = await this.getInfo(id).catch((error: Error) => {
-    //   this.logger.error("Failed to fetch file:", { error });
-    //   throw new Error(`[VideoService] Failed to fetch file: ${error.message}`);
-    // })
-
-    const resp = await this.youtube.getInfo(videoId).catch((error: Error) => {
+    const resp = await this.getInfo(videoId).catch((error: Error) => {
       this.logger.error("Failed to fetch file:", { error });
       throw new Error(`[VideoService] Failed to fetch file: ${error.message}`);
     });
-
-    const videoFormat = this.youtube.chooseFormat(resp.formats, {
-      filter: "videoonly",
-      quality: "highestvideo",
-    });
-
-    const audioFormat = this.youtube.chooseFormat(resp.formats, {
-      filter: "audioonly",
-      quality: "highestaudio",
-    });
+    const videoData = this.findSuitableVideoFormat(
+      resp.streamingData.adaptiveFormats
+    );
+    const audioData = this.findSuitableAudioFormat(
+      resp.streamingData.adaptiveFormats
+    );
+    this.logger.info("Video & Audio data:", { videoData, audioData });
+    if (!videoData || !audioData) {
+      this.logger.error("Failed to get video/audio data:", {
+        videoData,
+        audioData,
+      });
+      throw new Error(
+        `[VideoService] Failed to get video/audio data from youtube response: ${JSON.stringify(
+          resp
+        )}`
+      );
+    }
 
     // create the users directory
     fs.mkdirSync(userId, { recursive: true });
 
     const outputFilePath = path.join(
       userId,
-      `video_${this.sanitizeFileName(resp.videoDetails.title)}.${videoFormat.container}`
+      `video_${this.sanitizeFileName(resp.videoDetails.title)}.mp4`
     );
     const audioFilePath = path.join(
       userId,
-      `audio_${this.sanitizeFileName(resp.videoDetails.title)}.${audioFormat.container}`
+      `audio_${this.sanitizeFileName(resp.videoDetails.title)}.mp3`
     );
 
     this.videoFilePath = outputFilePath;
@@ -215,16 +237,9 @@ export class VideoService {
 
     const [{ outputFilePath: video }, { outputFilePath: audio }] =
       await Promise.all([
-        this.getItemFromYoutube(
-          resp,
-          videoFormat,
-          outputFilePath,
-          userId,
-          false
-        ),
-        this.getItemFromYoutube(resp, audioFormat, audioFilePath, userId, true),
+        this.getItemFromYoutube(videoData, url, outputFilePath, userId, true),
+        this.getItemFromYoutube(audioData, url, audioFilePath, userId, false),
       ]);
-
     return {
       outputFilePath: video,
       audioFilePath: audio,

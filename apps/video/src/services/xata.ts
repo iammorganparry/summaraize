@@ -8,12 +8,13 @@ import { PrismaVectorStore } from "@langchain/community/vectorstores/prisma";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { Prisma } from "@prisma/client";
 import type { PrismaClient } from "@thatrundown/prisma";
+import type { VideoDetails } from "../types/youtube";
 
 export class XataService {
   constructor(
     private readonly client: XataClient,
     private readonly db: PrismaClient,
-    private readonly logger: winston.Logger,
+    private readonly logger: winston.Logger
   ) {}
 
   get api() {
@@ -68,16 +69,22 @@ export class XataService {
       const err = error as AskTableError;
       if (err.status === 400 || err.status === 404) {
         return {
-          answer: "I couldn't answer your question. Please try again later or ask a different question. 😔",
+          answer:
+            "I couldn't answer your question. Please try again later or ask a different question. 😔",
           records: [],
         } satisfies AskResult;
       }
 
-      throw new Error(`[XataService] Failed to get summary from Xata: ${error}`);
+      throw new Error(
+        `[XataService] Failed to get summary from Xata: ${error}`
+      );
     }
   }
 
-  public async updateSummaryRequest(id: string, update: Prisma.SummaryRequestUpdateInput) {
+  public async updateSummaryRequest(
+    id: string,
+    update: Prisma.SummaryRequestUpdateInput
+  ) {
     return await this.db.summaryRequest.update({
       where: {
         id,
@@ -98,13 +105,13 @@ export class XataService {
     summary: z.infer<typeof SummarySchema>;
     videoUrl: string;
     transcription: string;
-    videoMetaData: ytdl.MoreVideoDetails;
+    videoMetaData: VideoDetails;
     embeddings: number[];
   }) {
     try {
       const content = `${transcription} \n ${summary.summary}`;
 
-      return await this.db.$transaction(async (tx) => {
+      const created = await this.db.$transaction(async (tx) => {
         const video = await tx.video.upsert({
           where: {
             url: videoUrl,
@@ -114,19 +121,19 @@ export class XataService {
             data_raw: JSON.stringify(videoMetaData),
             name: videoMetaData.title,
             duration: videoMetaData.lengthSeconds,
-            thumbnail: videoMetaData.thumbnails[0]?.url,
+            thumbnail: videoMetaData.thumbnail.thumbnails[0].url,
             url: videoUrl,
             user_id: userId,
             views: videoMetaData.viewCount,
             authors: {
               connectOrCreate: {
                 where: {
-                  channel_url: videoMetaData.author.channel_url,
+                  channel_url: videoMetaData.channelId,
                 },
                 create: {
-                  name: videoMetaData.author.name,
-                  avatar: videoMetaData.author.avatar || "",
-                  channel_url: videoMetaData.author.channel_url || "",
+                  name: videoMetaData.author,
+                  avatar: "",
+                  channel_url: videoMetaData.channelId || "",
                 },
               },
             },
@@ -148,24 +155,23 @@ export class XataService {
           },
         });
 
-        await this.vectorStore.addModels(
-          await this.db.$transaction([
-            this.db.vectors.create({
-              data: {
-                content,
-                user_id: userId,
-                // summary: {
-                //   connect: {
-                //     id: createdSummary.xata_id,
-                //   },
-                // },
-              },
-            }),
-          ]),
-        );
-
         return createdSummary;
       });
+      return await this.vectorStore.addModels(
+        await this.db.$transaction([
+          this.db.vectors.create({
+            data: {
+              content,
+              user_id: userId,
+              summary: {
+                connect: {
+                  id: created.id,
+                },
+              },
+            },
+          }),
+        ])
+      );
     } catch (error) {
       const err = error as Prisma.PrismaClientKnownRequestError;
       this.logger.error("Failed to save summary:", { error });
