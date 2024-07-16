@@ -78,7 +78,7 @@ model Summary {
   updated_at             DateTime @updatedAt
   transcription          String
   summary                String
-  video_url              String   @unique
+  video_url              String
   xata_createdat         DateTime @default(now()) @db.Timestamptz(6)
   xata_id                String   @unique(map: "Summary__pgroll_new_xata_id_key") @default(dbgenerated("('rec_'::text || (xata_private.xid())::text)"))
   xata_updatedat         DateTime @default(now()) @db.Timestamptz(6)
