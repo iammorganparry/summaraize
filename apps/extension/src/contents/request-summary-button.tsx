@@ -227,7 +227,10 @@ function RequestSummaryButton() {
   };
 
   const resetState = useCallback(async () => {
-    setState(initState);
+    setState((ps) => ({
+      ...initState,
+      token: ps.token,
+    }));
     await refetch();
     await refetchSummaryRequest();
   }, [refetch, refetchSummaryRequest]);
