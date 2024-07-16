@@ -32,6 +32,12 @@ And then drag and drop the downloaded file
 > If this fails, please get the latest ZIP file from the most recent action and drag n drop this in to the extensions page.
 > [Found here](https://github.com/iammorganparry/thatrundown/actions)
 
+Youll know if somethings up if you see this..
+
+![error-image](https://i.imgur.com/jA5pLi0.png)
+
+If you do.. use the zip file install instead
+
 #### Other browsers not supported yet
 
 ## Run Locally

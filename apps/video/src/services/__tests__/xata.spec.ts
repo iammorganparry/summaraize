@@ -22,26 +22,30 @@ describe("Xata Service", () => {
         videoUrl: faker.internet.url(),
       },
       userId: "user_2iuPh9T519gz50eUoP8MG21u08j",
-      // @ts-expect-error -- not mocking all of it
       videoMetaData: {
+        allowRatings: true,
+        channelId: "channelId",
+        isCrawlable: true,
+        isLiveContent: false,
+        isOwnerViewing: false,
+        isPrivate: false,
+        isUnpluggedCorpus: false,
+        keywords: ["keyword1", "keyword2"],
+        videoId: "videoId",
+        viewCount: "100",
         title: "Video Title",
-        thumbnails: [
-          {
-            url: faker.internet.url(),
-            width: 120,
-            height: 90,
-          },
-        ],
-        description: "Video Description",
-        lengthSeconds: "120",
-        author: {
-          id: "author_2iuPh9T519gz50eUoP8MG21u08j",
-          verified: true,
-          name: "Author",
-          avatar: faker.internet.url(),
-          channel_url: faker.internet.url(),
+        thumbnail: {
+          thumbnails: [
+            {
+              url: faker.internet.url(),
+              width: 120,
+              height: 90,
+            },
+          ],
         },
-        age_restricted: false,
+        shortDescription: "Video Description",
+        lengthSeconds: "120",
+        author: "Author",
       },
       videoUrl: faker.internet.url(),
       transcription: "This is a transcription",

@@ -2,7 +2,6 @@ import type { XataClient } from "@thatrundown/xata";
 import type winston from "winston";
 import type { z } from "zod";
 import type { SummarySchema } from "../schema/summary";
-import type ytdl from "@distube/ytdl-core";
 import type { AskResult, AskTableError } from "@xata.io/client";
 import { PrismaVectorStore } from "@langchain/community/vectorstores/prisma";
 import { OpenAIEmbeddings } from "@langchain/openai";
@@ -16,10 +15,6 @@ export class XataService {
     private readonly db: PrismaClient,
     private readonly logger: winston.Logger
   ) {}
-
-  get api() {
-    return this.client;
-  }
 
   get vectorStore() {
     return PrismaVectorStore.withModel(this.db).create(new OpenAIEmbeddings(), {
@@ -49,7 +44,7 @@ export class XataService {
 
   public async askSummary(question: string, userId: string) {
     try {
-      return await this.client.db.Summary.ask(question, {
+      return await this.client.db.Vectors.ask(question, {
         rules: [
           "When you give an example, this example must exist exactly in the context given.",
           'Only answer questions that are relating to the defined context. If asked about a question outside of the context, you can respond with "I can only answer questions about the summaries you have requested silly! 😜"',
@@ -58,7 +53,7 @@ export class XataService {
         searchType: "vector",
         vectorSearch: {
           column: "embedding",
-          contentColumn: "summary",
+          contentColumn: "content",
           filter: {
             user_id: userId,
           },

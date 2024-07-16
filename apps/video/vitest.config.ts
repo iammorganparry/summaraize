@@ -1,12 +1,19 @@
 /// <reference types="vitest" />
 import { defineConfig } from "vite";
-import dotenv from "dotenv";
-dotenv.config({
-  path: "../../.env",
-}); // Load .env variables with
 
 export default defineConfig({
   test: {
-    // ... Specify options here.
+    maxWorkers: 1,
+    maxConcurrency: 1,
+    minWorkers: 1,
+    logHeapUsage: true,
+
+    // ...
   },
+});
+
+import { config } from "dotenv";
+
+config({
+  path: "../../.env",
 });
