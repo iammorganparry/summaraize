@@ -23,8 +23,7 @@
     "format": "turbo format",
     "build": "turbo build",
     "lint": "turbo lint",
-    "dev": "turbo dev",
-    "install:ce": "turbo install:ce"
+    "dev": "turbo dev"
   },
   "devDependencies": {
     "turbo": "^2.0.6"

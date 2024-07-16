@@ -178,10 +178,12 @@ export class VideoService {
 
     const videoFormat = this.youtube.chooseFormat(resp.formats, {
       filter: "videoonly",
+      quality: "highestvideo",
     });
 
     const audioFormat = this.youtube.chooseFormat(resp.formats, {
       filter: "audioonly",
+      quality: "highestaudio",
     });
 
     // create the users directory
