@@ -1,7 +1,7 @@
 {
   "name": "@thatrundown/extension",
   "displayName": "thatrundown. 👨🏻‍💼",
-  "version": "2024.07.1601",
+  "version": "2024.07.1602",
   "description": "The main extension for thatrundown.",
   "author": "(Morgan Parry <mparry92@gmail.com>)",
   "scripts": {
