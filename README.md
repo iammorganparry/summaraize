@@ -28,6 +28,38 @@ If you do.. use the zip file install instead
 
 #### Other browsers not supported yet
 
+## How to use..
+
+1. Install the extension via the chrome store above
+2. You should be redirected to youtube to start getting some rundowns!
+3. Login to the application via page button or slide out
+4. Request a summary!
+5. Wait a few mins for the magic to happen
+6. Profit???
+7. You can view your rundown once complete and also chat with it!
+
+## Key Features
+
+### 🔐 Clerk Authentication
+
+Using clerk to secure the api and frontend applications
+
+### 💨 Inngest
+
+Using inngest to manage AI workflows and queuing
+
+### 🦋 Xata.io
+
+Using Xata to store all the goods
+
+### ⎐ Prisma
+
+Using prisma to talk to xata and make my life easy
+
+### Other mentions
+
+Shoutout to ytdl for making the youtube extraction easier, Plasmo for actually solving chrome extensions.. t3 for being t3
+
 ## Run Locally
 
 Clone the project
