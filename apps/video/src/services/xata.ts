@@ -100,7 +100,6 @@ export class XataService {
     videoUrl: string;
     transcription: string;
     videoMetaData: ytdl.MoreVideoDetails;
-    embeddings: number[];
   }) {
     try {
       const content = `${transcription} \n ${summary.summary}`;
