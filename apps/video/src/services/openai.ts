@@ -48,7 +48,7 @@ export class OpenAiService {
   }
 
   public async summarize(
-    videoMetaData: VideoDetails,
+    videoMetaData: ytdl.MoreVideoDetails,
     transcription: string,
     uploadedImages: UploadFileResult[]
   ) {
@@ -75,7 +75,7 @@ export class OpenAiService {
                 type: "text",
                 text: `Here is the video information: 
               Title: ${videoMetaData.title}
-              Description: ${videoMetaData.shortDescription}
+              Description: ${videoMetaData.description}
               Channel: ${videoMetaData.author}
               Duration: ${videoMetaData.lengthSeconds}
               `,

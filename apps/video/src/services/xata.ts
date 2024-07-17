@@ -8,6 +8,7 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 import { Prisma } from "@prisma/client";
 import type { PrismaClient } from "@thatrundown/prisma";
 import type { VideoDetails } from "../types/youtube";
+import type ytdl from "@distube/ytdl-core";
 
 export class XataService {
   constructor(
@@ -100,7 +101,7 @@ export class XataService {
     summary: z.infer<typeof SummarySchema>;
     videoUrl: string;
     transcription: string;
-    videoMetaData: VideoDetails;
+    videoMetaData: ytdl.MoreVideoDetails;
     embeddings: number[];
   }) {
     try {
@@ -123,10 +124,10 @@ export class XataService {
             authors: {
               connectOrCreate: {
                 where: {
-                  channel_url: videoMetaData.channelId,
+                  channel_url: videoMetaData.author.channel_url,
                 },
                 create: {
-                  name: videoMetaData.author,
+                  name: videoMetaData.author.name,
                   avatar: "",
                   channel_url: videoMetaData.channelId || "",
                 },

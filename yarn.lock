@@ -506,7 +506,7 @@
 
 "@distube/ytdl-core@^4.13.5":
   version "4.13.5"
-  resolved "https://registry.npmjs.org/@distube/ytdl-core/-/ytdl-core-4.13.5.tgz"
+  resolved "https://registry.yarnpkg.com/@distube/ytdl-core/-/ytdl-core-4.13.5.tgz#f9bacaa43225953d0ccd2a682a31d9dbbc378973"
   integrity sha512-g+4UJIR/auAJbia7iB0aWvaJDbs22P53NySWa47b1NT4xMTDJYguxHFArPrvRkcJrb/AgKjv/XoSZGghpL0CJA==
   dependencies:
     http-cookie-agent "^6.0.5"

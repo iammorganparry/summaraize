@@ -49,27 +49,24 @@ export class VideoService {
   }
 
   public async getItemFromYoutube(
-    data: AdaptiveFormat,
-    url: string,
+    info: ytdl.videoInfo,
+    format: downloadOptions["format"],
     outputFilePath: string,
     userId: string,
     isAudio = false
   ): Promise<{ outputFilePath: string }> {
     // if the file already exists, return the path
-    // this.logger.info("Format chosen:", { format });
-
-    if (!data?.approxDurationMs) {
-      this.logger.error("Failed to get target duration:", { data });
+    this.logger.info("Format chosen:", { format });
+    if (!format?.approxDurationMs) {
+      this.logger.error("Failed to get target duration:", { info });
       throw new Error(
-        `[VideoService] Failed to get target duration from format: ${JSON.stringify(data)}`
+        `[VideoService] Failed to get target duration from format: ${JSON.stringify(format)}`
       );
     }
-
     const progressStream = progress({
-      length: Number.parseInt(data.contentLength),
+      length: Number.parseInt(format.contentLength),
       time: 1000,
     });
-
     progressStream.on("progress", async (progress) => {
       this.logger.info("Downloading video:", { progress });
       const eventToUse = isAudio
@@ -77,23 +74,19 @@ export class VideoService {
         : PusherEvents.SummaryProgressVideo;
       await this.socket.trigger(`private-${userId}`, eventToUse, {
         progress: progress.percentage,
-        videoId: getVideoID(url),
+        videoId: info.videoDetails.videoId,
       });
     });
     const writeStream = fs.createWriteStream(outputFilePath);
-
-    const response = await fetch(data.url);
-    if (!response.ok) throw new Error("Response is not ok.");
-    if (!response.body) throw new Error("Response body is empty.");
-
-    // @ts-expect-error - body is fine
-    const readable = Readable.fromWeb(response.body)
+    const command = this.youtube
+      .downloadFromInfo(info, {
+        format,
+      })
       .pipe(progressStream)
       .pipe(writeStream);
-
     return await new Promise((resolve, reject) => {
-      readable.on("finish", () => resolve({ outputFilePath }));
-      readable.on("error", reject);
+      command.on("finish", () => resolve({ outputFilePath }));
+      command.on("error", reject);
     });
   }
 
@@ -174,7 +167,7 @@ export class VideoService {
   ): Promise<{
     outputFilePath: string;
     audioFilePath: string;
-    videoMetaData: VideoDetails;
+    videoMetaData: ytdl.MoreVideoDetails;
   }> {
     // make sure the videoId is valid
     const validId = this.youtube.validateID(videoId);
@@ -188,44 +181,33 @@ export class VideoService {
 
     this.logger.info("Fetching video info:", { videoId });
 
-    const resp = await this.getInfo(videoId).catch((error: Error) => {
+    // const resp = await this.getInfo(videoId).catch((error: Error) => {
+    //   this.logger.error("Failed to fetch file:", { error });
+    //   throw new Error(`[VideoService] Failed to fetch file: ${error.message}`);
+    // });
+
+    const resp = await this.youtube.getInfo(videoId).catch((error: Error) => {
       this.logger.error("Failed to fetch file:", { error });
       throw new Error(`[VideoService] Failed to fetch file: ${error.message}`);
     });
-    const videoData = this.findSuitableVideoFormat(
-      resp.streamingData.adaptiveFormats
-    );
-    const audioData = this.findSuitableAudioFormat(
-      resp.streamingData.adaptiveFormats
-    );
-    this.logger.info("Video & Audio data:", { videoData, audioData });
-    if (!videoData || !audioData) {
-      this.logger.error("Failed to get video/audio data:", {
-        videoData,
-        audioData,
-      });
-      throw new Error(
-        `[VideoService] Failed to get video/audio data from youtube response: ${JSON.stringify(
-          resp
-        )}`
-      );
-    }
-
+    const videoFormat = this.youtube.chooseFormat(resp.formats, {
+      filter: "videoonly",
+    });
+    const audioFormat = this.youtube.chooseFormat(resp.formats, {
+      filter: "audioonly",
+    });
     // create the users directory
     fs.mkdirSync(userId, { recursive: true });
-
     const outputFilePath = path.join(
       userId,
-      `video_${this.sanitizeFileName(resp.videoDetails.title)}.mp4`
+      `video_${this.sanitizeFileName(resp.videoDetails.title)}.${videoFormat.container}`
     );
     const audioFilePath = path.join(
       userId,
-      `audio_${this.sanitizeFileName(resp.videoDetails.title)}.mp3`
+      `audio_${this.sanitizeFileName(resp.videoDetails.title)}.${audioFormat.container}`
     );
-
     this.videoFilePath = outputFilePath;
     this.audioFilePath = audioFilePath;
-
     if (fs.existsSync(outputFilePath) && fs.existsSync(audioFilePath)) {
       this.logger.info("Files already exists:", { outputFilePath });
       return {
@@ -234,11 +216,16 @@ export class VideoService {
         audioFilePath,
       };
     }
-
     const [{ outputFilePath: video }, { outputFilePath: audio }] =
       await Promise.all([
-        this.getItemFromYoutube(videoData, url, outputFilePath, userId, true),
-        this.getItemFromYoutube(audioData, url, audioFilePath, userId, false),
+        this.getItemFromYoutube(
+          resp,
+          videoFormat,
+          outputFilePath,
+          userId,
+          false
+        ),
+        this.getItemFromYoutube(resp, audioFormat, audioFilePath, userId, true),
       ]);
     return {
       outputFilePath: video,
