@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { getAuthToken } from "~lib/trpc/vanilla-client";
 
-export const useGetAuthToken = (args: {
+export const useGetAuthToken = (args?: {
   onTokenFetch: (token?: string | null) => void;
 }) => {
   const data = useQuery({

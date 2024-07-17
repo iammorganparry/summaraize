@@ -5,7 +5,9 @@ import { getBaseUrl } from "./react";
 import { Clerk } from "@clerk/clerk-js/headless";
 
 export async function getAuthToken() {
-  const clerk = new Clerk(process.env.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY as string);
+  const clerk = new Clerk(
+    process.env.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY as string
+  );
   await clerk.load();
   return (await clerk.session?.getToken()) ?? null;
 }
@@ -20,7 +22,6 @@ export const client = createTRPCProxyClient<AppRouter>({
         try {
           const token = await getAuthToken();
           // const token = await storage.get("clerk-token"); // "value"
-          console.log("Got Token", token);
           return {
             authorization: token ? `Bearer ${token}` : "",
           };

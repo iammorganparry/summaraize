@@ -252,12 +252,10 @@ function RequestSummaryButton() {
 
   const setProgressFromWS = useCallback(
     (data: { progress: number; videoId: string }) => {
-      console.log(data);
       if (+data.progress === 100) {
         return refresh();
       }
       if (data.videoId === getYoutuveVideoId(window.location.href)) {
-        console.log("Setting progress", data.progress);
         setState((prev) => ({
           ...prev,
           progress: prev.progress + data.progress,

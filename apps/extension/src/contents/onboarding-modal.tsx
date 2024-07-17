@@ -1,6 +1,16 @@
 import { CacheProvider } from "@emotion/react";
-import { Box, Dialog, DialogActions, DialogContent, Typography } from "@mui/material";
-import type { PlasmoCSConfig, PlasmoGetStyle, PlasmoMountShadowHost } from "plasmo";
+import {
+  Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  Typography,
+} from "@mui/material";
+import type {
+  PlasmoCSConfig,
+  PlasmoGetStyle,
+  PlasmoMountShadowHost,
+} from "plasmo";
 import createCache from "@emotion/cache";
 import { ThatRundownThemeProvider } from "~providers/theme";
 import { ShepherdJourneyProvider, useShepherd } from "react-shepherd";
@@ -147,7 +157,10 @@ const TourButton = ({
 };
 
 let container: Element | null = null;
-export const mountShadowHost: PlasmoMountShadowHost = ({ shadowHost, anchor }) => {
+export const mountShadowHost: PlasmoMountShadowHost = ({
+  shadowHost,
+  anchor,
+}) => {
   anchor?.element.appendChild(shadowHost);
   container = shadowHost;
 };
@@ -162,7 +175,6 @@ function OnboardingModal() {
 
   useEffect(() => {
     const open = localStorage.getItem("thatrundown-demo-done");
-    console.log("GOT STATE", open);
     if (!open && user) {
       setOpen(true);
     }
@@ -192,11 +204,15 @@ function OnboardingModal() {
               <DialogContent>
                 <Typography variant="h4">Welcome to That Rundown!</Typography>
                 <Typography variant="body1">
-                  We're excited to have you here. Let's get started with a quick onboarding.
+                  We're excited to have you here. Let's get started with a quick
+                  onboarding.
                 </Typography>
               </DialogContent>
               <DialogActions>
-                <TourButton onClick={() => setOpen(false)} container={c as HTMLElement} />
+                <TourButton
+                  onClick={() => setOpen(false)}
+                  container={c as HTMLElement}
+                />
               </DialogActions>
             </Dialog>
           </ShepherdJourneyProvider>

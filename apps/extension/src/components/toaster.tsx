@@ -10,7 +10,6 @@ export const ToasterBoi = () => {
 
   useEffect(() => {
     window.addEventListener("create.toast", (event) => {
-      console.log("[ToasterBoi]", event);
       toast[event.detail.type](event.detail.message);
     });
   }, []);

@@ -11,7 +11,6 @@ export const storageCache = {
   get: async <T>(key: string) => {
     try {
       const value = await storage.get(key);
-      console.log("Value", value);
       if (!value) {
         return null as T;
       }

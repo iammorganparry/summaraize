@@ -24,11 +24,7 @@ export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
     return pusher.subscribe(`private-${userId}`);
   }, [userId, pusher]);
 
-  // useEffect(() => {
-  //   channel?.bind("summary.progress.video", (e) => {
-  //     console.log("SummaryProgressVideo", e);
-  //   });
-  // }, [channel]);
-
-  return <PusherContext.Provider value={channel}>{children}</PusherContext.Provider>;
+  return (
+    <PusherContext.Provider value={channel}>{children}</PusherContext.Provider>
+  );
 };
