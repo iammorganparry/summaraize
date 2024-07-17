@@ -3,6 +3,7 @@ import { Button, styled } from "@mui/material";
 export const OutlinedButton = styled(Button)(({ theme }) => ({
   fontWeight: 600,
   fontSize: 12,
+
   zIndex: 3,
   marginBottom: theme.spacing(1),
   gap: theme.spacing(1),

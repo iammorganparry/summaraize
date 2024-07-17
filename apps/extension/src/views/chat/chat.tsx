@@ -37,15 +37,16 @@ export const ChatWithThatRundown = () => {
   });
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
-    api: `${getBaseUrl()}/api/chat`,
-    streamMode: "text",
-    // credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+    useChat({
+      api: `${getBaseUrl()}/api/chat`,
+      streamMode: "text",
+      // credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,18 +59,16 @@ export const ChatWithThatRundown = () => {
 
   const stopPropagation = useCallback((e: KeyboardEvent) => {
     // if the input is focused, don't stop propagation
-    if (inputRef.current?.contains(e.target as Node)) return;
-
     e.stopPropagation();
   }, []);
 
   const reversedMessages = [...messages].reverse();
 
   useEffect(() => {
-    window.addEventListener("keyup", stopPropagation, true);
+    window.addEventListener("keydown", stopPropagation, true);
     inputRef.current?.focus();
     return () => {
-      window.removeEventListener("keyup", stopPropagation, true);
+      window.removeEventListener("keydown", stopPropagation, true);
     };
   }, [stopPropagation]);
 
@@ -93,7 +92,11 @@ export const ChatWithThatRundown = () => {
           <>
             {reversedMessages.map((message) => (
               <Message
-                loading={isLoading && message.role === "assistant" && isMostRecentMessage(message, messages)}
+                loading={
+                  isLoading &&
+                  message.role === "assistant" &&
+                  isMostRecentMessage(message, messages)
+                }
                 key={message.id}
                 message={message.content}
                 type={message.role}
@@ -110,7 +113,13 @@ export const ChatWithThatRundown = () => {
               height: "100%",
             }}
           >
-            <StyledInput inputRef={inputRef} name="prompt" value={input} onChange={onChange} id="input" />
+            <StyledInput
+              inputRef={inputRef}
+              name="prompt"
+              value={input}
+              onChange={onChange}
+              id="input"
+            />
           </Box>
           <Box
             sx={{
