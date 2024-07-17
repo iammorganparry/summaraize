@@ -20,32 +20,22 @@ export const _transcribeVideo = async ({
     };
   }
 
-  const { audioFilePath, outputFilePath, videoMetaData } = await step.run(
-    "download-audio-video-file",
-    async () => {
-      return await services.video.createFilesFromYoutubeUrl(
-        videoId,
-        src,
-        userId
-      );
-    }
-  );
+  const { audioFilePath, outputFilePath, videoMetaData } = await step.run("download-audio-video-file", async () => {
+    return await services.video.createFilesFromYoutubeUrl(videoId, src, userId);
+  });
 
   if (!audioFilePath) {
     throw new Error("Failed to download audio file");
   }
-  const { text: transcription } = await step.run(
-    "transcribe-audio",
-    async () => {
-      await services.xata.updateSummaryRequest(summaryRequestId, {
-        stage: SummaryStage.TRANSCRIBING,
-      });
-      await services.pusher.sendToUser(userId, PusherEvents.SummaryStep, {
-        step: SummaryStage.TRANSCRIBING,
-      });
-      return await services.ai.transcribe(audioFilePath);
-    }
-  );
+  const { text: transcription } = await step.run("transcribe-audio", async () => {
+    await services.xata.updateSummaryRequest(summaryRequestId, {
+      stage: SummaryStage.TRANSCRIBING,
+    });
+    await services.pusher.sendToUser(userId, PusherEvents.SummaryStep, {
+      step: SummaryStage.TRANSCRIBING,
+    });
+    return await services.ai.transcribe(audioFilePath);
+  });
 
   const { uploadedImages } = await step.run("extract-frames", async () => {
     await services.xata.updateSummaryRequest(summaryRequestId, {
@@ -60,34 +50,25 @@ export const _transcribeVideo = async ({
     return { videoMetaData, uploadedImages: images.data, frames };
   });
 
-  const summary = await step.run(
-    "summarize-transcription-and-frames",
-    async () => {
-      await services.xata.updateSummaryRequest(summaryRequestId, {
-        stage: SummaryStage.SUMMARIZING,
-      });
-      await services.pusher.sendToUser(userId, PusherEvents.SummaryStep, {
-        // Thought: could use a real time db change stream on the summary request table instead?
-        step: SummaryStage.SUMMARIZING,
-      });
-      const summary = await services.ai.summarize(
-        videoMetaData,
-        transcription,
-        uploadedImages
-      );
+  const summary = await step.run("summarize-transcription-and-frames", async () => {
+    await services.xata.updateSummaryRequest(summaryRequestId, {
+      stage: SummaryStage.SUMMARIZING,
+    });
+    await services.pusher.sendToUser(userId, PusherEvents.SummaryStep, {
+      // Thought: could use a real time db change stream on the summary request table instead?
+      step: SummaryStage.SUMMARIZING,
+    });
+    const summary = await services.ai.summarize(videoMetaData, transcription, uploadedImages);
 
-      return summary;
-    }
-  );
+    return summary;
+  });
 
   if (!summary.summary) {
     throw new NonRetriableError("Failed to summarize video");
   }
 
   await step.run("generate-embeddings-and-save", async () => {
-    const embeddings = await services.ai.generateEmbeddings(
-      `${transcription}\n${summary.summary}`
-    );
+    const embeddings = await services.ai.generateEmbeddings(`${transcription}\n${summary.summary}`);
     await services.xata.saveSummary({
       userId,
       summary: summary,
@@ -133,14 +114,10 @@ export const transcribeVideo = inngest.createFunction(
     onFailure: async ({ services, event, logger }) => {
       const { event: originalEvent } = event.data;
       logger.error("Failed to get that rundown", event.data.error);
-      await services.pusher.sendToUser(
-        originalEvent.data.userId,
-        PusherEvents.SummaryError,
-        {
-          error: `Failed to get that rundown.. ${event.data.error.message}`,
-          videoId: originalEvent.data.videoId,
-        }
-      );
+      await services.pusher.sendToUser(originalEvent.data.userId, PusherEvents.SummaryError, {
+        error: `Failed to get that rundown.. ${event.data.error.message}`,
+        videoId: originalEvent.data.videoId,
+      });
       await services.video.cleanup({
         userId: originalEvent.data.userId,
       });
@@ -154,7 +131,7 @@ export const transcribeVideo = inngest.createFunction(
     ],
   },
   { event: "app/transcribe-video" },
-  _transcribeVideo
+  _transcribeVideo,
 );
 
 export const cancelSummary = inngest.createFunction(
@@ -178,5 +155,5 @@ export const cancelSummary = inngest.createFunction(
     } catch (error) {
       return;
     }
-  }
+  },
 );

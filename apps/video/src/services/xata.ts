@@ -7,7 +7,6 @@ import { PrismaVectorStore } from "@langchain/community/vectorstores/prisma";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { Prisma } from "@prisma/client";
 import type { PrismaClient } from "@thatrundown/prisma";
-import type { VideoDetails } from "../types/youtube";
 import type ytdl from "@distube/ytdl-core";
 
 export class XataService {
@@ -95,7 +94,6 @@ export class XataService {
     summary,
     transcription,
     videoMetaData,
-    embeddings,
   }: {
     userId: string;
     summary: z.infer<typeof SummarySchema>;
@@ -117,7 +115,7 @@ export class XataService {
             data_raw: JSON.stringify(videoMetaData),
             name: videoMetaData.title,
             duration: videoMetaData.lengthSeconds,
-            thumbnail: videoMetaData.thumbnail.thumbnails[0].url,
+            thumbnail: videoMetaData?.thumbnails[0]?.url,
             url: videoUrl,
             user_id: userId,
             views: videoMetaData.viewCount,

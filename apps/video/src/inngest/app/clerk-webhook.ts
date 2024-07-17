@@ -7,16 +7,8 @@ export const syncUser = inngest.createFunction(
     // The event payload's data will be the Clerk User json object
     logger.info("Syncing user from Clerk", event.data);
 
-    const {
-      id,
-      first_name,
-      last_name,
-      email_addresses,
-      primary_email_address_id,
-    } = event.data;
-    const email = email_addresses?.find(
-      (e) => e.id === primary_email_address_id
-    )?.email_address;
+    const { id, first_name, last_name, email_addresses, primary_email_address_id } = event.data;
+    const email = email_addresses?.find((e) => e.id === primary_email_address_id)?.email_address;
 
     if (!email) {
       throw new Error(`No email found for user: ${id}`);
@@ -34,7 +26,7 @@ export const syncUser = inngest.createFunction(
         email: email,
       },
     });
-  }
+  },
 );
 
 export const deleteUser = inngest.createFunction(
@@ -49,5 +41,5 @@ export const deleteUser = inngest.createFunction(
     return await services.prisma.user.delete({
       where: { id: id },
     });
-  }
+  },
 );

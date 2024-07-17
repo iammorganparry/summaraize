@@ -1,10 +1,5 @@
-import { useState } from "react";
-import Button from "@mui/material/Button";
-import { SignInButton, useSignIn, useSignUp } from "@clerk/chrome-extension";
-import type { OAuthStrategy } from "@clerk/types";
-import { Box, Stack, Typography, styled } from "@mui/material";
-import { FaGithub } from "react-icons/fa";
-import { FaGoogle } from "react-icons/fa";
+import { useSignIn } from "@clerk/chrome-extension";
+import { Box, Stack, Typography } from "@mui/material";
 import { StyledSignInButton } from "~components/buttons/signin";
 
 export const LoginPage = () => {

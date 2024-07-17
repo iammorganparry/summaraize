@@ -45,7 +45,11 @@ describe("Xata Service", () => {
         },
         shortDescription: "Video Description",
         lengthSeconds: "120",
-        author: "Author",
+        // @ts-expect-error
+        author: {
+          channel_url: faker.internet.url(),
+          name: "Author",
+        },
       },
       videoUrl: faker.internet.url(),
       transcription: "This is a transcription",

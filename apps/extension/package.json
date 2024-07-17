@@ -63,10 +63,6 @@
     "vitest": "^2.0.2"
   },
   "manifest": {
-    "permissions": [
-      "cookies",
-      "storage",
-      "tabs"
-    ]
+    "permissions": ["cookies", "storage", "tabs"]
   }
 }

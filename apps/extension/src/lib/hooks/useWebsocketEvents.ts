@@ -35,11 +35,5 @@ export const useWebsocketEvents = ({
     channel?.bind("summary.progress.video", onSummaryProgress);
     channel?.bind("summary.completed", onSummaryCompleted);
     channel?.bind("summary.error", onSummaryError);
-  }, [
-    onSummaryProgress,
-    onSummaryCompleted,
-    channel,
-    onSummaryStep,
-    onSummaryError,
-  ]);
+  }, [onSummaryProgress, onSummaryCompleted, channel, onSummaryStep, onSummaryError]);
 };

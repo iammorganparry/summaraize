@@ -6,7 +6,6 @@ import { SummarySchema } from "../schema/summary";
 import type { OpenAIError } from "openai/error.mjs";
 import type winston from "winston";
 import fs from "node:fs";
-import type { VideoDetails } from "../types/youtube";
 
 export const getOpenAI = () =>
   new OpenAI({
@@ -21,7 +20,7 @@ export class OpenAiService {
 
   constructor(
     private ai: OpenAI,
-    private readonly logger: winston.Logger
+    private readonly logger: winston.Logger,
   ) {}
 
   get api() {
@@ -50,7 +49,7 @@ export class OpenAiService {
   public async summarize(
     videoMetaData: ytdl.MoreVideoDetails,
     transcription: string,
-    uploadedImages: UploadFileResult[]
+    uploadedImages: UploadFileResult[],
   ) {
     try {
       const response = await this.ai.chat.completions.create({

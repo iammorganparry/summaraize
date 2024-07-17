@@ -31,16 +31,12 @@ export const tourSteps = [
   },
   {
     id: "eleventh",
-    text: [
-      "Click here to open the slide out window, where you can view your summaries and chat.",
-    ],
+    text: ["Click here to open the slide out window, where you can view your summaries and chat."],
     attachTo: {
       element: () =>
         document
           .querySelector("#thatrundown-slider")
-          ?.shadowRoot?.querySelector(
-            "#that-rundown-sheet-button"
-          ) as HTMLElement,
+          ?.shadowRoot?.querySelector("#that-rundown-sheet-button") as HTMLElement,
       on: "left",
     },
     scrollTo: true,
