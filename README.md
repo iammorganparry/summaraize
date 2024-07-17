@@ -12,21 +12,9 @@ Install and run the extension in your favorite chromium browser
 
 #### Chromium based
 
-Hit the link to download the extension
+Hit the link to download the extension (Ive somehow managed to get it approved on the chrome store within a week.. must be a worlds first... 😅)
 
-[DOWNLOAD FOR CHROME](https://utfs.io/f/f46db075-19a2-46ca-b88d-92fd5f7763b4-1jyp8g.crx)
-
-Navigate to:
-
-```bash
- chrome://extensions
-```
-
-Enabled development mode:
-
-![toggle-switch](https://i.imgur.com/kL8W7T4.png)
-
-And then drag and drop the downloaded file
+[DOWNLOAD FOR CHROME](https://chromewebstore.google.com/detail/thatrundown-%F0%9F%91%A8%F0%9F%8F%BB%E2%80%8D%F0%9F%92%BC/nlglhmlpmhinfajbeojonppplopckbmp?authuser=0&hl=en-GB)
 
 > [!WARNING]
 > If this fails, please get the latest ZIP file from the most recent action and drag n drop this in to the extensions page.
