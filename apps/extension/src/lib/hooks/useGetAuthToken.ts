@@ -6,12 +6,12 @@ export const useGetAuthToken = (args?: {
   onTokenFetch: (token?: string | null) => void;
 }) => {
   const data = useQuery({
-    queryKey: ["get-token"],
+    queryKey: ["get-token", window.location.href],
     queryFn: getAuthToken,
     refetchOnWindowFocus: false,
-    // every 5 minutes
-    refetchInterval: 1000 * 60 * 5,
-    retry: 3,
+    retry: false,
+    // 1 hour
+    cacheTime: 1000 * 60 * 60,
   });
 
   useEffect(() => {

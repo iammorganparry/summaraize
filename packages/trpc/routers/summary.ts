@@ -4,6 +4,29 @@ import { protectedProcedure, createTRPCRouter } from "../trpc";
 import { SummaryStage } from ".prisma/client";
 
 export const summaryRouter = createTRPCRouter({
+  getSummaryById: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(({ input, ctx }) => {
+      return ctx.db.summary.findFirst({
+        where: {
+          id: input.id,
+          user: {
+            id: ctx.auth.userId,
+          },
+        },
+        include: {
+          video: {
+            include: {
+              authors: true,
+            },
+          },
+        },
+      });
+    }),
   getSummaryRequests: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.summaryRequest.findMany({
       where: {

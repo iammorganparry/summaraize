@@ -14,7 +14,7 @@ describe("Chat", () => {
   });
 
   it("should handle ask", async () => {
-    const resp = await service.askSummary("What is it? Gandalf?", "user_2jF960TkoXyGenkxLTxpMWVRxa2");
+    const resp = await service.askSummary("Where was gandalf?", "user_2jF960TkoXyGenkxLTxpMWVRxa2");
     console.log(resp);
     expect(resp).toBeDefined();
   });

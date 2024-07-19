@@ -39,7 +39,12 @@ app.use(
 );
 
 app.use("/api/*", thatrundownServices);
-
+app.use("/api/chat", async (c, next) => {
+  c.header("Content-Type", "text/event-stream;charset=utf-8'");
+  c.header("Cache-Control", "no-cache, no-transform");
+  c.header("Connection", "keep-alive");
+  await next();
+});
 app.use(
   "/api/trpc/*",
   trpcServer({

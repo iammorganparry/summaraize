@@ -24,7 +24,5 @@ export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
     return pusher.subscribe(`private-${userId}`);
   }, [userId, pusher]);
 
-  return (
-    <PusherContext.Provider value={channel}>{children}</PusherContext.Provider>
-  );
+  return <PusherContext.Provider value={channel}>{children}</PusherContext.Provider>;
 };

@@ -1,48 +1,52 @@
 import { Hono } from "hono";
 import { thatrundownServices } from "../middlware";
-import type { Message } from "openai/resources/beta/threads/messages.mjs";
 import { openai } from "@ai-sdk/openai";
-import { streamText } from "hono/streaming";
-import { streamText as streamTextResponse } from "ai";
+import { SSEStreamingApi, streamSSE, streamText } from "hono/streaming";
+import { streamText as streamTextResponse, type Message } from "ai";
+import type { AskResult } from "@xata.io/client";
 
 export const aiChatRoute = new Hono();
+
 aiChatRoute.post("/", thatrundownServices, async (c) => {
-  try {
-    return streamText(c, async (stream) => {
-      // Set of messages to create vector embeddings on
-      const { messages = [] } = await c.req.json();
-      const clerk = c.get("clerkAuth");
-      const userId = clerk?.userId;
-
-      const xata = c.get("xata");
-
-      const userMessages = messages.filter((i: Message) => i.role === "user");
-      const input = userMessages[userMessages.length - 1].content;
-
-      const relevantRecords = await xata.semanticSearch(input, userId as string);
-
-      const systemContext = relevantRecords.map((i) => i.pageContent).join("\n");
-
-      const response = await streamTextResponse({
-        model: openai.chat("gpt-3.5-turbo", {
-          user: userId as string,
-        }),
-        prompt: `
-            Context: ${systemContext}
-            User: ${input}
-            System:
-      `,
+  const data = (await c.req.json()) as {
+    question: string;
+    sessionId?: string;
+  };
+  const sessionId = data?.sessionId;
+  const clerk = c.get("clerkAuth");
+  const userId = clerk?.userId;
+  const xata = c.get("xata");
+  const { readable, writable } = new TransformStream({
+    start() {
+      xata.api.db.Summary.ask(data.question, {
+        rules: [
+          "Your name is Sandra, and you are a bot. But the best bot ever! 🤖",
+          "If you are not sure about the answer, just ask me again.",
+        ],
+        searchType: "keyword",
+        sessionId,
+        search: {
+          fuzziness: 2,
+          filter: {
+            user_id: userId as string,
+          },
+          prefix: "phrase",
+          target: ["summary", { column: "name", weight: 4 }, "transcription"],
+        },
+        onMessage: async (message: AskResult) => {
+          stream.writeSSE({
+            data: JSON.stringify(message),
+          });
+        },
       });
+    },
+  });
 
-      let fullResponse = "";
-      for await (const delta of response.textStream) {
-        fullResponse += delta;
-        stream.write(delta);
-      }
-    });
-  } catch (error) {
-    console.error("Failed to generate chat response", error);
-    return c.json({ error: "Failed to generate chat response " }, 500);
-  }
-  // Shoutout Xata for the sick tutorial on this
+  const stream = new SSEStreamingApi(writable, readable);
+
+  c.header("Content-Type", "text/event-stream");
+  c.header("Cache-Control", "no-cache");
+  c.header("Connection", "keep-alive");
+
+  return c.newResponse(stream.responseReadable);
 });

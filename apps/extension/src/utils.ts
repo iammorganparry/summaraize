@@ -53,7 +53,7 @@ export const removeExtraParams = (url: string) => {
   return urlObj.toString();
 };
 
-export const isMostRecentMessage = (message: Message, messages: Message[]) => {
+export const isMostRecentMessage = (message: Partial<Message>, messages: Partial<Message>[]) => {
   const mostRecentMessage = messages[0];
   return mostRecentMessage.id === message.id;
 };
